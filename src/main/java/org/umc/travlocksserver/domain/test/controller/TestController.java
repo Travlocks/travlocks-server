@@ -1,4 +1,4 @@
-package org.umc.travlocksserver.controller;
+package org.umc.travlocksserver.domain.test.controller;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
