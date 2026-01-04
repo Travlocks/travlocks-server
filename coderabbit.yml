@@ -5,5 +5,7 @@ reviews:
   auto_review:
     enabled: false
     auto_incremental_review: false
+  review_status: false
+  commit_status: false
 chat:
   auto_reply: false
