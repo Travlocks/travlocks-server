@@ -69,13 +69,6 @@ public class GlobalExceptionHandler {
 	// ⚪ DTO Validation 예외 처리
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	public ResponseEntity<ErrorResponse> handleValidationException(MethodArgumentNotValidException e) {
-		BaseCode commonErrorCode = ErrorCode.NOT_VALID_EXCEPTION;
-		/*
-		e.getBindingResult().getFieldErrors(): DTO 검증 중 실패한 필드들의 정보를 모두 가져옴
-		FieldError 객체
-		- field: 실패한 필드 이름
-		- defaultMessage: 어노테이션에서 설정한 오류메시지
-		*/
 		ErrorResponse errorResponse = new ErrorResponse(e.getBindingResult().getFieldErrors());
 
 		return ResponseEntity
