@@ -5,4 +5,5 @@ import org.umc.travlocksserver.domain.member.entity.Member;
 
 public interface MemberRepository extends JpaRepository<Member, Long> {
     boolean existsByEmail(String email);
+    boolean existsByNickname(String nickname);
 }

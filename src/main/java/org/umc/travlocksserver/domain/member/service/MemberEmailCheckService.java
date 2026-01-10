@@ -2,7 +2,7 @@ package org.umc.travlocksserver.domain.member.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.umc.travlocksserver.domain.member.dto.MemberEmailExistsResponseDTO;
+import org.umc.travlocksserver.domain.member.dto.response.MemberEmailExistsResponseDTO;
 import org.umc.travlocksserver.domain.member.repository.MemberRepository;
 
 @Service
