@@ -1,0 +1,11 @@
+aws:
+  region: ${AWS_REGION:ap-northeast-2}
+  ses:
+    from-email: ${AWS_SES_FROM_EMAIL:travlocksserver@gmail.com}
+
+spring:
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+
