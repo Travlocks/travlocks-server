@@ -20,6 +20,10 @@ public class EmailVerificationRedisRepository {
             String code
     ) {}
 
+    public String key(String verificationId) {
+        return "email_verification:" + verificationId;
+    }
+
     public void save(String verificationId, EmailVerificationCache cache, Duration ttl) {
         try {
             String value = objectMapper.writeValueAsString(cache); // Java 객체 → JSON 문자열
@@ -29,7 +33,19 @@ public class EmailVerificationRedisRepository {
         }
     }
 
-    public String key(String verificationId) {
-        return "email_verification:" + verificationId;
+    public EmailVerificationCache find(String verificationId) {
+        String value = redisTemplate.opsForValue().get(key(verificationId));
+        if (value == null) return null;
+
+        try {
+            return objectMapper.readValue(value, EmailVerificationCache.class);
+        } catch (Exception e) {
+            throw new IllegalStateException("Redis 역직렬화 실패", e);
+        }
     }
+
+    public void delete(String verificationId) {
+        redisTemplate.delete(key(verificationId));
+    }
+
 }

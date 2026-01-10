@@ -20,7 +20,12 @@ public enum AuthSuccessCode implements BaseCode {
     EMAIL_ALREADY_EXISTS(
             HttpStatus.OK,
             "이미 가입된 이메일입니다."
-    )
+    ),
+    EMAIL_VERIFICATION_CONFIRMED(
+            HttpStatus.OK,
+            "이메일 인증이 완료되었습니다."
+    ),
+
     ;
 
     private final HttpStatus status;

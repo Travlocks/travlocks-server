@@ -5,9 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.umc.travlocksserver.domain.auth.dto.AuthEmailExistsResponseDTO;
-import org.umc.travlocksserver.domain.auth.dto.AuthSendEmailRequestDTO;
-import org.umc.travlocksserver.domain.auth.dto.AuthSendEmailResponseDTO;
+import org.umc.travlocksserver.domain.auth.dto.*;
 import org.umc.travlocksserver.domain.auth.exception.code.AuthSuccessCode;
 import org.umc.travlocksserver.domain.auth.service.AuthEmailCheckService;
 import org.umc.travlocksserver.domain.auth.service.EmailVerificationService;
@@ -48,5 +46,18 @@ public class AuthController {
 
         return ApiResponse.ok(successCode, data);
     }
+
+    @PostMapping("/email-verification/confirm")
+    public ApiResponse<org.umc.travlocksserver.domain.auth.dto.AuthVerifyEmailResponseDTO> confirmEmailVerificationCode(
+            @Valid @RequestBody AuthVerifyEmailRequestDTO request
+    ) {
+        AuthVerifyEmailResponseDTO data = emailVerificationService.confirmVerificationCode(
+                request.verificationId(),
+                request.code()
+        );
+
+        return ApiResponse.ok(AuthSuccessCode.EMAIL_VERIFICATION_CONFIRMED, data);
+    }
+
 
 }
