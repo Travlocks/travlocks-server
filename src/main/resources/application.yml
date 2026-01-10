@@ -1,11 +1,34 @@
-aws:
-  region: ${AWS_REGION:ap-northeast-2}
-  ses:
-    from-email: ${AWS_SES_FROM_EMAIL:travlocksserver@gmail.com}
-
 spring:
+  application:
+    name: "travlocks"
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${DB_URL} # jdbc:mysql://localhost:3306/{???????}
+    username: ${DB_USER} # MySQL ?? ??
+    password: ${DB_PW} # MySQL ????
+
+  jpa:
+    database: mysql
+    database-platform: org.hibernate.dialect.MySQLDialect
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+
   data:
     redis:
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
+
+aws:
+  region: ${AWS_REGION:ap-northeast-2}
+  ses:
+    from-email: ${AWS_SES_FROM_EMAIL:travlocksserver@gmail.com}
+  credentials:
+    access-key: ${AWS_ACCESS_KEY_ID:}
+    secret-key: ${AWS_SECRET_ACCESS_KEY:}
+
 
