@@ -1,19 +1,19 @@
-package org.umc.travlocksserver.domain.auth.service;
+package org.umc.travlocksserver.domain.member.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.umc.travlocksserver.domain.auth.dto.AuthEmailExistsResponseDTO;
+import org.umc.travlocksserver.domain.member.dto.MemberEmailExistsResponseDTO;
 import org.umc.travlocksserver.domain.member.repository.MemberRepository;
 
 @Service
 @RequiredArgsConstructor
-public class AuthEmailCheckService {
+public class MemberEmailCheckService {
 
     private final MemberRepository memberRepository;
 
-    public AuthEmailExistsResponseDTO checkEmailExists(String email) {
+    public MemberEmailExistsResponseDTO checkEmailExists(String email) {
         boolean exists = memberRepository.existsByEmail(email);
-        return new AuthEmailExistsResponseDTO(exists);
+        return new MemberEmailExistsResponseDTO(exists);
     }
 }
 

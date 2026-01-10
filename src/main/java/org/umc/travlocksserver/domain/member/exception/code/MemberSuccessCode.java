@@ -1,4 +1,4 @@
-package org.umc.travlocksserver.domain.auth.exception.code;
+package org.umc.travlocksserver.domain.member.exception.code;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -7,19 +7,18 @@ import org.umc.travlocksserver.global.apiPayload.code.BaseCode;
 
 @Getter
 @AllArgsConstructor
-public enum AuthSuccessCode implements BaseCode {
+public enum MemberSuccessCode implements BaseCode {
 
-    EMAIL_VERIFICATION_CODE_SENT(
+    EMAIL_AVAILABLE(
             HttpStatus.OK,
-            "인증 코드가 발송되었습니다."
+            "사용 가능한 이메일입니다."
     ),
-    EMAIL_VERIFICATION_CONFIRMED(
+    EMAIL_ALREADY_EXISTS(
             HttpStatus.OK,
-            "이메일 인증이 완료되었습니다."
+            "이미 가입된 이메일입니다."
     )
     ;
 
     private final HttpStatus status;
     private final String message;
 }
-
