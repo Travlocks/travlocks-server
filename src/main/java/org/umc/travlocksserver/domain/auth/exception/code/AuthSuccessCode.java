@@ -12,7 +12,16 @@ public enum AuthSuccessCode implements BaseCode {
     EMAIL_VERIFICATION_CODE_SENT(
             HttpStatus.OK,
             "인증 코드가 발송되었습니다."
-    );
+    ),
+    EMAIL_AVAILABLE(
+            HttpStatus.OK,
+            "사용 가능한 이메일입니다."
+    ),
+    EMAIL_ALREADY_EXISTS(
+            HttpStatus.OK,
+            "이미 가입된 이메일입니다."
+    )
+    ;
 
     private final HttpStatus status;
     private final String message;
