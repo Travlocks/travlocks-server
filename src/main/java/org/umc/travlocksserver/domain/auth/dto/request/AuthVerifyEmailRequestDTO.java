@@ -1,4 +1,4 @@
-package org.umc.travlocksserver.domain.auth.dto;
+package org.umc.travlocksserver.domain.auth.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 

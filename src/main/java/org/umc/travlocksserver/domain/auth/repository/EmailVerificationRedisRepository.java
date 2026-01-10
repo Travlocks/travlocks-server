@@ -20,10 +20,6 @@ public class EmailVerificationRedisRepository {
             String code
     ) {}
 
-    public String key(String verificationId) {
-        return "email_verification:" + verificationId;
-    }
-
     public void save(String verificationId, EmailVerificationCache cache, Duration ttl) {
         try {
             String value = objectMapper.writeValueAsString(cache); // Java 객체 → JSON 문자열
@@ -46,6 +42,10 @@ public class EmailVerificationRedisRepository {
 
     public void delete(String verificationId) {
         redisTemplate.delete(key(verificationId));
+    }
+
+    public String key(String verificationId) {
+        return "email_verification:" + verificationId;
     }
 
 }

@@ -2,8 +2,8 @@ package org.umc.travlocksserver.domain.auth.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.umc.travlocksserver.domain.auth.dto.AuthSendEmailResponseDTO;
-import org.umc.travlocksserver.domain.auth.dto.AuthVerifyEmailResponseDTO;
+import org.umc.travlocksserver.domain.auth.dto.response.AuthSendEmailResponseDTO;
+import org.umc.travlocksserver.domain.auth.dto.response.AuthVerifyEmailResponseDTO;
 import org.umc.travlocksserver.domain.auth.exception.AuthException;
 import org.umc.travlocksserver.domain.auth.exception.code.AuthErrorCode;
 import org.umc.travlocksserver.domain.auth.repository.EmailVerificationRedisRepository;
@@ -83,11 +83,34 @@ public class EmailVerificationService {
         return new AuthVerifyEmailResponseDTO(signupToken);
     }
 
-    private String generateSignupToken() {
-        byte[] bytes = new byte[16];
-        RANDOM.nextBytes(bytes);
-        return "signup_" + HexFormat.of().formatHex(bytes); // signup_ + 32hex
+    public void resendVerificationCode(String verificationId) {
+
+        // 1) 기존 인증 요청 조회
+        EmailVerificationRedisRepository.EmailVerificationCache oldCache =
+                redisRepository.find(verificationId);
+
+        if (oldCache == null) {
+            throw new AuthException(AuthErrorCode.EMAIL_VERIFICATION_NOT_FOUND);
+        }
+
+        // 2) 새 코드 생성
+        String newCode = generate6DigitCode();
+
+        // 3) 이메일 발송 (실패하면 Redis 그대로 유지)
+        try {
+            emailSender.sendVerificationCode(oldCache.email(), newCode);
+        } catch (Exception e) {
+            throw new AuthException(AuthErrorCode.EMAIL_SEND_FAILED);
+        }
+
+        // 4) 성공했을 때만 Redis 업데이트 (같은 verificationId로 갱신)
+        redisRepository.save(
+                verificationId,
+                new EmailVerificationRedisRepository.EmailVerificationCache(oldCache.email(), newCode),
+                TTL
+        );
     }
+
 
     private String generate6DigitCode() {
         int n = RANDOM.nextInt(900_000) + 100_000; // 100000~999999
@@ -98,5 +121,11 @@ public class EmailVerificationService {
         byte[] bytes = new byte[8];
         RANDOM.nextBytes(bytes);
         return "verif_" + HexFormat.of().formatHex(bytes); // verif_ + 16hex
+    }
+
+    private String generateSignupToken() {
+        byte[] bytes = new byte[16];
+        RANDOM.nextBytes(bytes);
+        return "signup_" + HexFormat.of().formatHex(bytes); // signup_ + 32hex
     }
 }
