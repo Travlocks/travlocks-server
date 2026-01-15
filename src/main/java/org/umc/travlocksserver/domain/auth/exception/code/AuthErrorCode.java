@@ -3,7 +3,7 @@ package org.umc.travlocksserver.domain.auth.exception.code;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
-import org.umc.travlocksserver.global.apiPayload.code.BaseCode;
+import org.umc.travlocksserver.global.code.BaseCode;
 
 @Getter
 @AllArgsConstructor

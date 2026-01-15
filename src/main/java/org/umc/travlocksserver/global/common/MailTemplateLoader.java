@@ -1,4 +1,4 @@
-package org.umc.travlocksserver.global.apiPayload.common;
+package org.umc.travlocksserver.global.common;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.ClassPathResource;

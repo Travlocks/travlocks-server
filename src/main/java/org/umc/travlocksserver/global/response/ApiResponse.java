@@ -1,6 +1,6 @@
-package org.umc.travlocksserver.global.apiPayload;
+package org.umc.travlocksserver.global.response;
 
-import org.umc.travlocksserver.global.apiPayload.code.BaseCode;
+import org.umc.travlocksserver.global.code.BaseCode;
 
 // ✨ 모든 API 응답을 일관된 JSON 구조로 반환하기 위한 레코드
 public record ApiResponse<T>(

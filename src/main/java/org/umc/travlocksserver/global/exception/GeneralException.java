@@ -1,7 +1,7 @@
-package org.umc.travlocksserver.global.apiPayload.exception;
+package org.umc.travlocksserver.global.exception;
 
 import lombok.Getter;
-import org.umc.travlocksserver.global.apiPayload.code.BaseCode;
+import org.umc.travlocksserver.global.code.BaseCode;
 
 @Getter
 public abstract class GeneralException extends RuntimeException {

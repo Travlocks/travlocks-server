@@ -1,4 +1,4 @@
-package org.umc.travlocksserver.global.apiPayload.code;
+package org.umc.travlocksserver.global.code;
 
 import org.springframework.http.HttpStatus;
 

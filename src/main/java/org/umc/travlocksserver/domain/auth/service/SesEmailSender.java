@@ -3,7 +3,7 @@ package org.umc.travlocksserver.domain.auth.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.umc.travlocksserver.global.apiPayload.common.MailTemplateLoader;
+import org.umc.travlocksserver.global.common.MailTemplateLoader;
 import software.amazon.awssdk.services.ses.SesClient;
 import software.amazon.awssdk.services.ses.model.*;
 

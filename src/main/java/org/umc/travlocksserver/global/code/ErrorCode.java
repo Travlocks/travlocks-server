@@ -1,13 +1,12 @@
-package org.umc.travlocksserver.global.apiPayload.code.common;
+package org.umc.travlocksserver.global.code;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
-import org.umc.travlocksserver.global.apiPayload.code.BaseCode;
 
 @Getter
 @AllArgsConstructor
-public enum CommonErrorCode implements BaseCode {
+public enum ErrorCode implements BaseCode {
 
     // 400
     REQUEST_HEADER_EMPTY(HttpStatus.BAD_REQUEST, "요청 헤더가 비어있습니다."),

@@ -1,4 +1,4 @@
-package org.umc.travlocksserver.global.apiPayload.config;
+package org.umc.travlocksserver.global.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

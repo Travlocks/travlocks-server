@@ -1,9 +1,9 @@
-package org.umc.travlocksserver.global.apiPayload.aws;
+package org.umc.travlocksserver.global.aws;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.umc.travlocksserver.global.apiPayload.config.AwsProperties;
+import org.umc.travlocksserver.global.config.AwsProperties;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;

@@ -10,7 +10,9 @@ import org.umc.travlocksserver.domain.auth.dto.response.AuthVerifyEmailResponseD
 import org.umc.travlocksserver.domain.auth.exception.code.AuthSuccessCode;
 import org.umc.travlocksserver.domain.member.service.MemberEmailCheckService;
 import org.umc.travlocksserver.domain.auth.service.EmailVerificationService;
-import org.umc.travlocksserver.global.apiPayload.ApiResponse;
+import org.umc.travlocksserver.global.response.ApiResponse;
+import org.umc.travlocksserver.global.response.SuccessResponse;
+
 import jakarta.validation.Valid;
 
 @RestController
@@ -22,17 +24,17 @@ public class AuthController {
     private final MemberEmailCheckService authEmailCheckService;
 
     @PostMapping("/email-verification")
-    public ApiResponse<AuthSendEmailResponseDTO> sendEmailVerificationCode(
+    public SuccessResponse<AuthSendEmailResponseDTO> sendEmailVerificationCode(
             @Valid @RequestBody AuthSendEmailRequestDTO request
     ) {
         AuthSendEmailResponseDTO data =
                 emailVerificationService.sendVerificationCode(request.email());
 
-        return ApiResponse.ok(AuthSuccessCode.EMAIL_VERIFICATION_CODE_SENT, data);
+        return SuccessResponse.ok(AuthSuccessCode.EMAIL_VERIFICATION_CODE_SENT, data);
     }
 
     @PostMapping("/email-verification/confirm")
-    public ApiResponse<AuthVerifyEmailResponseDTO> confirmEmailVerificationCode(
+    public SuccessResponse<AuthVerifyEmailResponseDTO> confirmEmailVerificationCode(
             @Valid @RequestBody AuthVerifyEmailRequestDTO request
     ) {
         AuthVerifyEmailResponseDTO data = emailVerificationService.confirmVerificationCode(
@@ -40,17 +42,14 @@ public class AuthController {
                 request.code()
         );
 
-        return ApiResponse.ok(AuthSuccessCode.EMAIL_VERIFICATION_CONFIRMED, data);
+        return SuccessResponse.ok(AuthSuccessCode.EMAIL_VERIFICATION_CONFIRMED, data);
     }
 
     @PostMapping("/email-verification/resend")
-    public ApiResponse<Void> resendEmailVerificationCode(
+    public SuccessResponse<?> resendEmailVerificationCode(
             @Valid @RequestBody AuthResendEmailRequestDTO request
     ) {
         emailVerificationService.resendVerificationCode(request.verificationId());
-        return ApiResponse.ok(AuthSuccessCode.EMAIL_VERIFICATION_CODE_RESENT);
+        return SuccessResponse.ok(AuthSuccessCode.EMAIL_VERIFICATION_CODE_RESENT);
     }
-
-
-
 }
