@@ -11,8 +11,7 @@ public record ErrorResponse(
 	boolean isSuccess,
 	String errorCode,
 	String errorMessage,
-	Object data
-) {
+	Object data) {
 
 	public ErrorResponse(BaseCode errorCode) {
 		this(

@@ -6,10 +6,10 @@ import org.umc.travlocksserver.global.code.BaseCode;
 @Getter
 public abstract class GeneralException extends RuntimeException {
 
-    private final BaseCode errorCode;
+	private final BaseCode errorCode;
 
-    public GeneralException(BaseCode errorCode) {
-        super(errorCode.getMessage());
-        this.errorCode = errorCode;
-    }
+	public GeneralException(BaseCode errorCode) {
+		super(errorCode.getMessage());
+		this.errorCode = errorCode;
+	}
 }

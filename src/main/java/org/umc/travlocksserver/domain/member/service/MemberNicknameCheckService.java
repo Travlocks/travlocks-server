@@ -9,12 +9,12 @@ import org.umc.travlocksserver.domain.member.repository.MemberRepository;
 @RequiredArgsConstructor
 public class MemberNicknameCheckService {
 
-    private final MemberRepository memberRepository;
+	private final MemberRepository memberRepository;
 
-    public MemberNicknameExistsResponseDTO checkNicknameExists(String nickname) {
-        boolean exists = memberRepository.existsByNickname(nickname);
+	public MemberNicknameExistsResponseDTO checkNicknameExists(String nickname) {
+		boolean exists = memberRepository.existsByNickname(nickname);
 
-        // exists == true → 이미 사용 중 → available = false
-        return new MemberNicknameExistsResponseDTO(!exists);
-    }
+		// exists == true → 이미 사용 중 → available = false
+		return new MemberNicknameExistsResponseDTO(!exists);
+	}
 }

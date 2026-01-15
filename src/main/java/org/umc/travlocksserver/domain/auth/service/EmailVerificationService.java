@@ -18,114 +18,109 @@ import java.util.HexFormat;
 @RequiredArgsConstructor
 public class EmailVerificationService {
 
-    private static final Duration TTL = Duration.ofMinutes(5); // 인증 코드 유효 시간: 5분
-    private static final Duration SIGNUP_TOKEN_TTL = Duration.ofMinutes(20);
+	private static final Duration TTL = Duration.ofMinutes(5); // 인증 코드 유효 시간: 5분
+	private static final Duration SIGNUP_TOKEN_TTL = Duration.ofMinutes(20);
 
-    private final EmailVerificationRedisRepository redisRepository;
-    private final SesEmailSender emailSender;
-    private final MemberRepository memberRepository;
-    private final SignupTokenRedisRepository signupTokenRedisRepository;
+	private final EmailVerificationRedisRepository redisRepository;
+	private final SesEmailSender emailSender;
+	private final MemberRepository memberRepository;
+	private final SignupTokenRedisRepository signupTokenRedisRepository;
 
-    private static final SecureRandom RANDOM = new SecureRandom();
+	private static final SecureRandom RANDOM = new SecureRandom();
 
-    public AuthSendEmailResponseDTO sendVerificationCode(String email) {
-        // 이미 가입된 이메일이면 차단
-        if (memberRepository.existsByEmail(email)) {
-            throw new AuthException(AuthErrorCode.EMAIL_ALREADY_REGISTERED);
-        }
+	public AuthSendEmailResponseDTO sendVerificationCode(String email) {
+		// 이미 가입된 이메일이면 차단
+		if (memberRepository.existsByEmail(email)) {
+			throw new AuthException(AuthErrorCode.EMAIL_ALREADY_REGISTERED);
+		}
 
-        String code = generate6DigitCode(); // 6자리 숫자 코드
-        String verificationId = generateVerificationId();
+		String code = generate6DigitCode(); // 6자리 숫자 코드
+		String verificationId = generateVerificationId();
 
-        // Redis 저장
-        redisRepository.save(
-                verificationId,
-                new EmailVerificationRedisRepository.EmailVerificationCache(email, code),
-                TTL
-        );
+		// Redis 저장
+		redisRepository.save(
+			verificationId,
+			new EmailVerificationRedisRepository.EmailVerificationCache(email, code),
+			TTL);
 
-        // SesEmailSender 호출 (이메일 발송)
-        try {
-            emailSender.sendVerificationCode(email, code);
-        } catch (Exception e) {
-            // SES 발송 실패 시 Redis 롤백
-            redisRepository.delete(verificationId);
-            throw new AuthException(AuthErrorCode.EMAIL_SEND_FAILED);
-        }
+		// SesEmailSender 호출 (이메일 발송)
+		try {
+			emailSender.sendVerificationCode(email, code);
+		} catch (Exception e) {
+			// SES 발송 실패 시 Redis 롤백
+			redisRepository.delete(verificationId);
+			throw new AuthException(AuthErrorCode.EMAIL_SEND_FAILED);
+		}
 
-        return new AuthSendEmailResponseDTO(verificationId);
-    }
+		return new AuthSendEmailResponseDTO(verificationId);
+	}
 
-    public AuthVerifyEmailResponseDTO confirmVerificationCode(String verificationId, String code) {
+	public AuthVerifyEmailResponseDTO confirmVerificationCode(String verificationId, String code) {
 
-        EmailVerificationRedisRepository.EmailVerificationCache cache =
-                redisRepository.find(verificationId);
+		EmailVerificationRedisRepository.EmailVerificationCache cache = redisRepository.find(verificationId);
 
-        // 만료/없음
-        if (cache == null) {
-            throw new AuthException(AuthErrorCode.EMAIL_VERIFICATION_NOT_FOUND);
-        }
+		// 만료/없음
+		if (cache == null) {
+			throw new AuthException(AuthErrorCode.EMAIL_VERIFICATION_NOT_FOUND);
+		}
 
-        // 코드 불일치
-        if (!cache.code().equals(code)) {
-            throw new AuthException(AuthErrorCode.EMAIL_VERIFICATION_CODE_MISMATCH);
-        }
+		// 코드 불일치
+		if (!cache.code().equals(code)) {
+			throw new AuthException(AuthErrorCode.EMAIL_VERIFICATION_CODE_MISMATCH);
+		}
 
-        // 성공 -> signupToken 발급 (1회성)
-        String signupToken = generateSignupToken();
+		// 성공 -> signupToken 발급 (1회성)
+		String signupToken = generateSignupToken();
 
-        // signupToken -> email 저장 (회원가입 때 사용)
-        signupTokenRedisRepository.save(signupToken, cache.email(), SIGNUP_TOKEN_TTL);
+		// signupToken -> email 저장 (회원가입 때 사용)
+		signupTokenRedisRepository.save(signupToken, cache.email(), SIGNUP_TOKEN_TTL);
 
-        // verificationId는 재사용 방지 위해 삭제
-        redisRepository.delete(verificationId);
+		// verificationId는 재사용 방지 위해 삭제
+		redisRepository.delete(verificationId);
 
-        return new AuthVerifyEmailResponseDTO(signupToken);
-    }
+		return new AuthVerifyEmailResponseDTO(signupToken);
+	}
 
-    public void resendVerificationCode(String verificationId) {
+	public void resendVerificationCode(String verificationId) {
 
-        // 1) 기존 인증 요청 조회
-        EmailVerificationRedisRepository.EmailVerificationCache oldCache =
-                redisRepository.find(verificationId);
+		// 1) 기존 인증 요청 조회
+		EmailVerificationRedisRepository.EmailVerificationCache oldCache = redisRepository.find(verificationId);
 
-        if (oldCache == null) {
-            throw new AuthException(AuthErrorCode.EMAIL_VERIFICATION_NOT_FOUND);
-        }
+		if (oldCache == null) {
+			throw new AuthException(AuthErrorCode.EMAIL_VERIFICATION_NOT_FOUND);
+		}
 
-        // 2) 새 코드 생성
-        String newCode = generate6DigitCode();
+		// 2) 새 코드 생성
+		String newCode = generate6DigitCode();
 
-        // 3) 이메일 발송 (실패하면 Redis 그대로 유지)
-        try {
-            emailSender.sendVerificationCode(oldCache.email(), newCode);
-        } catch (Exception e) {
-            throw new AuthException(AuthErrorCode.EMAIL_SEND_FAILED);
-        }
+		// 3) 이메일 발송 (실패하면 Redis 그대로 유지)
+		try {
+			emailSender.sendVerificationCode(oldCache.email(), newCode);
+		} catch (Exception e) {
+			throw new AuthException(AuthErrorCode.EMAIL_SEND_FAILED);
+		}
 
-        // 4) 성공했을 때만 Redis 업데이트 (같은 verificationId로 갱신)
-        redisRepository.save(
-                verificationId,
-                new EmailVerificationRedisRepository.EmailVerificationCache(oldCache.email(), newCode),
-                TTL
-        );
-    }
+		// 4) 성공했을 때만 Redis 업데이트 (같은 verificationId로 갱신)
+		redisRepository.save(
+			verificationId,
+			new EmailVerificationRedisRepository.EmailVerificationCache(oldCache.email(), newCode),
+			TTL);
+	}
 
+	private String generate6DigitCode() {
+		int n = RANDOM.nextInt(900_000) + 100_000; // 100000~999999
+		return String.valueOf(n);
+	}
 
-    private String generate6DigitCode() {
-        int n = RANDOM.nextInt(900_000) + 100_000; // 100000~999999
-        return String.valueOf(n);
-    }
+	private String generateVerificationId() {
+		byte[] bytes = new byte[8];
+		RANDOM.nextBytes(bytes);
+		return "verif_" + HexFormat.of().formatHex(bytes); // verif_ + 16hex
+	}
 
-    private String generateVerificationId() {
-        byte[] bytes = new byte[8];
-        RANDOM.nextBytes(bytes);
-        return "verif_" + HexFormat.of().formatHex(bytes); // verif_ + 16hex
-    }
-
-    private String generateSignupToken() {
-        byte[] bytes = new byte[16];
-        RANDOM.nextBytes(bytes);
-        return "signup_" + HexFormat.of().formatHex(bytes); // signup_ + 32hex
-    }
+	private String generateSignupToken() {
+		byte[] bytes = new byte[16];
+		RANDOM.nextBytes(bytes);
+		return "signup_" + HexFormat.of().formatHex(bytes); // signup_ + 32hex
+	}
 }

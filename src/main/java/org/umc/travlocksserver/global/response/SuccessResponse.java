@@ -13,8 +13,7 @@ public record SuccessResponse<T>(
 			true,
 			successCode.getCode(),
 			successCode.getMessage(),
-			null
-		);
+			null);
 	}
 
 	public static <T> SuccessResponse<T> ok(BaseCode successCode, T data) {
@@ -22,7 +21,6 @@ public record SuccessResponse<T>(
 			true,
 			successCode.getCode(),
 			successCode.getMessage(),
-			data
-		);
+			data);
 	}
 }

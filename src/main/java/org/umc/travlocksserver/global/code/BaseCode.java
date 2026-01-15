@@ -4,10 +4,11 @@ import org.springframework.http.HttpStatus;
 
 public interface BaseCode {
 
-    HttpStatus getStatus();
-    String getMessage();
+	HttpStatus getStatus();
 
-    default String getCode() {
-        return ((Enum<?>) this).name();
-    }
+	String getMessage();
+
+	default String getCode() {
+		return ((Enum<?>)this).name();
+	}
 }

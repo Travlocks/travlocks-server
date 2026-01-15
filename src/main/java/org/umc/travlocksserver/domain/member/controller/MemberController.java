@@ -13,7 +13,6 @@ import org.umc.travlocksserver.domain.member.dto.response.MemberNicknameExistsRe
 import org.umc.travlocksserver.domain.member.exception.code.MemberSuccessCode;
 import org.umc.travlocksserver.domain.member.service.MemberEmailCheckService;
 import org.umc.travlocksserver.domain.member.service.MemberNicknameCheckService;
-import org.umc.travlocksserver.global.response.ApiResponse;
 import org.umc.travlocksserver.global.response.SuccessResponse;
 
 @Validated
@@ -22,38 +21,32 @@ import org.umc.travlocksserver.global.response.SuccessResponse;
 @RequestMapping("/members")
 public class MemberController {
 
-    private final MemberEmailCheckService memberEmailCheckService;
-    private final MemberNicknameCheckService memberNicknameCheckService;
+	private final MemberEmailCheckService memberEmailCheckService;
+	private final MemberNicknameCheckService memberNicknameCheckService;
 
-    @GetMapping("/email/exists")
-    public SuccessResponse<MemberEmailExistsResponseDTO> checkEmailExists(
-            @RequestParam
-            @NotBlank(message = "이메일은 필수입니다.")
-            @Email(message = "올바르지 않은 이메일 형식입니다.")
-            String email
-    ) {
-        MemberEmailExistsResponseDTO data = memberEmailCheckService.checkEmailExists(email);
+	@GetMapping("/email/exists")
+	public SuccessResponse<MemberEmailExistsResponseDTO> checkEmailExists(
+		@RequestParam @NotBlank(message = "이메일은 필수입니다.") @Email(message = "올바르지 않은 이메일 형식입니다.")
+		String email) {
+		MemberEmailExistsResponseDTO data = memberEmailCheckService.checkEmailExists(email);
 
-        MemberSuccessCode successCode = data.exists()
-                ? MemberSuccessCode.EMAIL_ALREADY_EXISTS
-                : MemberSuccessCode.EMAIL_AVAILABLE;
+		MemberSuccessCode successCode = data.exists()
+			? MemberSuccessCode.EMAIL_ALREADY_EXISTS
+			: MemberSuccessCode.EMAIL_AVAILABLE;
 
-        return SuccessResponse.ok(successCode, data);
-    }
+		return SuccessResponse.ok(successCode, data);
+	}
 
-    @GetMapping("/nickname/exists")
-    public SuccessResponse<MemberNicknameExistsResponseDTO> checkNicknameExists(
-            @RequestParam
-            @NotBlank(message = "닉네임은 필수입니다.")
-            String nickname
-    ) {
-        MemberNicknameExistsResponseDTO data =
-                memberNicknameCheckService.checkNicknameExists(nickname);
+	@GetMapping("/nickname/exists")
+	public SuccessResponse<MemberNicknameExistsResponseDTO> checkNicknameExists(
+		@RequestParam @NotBlank(message = "닉네임은 필수입니다.")
+		String nickname) {
+		MemberNicknameExistsResponseDTO data = memberNicknameCheckService.checkNicknameExists(nickname);
 
-        MemberSuccessCode successCode = data.available()
-                ? MemberSuccessCode.NICKNAME_AVAILABLE
-                : MemberSuccessCode.NICKNAME_ALREADY_EXISTS;
+		MemberSuccessCode successCode = data.available()
+			? MemberSuccessCode.NICKNAME_AVAILABLE
+			: MemberSuccessCode.NICKNAME_ALREADY_EXISTS;
 
-        return SuccessResponse.ok(successCode, data);
-    }
+		return SuccessResponse.ok(successCode, data);
+	}
 }

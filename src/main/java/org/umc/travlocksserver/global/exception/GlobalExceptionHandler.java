@@ -2,7 +2,6 @@ package org.umc.travlocksserver.global.exception;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.FieldError;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -10,16 +9,10 @@ import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
-import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
-import org.umc.travlocksserver.global.response.ApiResponse;
 import org.umc.travlocksserver.global.code.BaseCode;
 import org.umc.travlocksserver.global.code.ErrorCode;
 import org.umc.travlocksserver.global.response.ErrorResponse;
-
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 // ✨ 애플리케이션 전체에서 발생하는 예외를 catch 해서 통일된 응답(JSON)으로 반환하는 역할을 하는 클래스
 @Slf4j

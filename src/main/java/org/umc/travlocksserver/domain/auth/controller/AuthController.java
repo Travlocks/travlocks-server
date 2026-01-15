@@ -10,7 +10,6 @@ import org.umc.travlocksserver.domain.auth.dto.response.AuthVerifyEmailResponseD
 import org.umc.travlocksserver.domain.auth.exception.code.AuthSuccessCode;
 import org.umc.travlocksserver.domain.member.service.MemberEmailCheckService;
 import org.umc.travlocksserver.domain.auth.service.EmailVerificationService;
-import org.umc.travlocksserver.global.response.ApiResponse;
 import org.umc.travlocksserver.global.response.SuccessResponse;
 
 import jakarta.validation.Valid;
@@ -20,36 +19,34 @@ import jakarta.validation.Valid;
 @RequestMapping("/auth")
 public class AuthController {
 
-    private final EmailVerificationService emailVerificationService;
-    private final MemberEmailCheckService authEmailCheckService;
+	private final EmailVerificationService emailVerificationService;
+	private final MemberEmailCheckService authEmailCheckService;
 
-    @PostMapping("/email-verification")
-    public SuccessResponse<AuthSendEmailResponseDTO> sendEmailVerificationCode(
-            @Valid @RequestBody AuthSendEmailRequestDTO request
-    ) {
-        AuthSendEmailResponseDTO data =
-                emailVerificationService.sendVerificationCode(request.email());
+	@PostMapping("/email-verification")
+	public SuccessResponse<AuthSendEmailResponseDTO> sendEmailVerificationCode(
+		@Valid @RequestBody
+		AuthSendEmailRequestDTO request) {
+		AuthSendEmailResponseDTO data = emailVerificationService.sendVerificationCode(request.email());
 
-        return SuccessResponse.ok(AuthSuccessCode.EMAIL_VERIFICATION_CODE_SENT, data);
-    }
+		return SuccessResponse.ok(AuthSuccessCode.EMAIL_VERIFICATION_CODE_SENT, data);
+	}
 
-    @PostMapping("/email-verification/confirm")
-    public SuccessResponse<AuthVerifyEmailResponseDTO> confirmEmailVerificationCode(
-            @Valid @RequestBody AuthVerifyEmailRequestDTO request
-    ) {
-        AuthVerifyEmailResponseDTO data = emailVerificationService.confirmVerificationCode(
-                request.verificationId(),
-                request.code()
-        );
+	@PostMapping("/email-verification/confirm")
+	public SuccessResponse<AuthVerifyEmailResponseDTO> confirmEmailVerificationCode(
+		@Valid @RequestBody
+		AuthVerifyEmailRequestDTO request) {
+		AuthVerifyEmailResponseDTO data = emailVerificationService.confirmVerificationCode(
+			request.verificationId(),
+			request.code());
 
-        return SuccessResponse.ok(AuthSuccessCode.EMAIL_VERIFICATION_CONFIRMED, data);
-    }
+		return SuccessResponse.ok(AuthSuccessCode.EMAIL_VERIFICATION_CONFIRMED, data);
+	}
 
-    @PostMapping("/email-verification/resend")
-    public SuccessResponse<?> resendEmailVerificationCode(
-            @Valid @RequestBody AuthResendEmailRequestDTO request
-    ) {
-        emailVerificationService.resendVerificationCode(request.verificationId());
-        return SuccessResponse.ok(AuthSuccessCode.EMAIL_VERIFICATION_CODE_RESENT);
-    }
+	@PostMapping("/email-verification/resend")
+	public SuccessResponse<?> resendEmailVerificationCode(
+		@Valid @RequestBody
+		AuthResendEmailRequestDTO request) {
+		emailVerificationService.resendVerificationCode(request.verificationId());
+		return SuccessResponse.ok(AuthSuccessCode.EMAIL_VERIFICATION_CODE_RESENT);
+	}
 }
