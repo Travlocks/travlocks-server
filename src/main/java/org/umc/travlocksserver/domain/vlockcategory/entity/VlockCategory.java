@@ -27,7 +27,6 @@ public class VlockCategory {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    // DDL이 NOT NULL이면 nullable=false로 맞추는 게 1차 매핑에선 안전
     @Column(name = "deleted_at", nullable = false)
     private LocalDateTime deletedAt;
 }

@@ -44,8 +44,8 @@ public class Vlock extends SoftDeleteBaseEntity {
     @Column(nullable = false)
     private Double latitude;
 
-    @Column(nullable = false)
-    private Double longtitude;
+    @Column(name = "longtitude", nullable = false)
+    private Double longitude;
 
     @Column(nullable = false, length = 255)
     private String address;

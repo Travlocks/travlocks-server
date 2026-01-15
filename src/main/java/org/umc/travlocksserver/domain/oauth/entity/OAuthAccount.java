@@ -32,7 +32,6 @@ public class OAuthAccount {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    // ⚠ DDL 컬럼명이 'deletetd_at'이면 그대로 매핑해야 함
     @Column(name = "deletetd_at")
     private LocalDateTime deletedAt;
 }

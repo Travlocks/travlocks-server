@@ -29,6 +29,7 @@ public class City extends SoftDeleteBaseEntity {
     @Column(nullable = false)
     private Double latitude;
 
-    @Column(nullable = false)
+    @Column(name = "longtitude", nullable = false)
     private Double longitude;
+
 }
