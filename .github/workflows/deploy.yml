@@ -7,7 +7,7 @@ on:
 permissions:
   contents: read
 
-# 전역 환경변수 (필요하면 수정)
+# 전역 환경변수
 env:
   # Docker Hub 이미지 이름
   DOCKERHUB_IMAGE: docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DOCKERHUB_REPO }}
