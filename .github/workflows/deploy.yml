@@ -52,7 +52,7 @@ jobs:
     needs: build-and-push
     runs-on: ubuntu-latest
     steps:
-      # 5. EC2에 SSH 접속해서 배포 수행
+      # 5. EC2에 SSH 접속해서 배포 수행 
       - name: Deploy to EC2 via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
