@@ -1,0 +1,89 @@
+name: CI/CD Deploy to EC2 (Docker Hub)
+
+on:
+  push:
+    branches: ["deploy/#19-cicd"]
+
+permissions:
+  contents: read
+
+# 전역 환경변수 (필요하면 수정)
+env:
+  # Docker Hub 이미지 이름
+  DOCKERHUB_IMAGE: docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DOCKERHUB_REPO }}
+  # EC2에서 docker-compose.yml, .env 등이 있는 경로
+  APP_DIR: /home/ubuntu/travlocks
+
+jobs:
+  # 1) 빌드 + Docker Hub 푸시
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. 레포 체크아웃
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Docker 빌드 기능(buildx) 준비
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # 3. Docker Hub 로그인 (private repo push를 위해 필요)
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # 4. Docker 이미지 빌드 후 푸시
+      # - latest: 항상 최신 배포 이미지
+      # - github.sha: 특정 커밋 버전 추적/롤백용
+      - name: Build and Push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile
+          push: true
+          tags: |
+            ${{ env.DOCKERHUB_IMAGE }}:latest
+            ${{ env.DOCKERHUB_IMAGE }}:${{ github.sha }}
+
+  # 2) EC2로 배포 (이미지 pull + compose 재기동)
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      # 5. EC2에 SSH 접속해서 배포 수행
+      - name: Deploy to EC2 via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            set -e
+            echo "====== EC2 Deploy Start ======"
+
+            # 1) 배포 폴더로 이동 (docker-compose.yml과 .env가 있어야 함)
+            cd ${{ env.APP_DIR }}
+
+            # 2) Docker Hub 로그인 (private repo pull 위해 필요)
+            echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+
+            # 3) 최신 이미지 pull
+            #    - latest를 쓰는 경우: 아래 latest pull
+            docker pull ${{ env.DOCKERHUB_IMAGE }}:latest
+
+            # (선택) 특정 커밋 이미지를 쓰려면 아래처럼 sha 태그 pull
+            # docker pull ${{ env.DOCKERHUB_IMAGE }}:${{ github.sha }}
+
+            # 4) 기존 컨테이너 내림
+            docker compose down || true
+
+            # 5) 새 컨테이너 실행
+            #    - docker-compose.yml이 .env를 읽어야 RDS/Redis/S3 설정이 적용됨
+            docker compose up -d
+
+            # 6) 불필요한 이미지 정리(디스크 관리)
+            docker image prune -f
+
+            echo "====== EC2 Deploy Done ======"
