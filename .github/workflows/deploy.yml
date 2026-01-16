@@ -77,11 +77,11 @@ jobs:
             # docker pull ${{ env.DOCKERHUB_IMAGE }}:${{ github.sha }}
 
             # 4) 기존 컨테이너 내림
-            docker compose down || true
+            docker-compose down || true
 
             # 5) 새 컨테이너 실행
             #    - docker-compose.yml이 .env를 읽어야 RDS/Redis/S3 설정이 적용됨
-            docker compose up -d
+            docker-compose up -d
 
             # 6) 불필요한 이미지 정리(디스크 관리)
             docker image prune -f
