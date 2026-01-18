@@ -45,9 +45,9 @@ public class MemberController implements MemberControllerDocs {
             String nickname) {
         MemberNicknameExistsResponseDTO data = memberNicknameCheckService.checkNicknameExists(nickname);
 
-        MemberSuccessCode successCode = data.available()
-                ? MemberSuccessCode.NICKNAME_AVAILABLE
-                : MemberSuccessCode.NICKNAME_ALREADY_EXISTS;
+        MemberSuccessCode successCode = data.exists()
+                ? MemberSuccessCode.NICKNAME_ALREADY_EXISTS
+                : MemberSuccessCode.NICKNAME_AVAILABLE;
 
         return SuccessResponse.ok(successCode, data);
     }
