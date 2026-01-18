@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.umc.travlocksserver.domain.member.entity.Member;
 
 public interface MemberRepository extends JpaRepository<Member, Long> {
-    boolean existsByEmail(String email);
-    boolean existsByNickname(String nickname);
+	boolean existsByEmail(String email);
+
+	boolean existsByNickname(String nickname);
 }

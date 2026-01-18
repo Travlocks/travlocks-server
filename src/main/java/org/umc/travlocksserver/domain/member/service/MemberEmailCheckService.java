@@ -9,11 +9,10 @@ import org.umc.travlocksserver.domain.member.repository.MemberRepository;
 @RequiredArgsConstructor
 public class MemberEmailCheckService {
 
-    private final MemberRepository memberRepository;
+	private final MemberRepository memberRepository;
 
-    public MemberEmailExistsResponseDTO checkEmailExists(String email) {
-        boolean exists = memberRepository.existsByEmail(email);
-        return new MemberEmailExistsResponseDTO(exists);
-    }
+	public MemberEmailExistsResponseDTO checkEmailExists(String email) {
+		boolean exists = memberRepository.existsByEmail(email);
+		return new MemberEmailExistsResponseDTO(exists);
+	}
 }
-
