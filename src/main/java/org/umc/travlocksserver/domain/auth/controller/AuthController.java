@@ -17,10 +17,9 @@ import jakarta.validation.Valid;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/auth")
-public class AuthController {
+public class AuthController implements AuthControllerDocs {
 
 	private final EmailVerificationService emailVerificationService;
-	private final MemberEmailCheckService authEmailCheckService;
 
 	@PostMapping("/email-verification")
 	public SuccessResponse<AuthSendEmailResponseDTO> sendEmailVerificationCode(

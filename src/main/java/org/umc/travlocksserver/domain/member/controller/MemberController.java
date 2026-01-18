@@ -20,7 +20,7 @@ import org.umc.travlocksserver.global.response.SuccessResponse;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/members")
-public class MemberController {
+public class MemberController implements MemberControllerDocs {
 
     private final MemberEmailCheckService memberEmailCheckService;
     private final MemberNicknameCheckService memberNicknameCheckService;
