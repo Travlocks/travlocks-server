@@ -2,6 +2,7 @@ package org.umc.travlocksserver.domain.auth.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.validation.Valid;
 import org.umc.travlocksserver.domain.auth.dto.request.AuthResendEmailRequestDTO;
 import org.umc.travlocksserver.domain.auth.dto.request.AuthSendEmailRequestDTO;
 import org.umc.travlocksserver.domain.auth.dto.request.AuthVerifyEmailRequestDTO;
@@ -20,6 +21,7 @@ public interface AuthControllerDocs {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "실패")
     })
     SuccessResponse<AuthSendEmailResponseDTO> sendEmailVerificationCode(
+            @Valid
             AuthSendEmailRequestDTO request
     );
 
@@ -32,6 +34,7 @@ public interface AuthControllerDocs {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "실패")
     })
     SuccessResponse<AuthVerifyEmailResponseDTO> confirmEmailVerificationCode(
+            @Valid
             AuthVerifyEmailRequestDTO request
     );
 
@@ -44,6 +47,7 @@ public interface AuthControllerDocs {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "실패")
     })
     SuccessResponse<?> resendEmailVerificationCode(
+            @Valid
             AuthResendEmailRequestDTO request
     );
 }
