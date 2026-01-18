@@ -1,10 +1,24 @@
 package org.umc.travlocksserver.domain.auth.service;
 
-public interface SignupTokenService {
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.umc.travlocksserver.domain.auth.exception.AuthException;
+import org.umc.travlocksserver.domain.auth.exception.code.AuthErrorCode;
+import org.umc.travlocksserver.domain.auth.repository.SignupTokenRedisRepository;
 
-    /**
-     * signupToken이 유효하면 email을 반환하고,
-     * 1회성 토큰이므로 즉시 소모(삭제)한다.
-     */
-    String consumeAndGetEmail(String signupToken);
+@Service
+@RequiredArgsConstructor
+public class SignupTokenService {
+
+    private final SignupTokenRedisRepository signupTokenRedisRepository;
+
+    public String getEmail(String signupToken) {
+        String email = signupTokenRedisRepository.findEmail(signupToken);
+        if (email == null) throw new AuthException(AuthErrorCode.INVALID_SIGNUP_TOKEN);
+        return email;
+    }
+
+    public void consume(String signupToken) {
+        signupTokenRedisRepository.delete(signupToken);
+    }
 }

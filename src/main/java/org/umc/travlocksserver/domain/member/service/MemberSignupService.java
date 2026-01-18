@@ -42,8 +42,9 @@ public class MemberSignupService {
     @Transactional
     public MemberSignupResponseDTO signup(MemberSignupRequestDTO request) {
 
-        // 1) signupToken 검증 + 토큰에 저장된 email 조회(1회성이라면 여기서 소모)
-        String tokenEmail = signupTokenService.consumeAndGetEmail(request.signupToken());
+        // 1) signupToken 검증 + 토큰에 저장된 email 조회
+        String tokenEmail = signupTokenService.getEmail(request.signupToken());
+
         if (tokenEmail == null) {
             throw new MemberException(MemberErrorCode.SIGNUP_TOKEN_INVALID);
         }
@@ -59,7 +60,7 @@ public class MemberSignupService {
             throw new MemberException(MemberErrorCode.NICKNAME_ALREADY_EXISTS);
         }
 
-        // 3) 약관 검증 (필수 약관은 AGREED 아니면 실패)
+        // 3) 약관 검증
         List<Long> policyIds = request.consents().stream()
                 .map(MemberSignupRequestDTO.ConsentDTO::policyId)
                 .distinct()
@@ -77,6 +78,7 @@ public class MemberSignupService {
                         (a, b) -> b
                 ));
 
+        // 필수 약관은 AGREED 아니면 실패
         for (Policy policy : policies) {
             if (policy.isRequired()) {
                 ConsentStatus status = consentMap.get(policy.getId());
@@ -118,6 +120,9 @@ public class MemberSignupService {
         if (request.preferredTravelThemeIds() != null && !request.preferredTravelThemeIds().isEmpty()) {
             savePreferredThemes(savedMember, request.preferredTravelThemeIds());
         }
+
+        // 7) 회원가입 성공 시 signupToken 삭제
+        signupTokenService.consume(request.signupToken());
 
         return new MemberSignupResponseDTO(savedMember.getId(), savedMember.getNickname());
     }
