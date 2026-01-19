@@ -1,10 +1,10 @@
-package org.umc.travlocksserver.domain.member.service;
+package org.umc.travlocksserver.domain.member.service.command;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.umc.travlocksserver.domain.auth.service.SignupTokenService;
+import org.umc.travlocksserver.domain.auth.service.command.SignupTokenService;
 import org.umc.travlocksserver.domain.member.dto.request.MemberSignupRequestDTO;
 import org.umc.travlocksserver.domain.member.dto.response.MemberSignupResponseDTO;
 import org.umc.travlocksserver.domain.member.entity.Member;

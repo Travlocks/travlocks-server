@@ -13,9 +13,8 @@ import org.umc.travlocksserver.domain.auth.dto.response.AuthRefreshResponseDTO;
 import org.umc.travlocksserver.domain.auth.dto.response.AuthSendEmailResponseDTO;
 import org.umc.travlocksserver.domain.auth.dto.response.AuthVerifyEmailResponseDTO;
 import org.umc.travlocksserver.domain.auth.exception.code.AuthSuccessCode;
-import org.umc.travlocksserver.domain.auth.service.AuthService;
-import org.umc.travlocksserver.domain.member.service.MemberEmailCheckService;
-import org.umc.travlocksserver.domain.auth.service.EmailVerificationService;
+import org.umc.travlocksserver.domain.auth.service.command.AuthService;
+import org.umc.travlocksserver.domain.auth.service.command.EmailVerificationService;
 import org.umc.travlocksserver.global.response.SuccessResponse;
 
 import jakarta.validation.Valid;

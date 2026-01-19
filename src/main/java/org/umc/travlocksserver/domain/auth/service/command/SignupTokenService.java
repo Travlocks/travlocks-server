@@ -1,4 +1,4 @@
-package org.umc.travlocksserver.domain.auth.service;
+package org.umc.travlocksserver.domain.auth.service.command;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

@@ -8,9 +8,9 @@ import org.umc.travlocksserver.domain.member.dto.response.MemberEmailExistsRespo
 import org.umc.travlocksserver.domain.member.dto.response.MemberNicknameExistsResponseDTO;
 import org.umc.travlocksserver.domain.member.dto.response.MemberSignupResponseDTO;
 import org.umc.travlocksserver.domain.member.exception.code.MemberSuccessCode;
-import org.umc.travlocksserver.domain.member.service.MemberEmailCheckService;
-import org.umc.travlocksserver.domain.member.service.MemberNicknameCheckService;
-import org.umc.travlocksserver.domain.member.service.MemberSignupService;
+import org.umc.travlocksserver.domain.member.service.query.MemberEmailCheckService;
+import org.umc.travlocksserver.domain.member.service.query.MemberNicknameCheckService;
+import org.umc.travlocksserver.domain.member.service.command.MemberSignupService;
 import org.umc.travlocksserver.global.response.SuccessResponse;
 
 @Validated

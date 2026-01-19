@@ -1,4 +1,4 @@
-package org.umc.travlocksserver.domain.auth.service;
+package org.umc.travlocksserver.domain.auth.service.command;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -9,6 +9,7 @@ import org.umc.travlocksserver.domain.auth.exception.code.AuthErrorCode;
 import org.umc.travlocksserver.domain.auth.repository.EmailVerificationRedisRepository;
 import org.umc.travlocksserver.domain.auth.repository.SignupTokenRedisRepository;
 import org.umc.travlocksserver.domain.member.repository.MemberRepository;
+import org.umc.travlocksserver.global.aws.SesEmailSender;
 
 import java.security.SecureRandom;
 import java.time.Duration;

@@ -1,4 +1,4 @@
-package org.umc.travlocksserver.domain.auth.service;
+package org.umc.travlocksserver.global.aws;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
