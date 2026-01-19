@@ -2,10 +2,13 @@ package org.umc.travlocksserver.domain.auth.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import org.umc.travlocksserver.domain.auth.dto.request.AuthLoginRequestDTO;
 import org.umc.travlocksserver.domain.auth.dto.request.AuthResendEmailRequestDTO;
 import org.umc.travlocksserver.domain.auth.dto.request.AuthSendEmailRequestDTO;
 import org.umc.travlocksserver.domain.auth.dto.request.AuthVerifyEmailRequestDTO;
+import org.umc.travlocksserver.domain.auth.dto.response.AuthLoginResponseDTO;
 import org.umc.travlocksserver.domain.auth.dto.response.AuthSendEmailResponseDTO;
 import org.umc.travlocksserver.domain.auth.dto.response.AuthVerifyEmailResponseDTO;
 import org.umc.travlocksserver.global.response.SuccessResponse;
@@ -49,5 +52,22 @@ public interface AuthControllerDocs {
     SuccessResponse<?> resendEmailVerificationCode(
             @Valid
             AuthResendEmailRequestDTO request
+    );
+
+    @Operation(
+            summary = "로그인 API",
+            description = """
+            이메일과 비밀번호로 로그인을 진행합니다.
+            로그인에 성공하면 JWT 액세스 토큰을 응답 바디로 반환하고,
+            리프레시 토큰은 HttpOnly 쿠키로 발급됩니다.
+            """
+    )
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "로그인 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "실패")
+    })
+    SuccessResponse<AuthLoginResponseDTO> login(
+            @Valid AuthLoginRequestDTO request,
+            HttpServletResponse response
     );
 }

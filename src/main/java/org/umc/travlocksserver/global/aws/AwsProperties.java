@@ -1,4 +1,4 @@
-package org.umc.travlocksserver.global.config;
+package org.umc.travlocksserver.global.aws;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
