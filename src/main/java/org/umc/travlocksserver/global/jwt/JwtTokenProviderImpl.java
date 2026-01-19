@@ -72,12 +72,10 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
     @Override
     public Long extractMemberId(String refreshToken) {
         Claims claims = parseClaims(refreshToken);
-
         String sub = claims.getSubject();
         if (sub == null || sub.isBlank()) return null;
-
         try {
-            return Long.parseLong(sub);
+            return Long.valueOf(sub);
         } catch (NumberFormatException e) {
             return null;
         }
@@ -90,6 +88,28 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
             return true;
         } catch (JwtException | IllegalArgumentException e) {
             return false;
+        }
+    }
+
+    @Override
+    public boolean validateAccessToken(String accessToken) {
+        try {
+            parseClaims(accessToken);
+            return true;
+        } catch (JwtException | IllegalArgumentException e) {
+            return false;
+        }
+    }
+
+    @Override
+    public Long extractMemberIdFromAccessToken(String accessToken) {
+        Claims claims = parseClaims(accessToken);
+        String sub = claims.getSubject();
+        if (sub == null || sub.isBlank()) return null;
+        try {
+            return Long.valueOf(sub);
+        } catch (NumberFormatException e) {
+            return null;
         }
     }
 
