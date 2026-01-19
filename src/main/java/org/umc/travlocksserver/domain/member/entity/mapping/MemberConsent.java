@@ -5,6 +5,7 @@ import lombok.*;
 import org.umc.travlocksserver.domain.member.entity.Member;
 import org.umc.travlocksserver.domain.member.entity.Policy;
 import org.umc.travlocksserver.domain.member.enums.ConsentStatus;
+import org.umc.travlocksserver.global.entity.SoftDeleteBaseEntity;
 
 import java.time.LocalDateTime;
 
@@ -17,7 +18,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
-public class MemberConsent {
+public class MemberConsent extends SoftDeleteBaseEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "member_consent_id")
@@ -34,16 +35,5 @@ public class MemberConsent {
     @Enumerated(EnumType.STRING)
     @Column(name = "status", length = 10, nullable = false)
     private ConsentStatus status;
-
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
-    @Column(name = "deleted_at")
-    private LocalDateTime deletedAt;
-
-    @PrePersist
-    void prePersist() {
-        this.createdAt = LocalDateTime.now();
-    }
 }
 

@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.umc.travlocksserver.domain.member.entity.Member;
 import org.umc.travlocksserver.domain.member.entity.TravelTheme;
+import org.umc.travlocksserver.global.entity.BaseEntity;
 
 import java.time.LocalDateTime;
 
@@ -16,7 +17,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
-public class PreferredTravelTheme {
+public class PreferredTravelTheme extends BaseEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "preferred_travel_theme_id")
@@ -29,20 +30,4 @@ public class PreferredTravelTheme {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "travel_theme_id", nullable = false)
     private TravelTheme travelTheme;
-
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-
-    @PrePersist
-    void prePersist() {
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
-    }
-    @PreUpdate
-    void preUpdate() {
-        this.updatedAt = LocalDateTime.now();
-    }
 }

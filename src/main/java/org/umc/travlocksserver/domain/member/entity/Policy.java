@@ -3,6 +3,7 @@ package org.umc.travlocksserver.domain.member.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.umc.travlocksserver.domain.member.enums.PolicyType;
+import org.umc.travlocksserver.global.entity.SoftDeleteBaseEntity;
 
 import java.time.LocalDateTime;
 
@@ -12,7 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
-public class Policy {
+public class Policy extends SoftDeleteBaseEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "policy_id")
@@ -25,13 +26,5 @@ public class Policy {
     @Column(name = "is_required", nullable = false)
     private boolean required;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-
-    @Column(name = "deleted_at")
-    private LocalDateTime deletedAt;
 }
 
