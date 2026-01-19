@@ -20,7 +20,10 @@ public enum AuthSuccessCode implements BaseCode {
 		"인증 코드가 재전송되었습니다."),
     AUTH_LOGIN_SUCCESS(
             HttpStatus.OK,
-		"로그인에 성공했습니다.")
+		"로그인에 성공했습니다."),
+    AUTH_ACCESS_TOKEN_REISSUED(
+            HttpStatus.OK,
+            "액세스 토큰이 재발급되었습니다.")
     ;
 
 	private final HttpStatus status;

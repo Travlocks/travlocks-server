@@ -2,6 +2,7 @@ package org.umc.travlocksserver.domain.auth.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.umc.travlocksserver.domain.auth.dto.request.AuthLoginRequestDTO;
@@ -9,8 +10,10 @@ import org.umc.travlocksserver.domain.auth.dto.request.AuthResendEmailRequestDTO
 import org.umc.travlocksserver.domain.auth.dto.request.AuthSendEmailRequestDTO;
 import org.umc.travlocksserver.domain.auth.dto.request.AuthVerifyEmailRequestDTO;
 import org.umc.travlocksserver.domain.auth.dto.response.AuthLoginResponseDTO;
+import org.umc.travlocksserver.domain.auth.dto.response.AuthRefreshResponseDTO;
 import org.umc.travlocksserver.domain.auth.dto.response.AuthSendEmailResponseDTO;
 import org.umc.travlocksserver.domain.auth.dto.response.AuthVerifyEmailResponseDTO;
+import org.umc.travlocksserver.domain.auth.exception.code.AuthSuccessCode;
 import org.umc.travlocksserver.global.response.SuccessResponse;
 
 public interface AuthControllerDocs {
@@ -69,5 +72,17 @@ public interface AuthControllerDocs {
     SuccessResponse<AuthLoginResponseDTO> login(
             @Valid AuthLoginRequestDTO request,
             HttpServletResponse response
+    );
+
+    @Operation(
+            summary = "액세스 토큰 재발급 API",
+            description = "쿠키의 refreshToken이 유효하면 새 accessToken을 발급합니다."
+    )
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "액세스 토큰 재발급 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "실패")
+    })
+    SuccessResponse<AuthRefreshResponseDTO> refresh(
+            HttpServletRequest request
     );
 }

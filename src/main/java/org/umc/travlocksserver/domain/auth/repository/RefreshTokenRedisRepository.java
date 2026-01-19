@@ -12,20 +12,22 @@ public class RefreshTokenRedisRepository {
 
     private final StringRedisTemplate redisTemplate;
 
+    private String key(String jti) {
+        return "refresh_token:" + jti;
+    }
+
     public void save(String jti, Long memberId, Duration ttl) {
         redisTemplate.opsForValue().set(key(jti), String.valueOf(memberId), ttl);
     }
 
     public Long findMemberId(String jti) {
-        String v = redisTemplate.opsForValue().get(key(jti));
-        return (v == null) ? null : Long.valueOf(v);
+        String value = redisTemplate.opsForValue().get(key(jti));
+        if (value == null) return null;
+        try {
+            return Long.parseLong(value);
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 
-    public void delete(String jti) {
-        redisTemplate.delete(key(jti));
-    }
-
-    private String key(String jti) {
-        return "refresh_token:" + jti;
-    }
 }

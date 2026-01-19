@@ -70,6 +70,20 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
     }
 
     @Override
+    public Long extractMemberId(String refreshToken) {
+        Claims claims = parseClaims(refreshToken);
+
+        String sub = claims.getSubject();
+        if (sub == null || sub.isBlank()) return null;
+
+        try {
+            return Long.parseLong(sub);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    @Override
     public boolean validateRefreshToken(String refreshToken) {
         try {
             parseClaims(refreshToken);
@@ -79,6 +93,7 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
         }
     }
 
+    // JWT의 서명과 만료(exp) 여부를 검증한 뒤, payload에 담긴 Claims를 반환
     private Claims parseClaims(String token) {
         return Jwts.parser()
                 .verifyWith(key)

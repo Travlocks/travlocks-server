@@ -1,5 +1,6 @@
 package org.umc.travlocksserver.domain.auth.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -8,6 +9,7 @@ import org.umc.travlocksserver.domain.auth.dto.request.AuthResendEmailRequestDTO
 import org.umc.travlocksserver.domain.auth.dto.request.AuthSendEmailRequestDTO;
 import org.umc.travlocksserver.domain.auth.dto.request.AuthVerifyEmailRequestDTO;
 import org.umc.travlocksserver.domain.auth.dto.response.AuthLoginResponseDTO;
+import org.umc.travlocksserver.domain.auth.dto.response.AuthRefreshResponseDTO;
 import org.umc.travlocksserver.domain.auth.dto.response.AuthSendEmailResponseDTO;
 import org.umc.travlocksserver.domain.auth.dto.response.AuthVerifyEmailResponseDTO;
 import org.umc.travlocksserver.domain.auth.exception.code.AuthSuccessCode;
@@ -60,5 +62,12 @@ public class AuthController implements AuthControllerDocs {
             HttpServletResponse response) {
         AuthLoginResponseDTO data = authService.login(request, response);
         return SuccessResponse.ok(AuthSuccessCode.AUTH_LOGIN_SUCCESS, data);
+    }
+
+    @PostMapping("/refresh")
+    public SuccessResponse<AuthRefreshResponseDTO> refresh(
+            HttpServletRequest request) {
+        AuthRefreshResponseDTO data = authService.refreshAccessToken(request);
+        return SuccessResponse.ok(AuthSuccessCode.AUTH_ACCESS_TOKEN_REISSUED, data);
     }
 }

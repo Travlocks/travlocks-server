@@ -25,13 +25,22 @@ public enum AuthErrorCode implements BaseCode {
             HttpStatus.BAD_REQUEST,
             "인증 코드가 올바르지 않습니다."
     ),
-    INVALID_SIGNUP_TOKEN(HttpStatus.BAD_REQUEST,
-            "유효하지 않거나 만료된 회원가입 토큰입니다."),
+    INVALID_SIGNUP_TOKEN(
+            HttpStatus.BAD_REQUEST,
+            "유효하지 않거나 만료된 회원가입 토큰입니다."
+    ),
     INVALID_CREDENTIALS(
             HttpStatus.UNAUTHORIZED,
             "이메일 또는 비밀번호가 올바르지 않습니다."
     ),
-
+    INVALID_REFRESH_TOKEN(
+            HttpStatus.BAD_REQUEST,
+            "유효하지 않거나 만료된 리프레시 토큰입니다."
+    ),
+    REFRESH_TOKEN_REQUIRED(
+            HttpStatus.BAD_REQUEST,
+            "리프레시 토큰이 필요합니다."
+    )
     ;
 
     private final HttpStatus status;

@@ -23,11 +23,22 @@ public class SecurityConfig {
                         // Swagger 관련 URL 허용
                         .requestMatchers(
                                 "/swagger-ui/**",
-                                "/v3/api-docs/**",
-                                "/swagger-ui.html"
+                                "/swagger-ui.html",
+                                "/v3/api-docs/**"
                         ).permitAll()
 
-                        // JWT 붙이기 전까지는 전부 허용
+                        .requestMatchers(
+                                "/api/v1/auth/email-verification",
+                                "/api/v1/auth/email-verification/confirm",
+                                "/api/v1/auth/email-verification/resend",
+                                "/api/v1/members/email/exists",
+                                "/api/v1/members/nickname/exists",
+                                "/api/v1/members/signup",
+                                "/api/v1/auth/login",
+                                "/api/v1/auth/refresh"
+                        ).permitAll()
+
+                        // 나머지는 인증 필요
                         .anyRequest().permitAll()
                 );
 
