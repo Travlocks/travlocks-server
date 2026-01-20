@@ -3,9 +3,9 @@ package org.umc.travlocksserver.domain.template.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.umc.travlocksserver.domain.member.entity.Member;
+import org.umc.travlocksserver.domain.template.enums.TransportType;
 import org.umc.travlocksserver.domain.traveltheme.entity.TravelTheme;
 import org.umc.travlocksserver.global.entity.SoftDeleteBaseEntity;
-import org.umc.travlocksserver.domain.movetime.entity.TransportType;
 
 import java.time.LocalDate;
 

@@ -1,7 +1,8 @@
-package org.umc.travlocksserver.domain.movetime.entity;
+package org.umc.travlocksserver.domain.template.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.umc.travlocksserver.domain.template.enums.TransportType;
 import org.umc.travlocksserver.domain.vlock.entity.Vlock;
 import org.umc.travlocksserver.global.entity.BaseEntity;
 

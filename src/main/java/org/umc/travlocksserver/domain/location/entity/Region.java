@@ -1,4 +1,4 @@
-package org.umc.travlocksserver.domain.region.entity;
+package org.umc.travlocksserver.domain.location.entity;
 
 import jakarta.persistence.*;
 import lombok.*;

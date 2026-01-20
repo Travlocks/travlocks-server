@@ -1,9 +1,8 @@
-package org.umc.travlocksserver.domain.preferredtraveltheme.entity;
+package org.umc.travlocksserver.domain.traveltheme.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
 import org.umc.travlocksserver.domain.member.entity.Member;
-import org.umc.travlocksserver.domain.traveltheme.entity.TravelTheme;
 import org.umc.travlocksserver.global.entity.BaseEntity;
 
 @Getter
