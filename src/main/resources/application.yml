@@ -4,9 +4,9 @@ spring:
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: ${DB_URL}
-    username: ${DB_USER}
-    password: ${DB_PW}
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
 
   jpa:
     database: mysql
@@ -20,13 +20,13 @@ spring:
 
   data:
     redis:
-      host: ${REDIS_HOST:localhost}
-      port: ${REDIS_PORT:6379}
+      host: ${SPRING_DATA_REDIS_HOST:localhost}
+      port: ${SPRING_DATA_REDIS_PORT:6379}
 
 aws:
   region: ${AWS_REGION:ap-northeast-2}
   ses:
-    from-email: ${AWS_SES_FROM_EMAIL:travlocksserver@gmail.com}
+    from-email: ${AWS_SES_FROM_EMAIL}
   credentials:
     access-key: ${AWS_ACCESS_KEY_ID:}
     secret-key: ${AWS_SECRET_ACCESS_KEY:}
@@ -36,4 +36,8 @@ jwt:
   access-ttl-seconds: ${JWT_ACCESS_TTL_SECONDS:3600} # 1시간
   refresh-ttl-seconds: ${JWT_REFRESH_TTL_SECONDS:1209600} # 14일
 
-
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true

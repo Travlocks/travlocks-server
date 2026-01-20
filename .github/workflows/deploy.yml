@@ -52,38 +52,28 @@ jobs:
     needs: build-and-push
     runs-on: ubuntu-latest
     steps:
-      # 5. EC2에 SSH 접속해서 배포 수행 
+      # 5. EC2에 SSH 접속해서 배포 수행
       - name: Deploy to EC2 via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            set -e
-            echo "====== EC2 Deploy Start ======"
-
-            # 1) 배포 폴더로 이동 (docker-compose.yml과 .env가 있어야 함)
-            cd ${{ env.APP_DIR }}
-
-            # 2) Docker Hub 로그인 (private repo pull 위해 필요)
-            echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
-
-            # 3) 최신 이미지 pull
-            #    - latest를 쓰는 경우: 아래 latest pull
-            docker pull ${{ env.DOCKERHUB_IMAGE }}:latest
-
-            # (선택) 특정 커밋 이미지를 쓰려면 아래처럼 sha 태그 pull
-            # docker pull ${{ env.DOCKERHUB_IMAGE }}:${{ github.sha }}
-
-            # 4) 기존 컨테이너 내림
-            docker-compose down || true
-
-            # 5) 새 컨테이너 실행
-            #    - docker-compose.yml이 .env를 읽어야 RDS/Redis/S3 설정이 적용됨
-            docker-compose up -d
-
-            # 6) 불필요한 이미지 정리(디스크 관리)
-            docker image prune -f
-
-            echo "====== EC2 Deploy Done ======"
+            host: ${{ secrets.SSH_HOST }}
+            username: ${{ secrets.SSH_USER }}
+            key: ${{ secrets.SSH_PRIVATE_KEY }}
+            script: |
+              set -e
+              echo "====== EC2 Deploy Start ======"
+              cd ${{ env.APP_DIR }}
+              
+              echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+              
+              # 1) 이번 배포 태그를 SHA로 고정 (롤백 쉬움)
+              # .env에 IMAGE_TAG=... 라인이 있어야 함
+              sed -i 's/^IMAGE_TAG=.*/IMAGE_TAG=${{ github.sha }}/' .env
+              
+              # 2) pull + 재기동
+              docker compose pull
+              docker compose down || true
+              docker compose up -d
+              
+              docker image prune -f
+              echo "====== EC2 Deploy Done ======"
