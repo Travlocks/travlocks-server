@@ -3,7 +3,7 @@ package org.umc.travlocksserver.domain.member.exception.code;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
-import org.umc.travlocksserver.global.apiPayload.code.BaseCode;
+import org.umc.travlocksserver.global.code.BaseCode;
 
 @Getter
 @AllArgsConstructor
@@ -24,7 +24,11 @@ public enum MemberSuccessCode implements BaseCode {
     NICKNAME_ALREADY_EXISTS(
             HttpStatus.OK,
             "이미 사용 중인 닉네임입니다."
-    );
+    ),
+    MEMBER_SIGNUP_SUCCESS(
+            HttpStatus.CREATED,
+            "회원가입이 완료되었습니다."
+    ),
     ;
 
     private final HttpStatus status;

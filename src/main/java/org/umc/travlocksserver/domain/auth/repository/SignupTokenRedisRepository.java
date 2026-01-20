@@ -10,21 +10,21 @@ import java.time.Duration;
 @RequiredArgsConstructor
 public class SignupTokenRedisRepository {
 
-    private final StringRedisTemplate redisTemplate;
+	private final StringRedisTemplate redisTemplate;
 
-    public void save(String signupToken, String email, Duration ttl) {
-        redisTemplate.opsForValue().set(key(signupToken), email, ttl);
-    }
+	public void save(String signupToken, String email, Duration ttl) {
+		redisTemplate.opsForValue().set(key(signupToken), email, ttl);
+	}
 
-    public String findEmail(String signupToken) {
-        return redisTemplate.opsForValue().get(key(signupToken));
-    }
+	public String findEmail(String signupToken) {
+		return redisTemplate.opsForValue().get(key(signupToken));
+	}
 
-    public void delete(String signupToken) {
-        redisTemplate.delete(key(signupToken));
-    }
+	public void delete(String signupToken) {
+		redisTemplate.delete(key(signupToken));
+	}
 
-    private String key(String signupToken) {
-        return "signup_token:" + signupToken;
-    }
+	private String key(String signupToken) {
+		return "signup_token:" + signupToken;
+	}
 }
