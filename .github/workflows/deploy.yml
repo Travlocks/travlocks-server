@@ -66,14 +66,13 @@ jobs:
               
               echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
               
-              # 1) 이번 배포 태그를 SHA로 고정 (롤백 쉬움)
-              # .env에 IMAGE_TAG=... 라인이 있어야 함
+              # 1) 태그를 SHA로 고정 (롤백 쉬움)
               sed -i 's/^IMAGE_TAG=.*/IMAGE_TAG=${{ github.sha }}/' .env
               
               # 2) pull + 재기동
-              docker compose pull
-              docker compose down || true
-              docker compose up -d
+              docker-compose pull
+              docker-compose down || true
+              docker-compose up -d
               
               docker image prune -f
               echo "====== EC2 Deploy Done ======"
