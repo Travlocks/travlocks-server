@@ -3,8 +3,7 @@ package org.umc.travlocksserver.domain.oauth.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.umc.travlocksserver.domain.member.entity.Member;
-
-import java.time.LocalDateTime;
+import org.umc.travlocksserver.global.entity.CreatedSoftDeleteBaseEntity;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -12,7 +11,7 @@ import java.time.LocalDateTime;
 @Builder
 @Entity
 @Table(name = "oauth_accounts")
-public class OAuthAccount {
+public class OAuthAccount extends CreatedSoftDeleteBaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,9 +28,5 @@ public class OAuthAccount {
     @Column(name = "provider_id", nullable = false, length = 100)
     private String providerId;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
 
-    @Column(name = "deletetd_at")
-    private LocalDateTime deletedAt;
 }

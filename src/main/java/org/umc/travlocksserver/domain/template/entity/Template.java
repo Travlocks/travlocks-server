@@ -39,17 +39,19 @@ public class Template extends SoftDeleteBaseEntity {
     @Column(nullable = false, length = 30)
     private String title;
 
-    @Column(columnDefinition = "TEXT")
+    @Lob
+    @Column(name = "description")
     private String description;
 
     @Column(name = "cover_image_url", nullable = false, length = 255)
     private String coverImageUrl;
 
     @Column(name = "transport_type", nullable = false, length = 10)
-    private String transportType;
+    private String transportType; // WALK, CAR, TRANSIT
 
+    @Builder.Default
     @Column(name = "progress_rate", nullable = false)
-    private Integer progressRate;
+    private Integer progressRate = 0;
 
     @Column(name = "start_date")
     private LocalDate startDate;
@@ -60,8 +62,9 @@ public class Template extends SoftDeleteBaseEntity {
     @Column(name = "trip_days", nullable = false, length = 20)
     private String tripDays;
 
+    @Builder.Default
     @Column(name = "vlock_count", nullable = false)
-    private Integer vlockCount;
+    private Integer vlockCount = 0;
 
     @Column(name = "is_public", nullable = false)
     private Boolean isPublic;
@@ -69,15 +72,19 @@ public class Template extends SoftDeleteBaseEntity {
     @Column(name = "share_token", nullable = false, length = 100)
     private String shareToken;
 
+    @Builder.Default
     @Column(name = "favorite_count", nullable = false)
-    private Integer favoriteCount;
+    private Integer favoriteCount = 0;
 
+    @Builder.Default
     @Column(name = "remix_count", nullable = false)
-    private Integer remixCount;
+    private Integer remixCount = 0;
 
+    @Builder.Default
     @Column(name = "rating_count", nullable = false)
-    private Integer ratingCount;
+    private Integer ratingCount = 0;
 
+    @Builder.Default
     @Column(name = "avg_rating", nullable = false)
-    private Double avgRating;
+    private Double avgRating = 0.0;
 }

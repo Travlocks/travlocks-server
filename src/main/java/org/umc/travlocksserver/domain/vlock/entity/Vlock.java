@@ -44,7 +44,7 @@ public class Vlock extends SoftDeleteBaseEntity {
     @Column(nullable = false)
     private Double latitude;
 
-    @Column(name = "longtitude", nullable = false)
+    @Column(name = "longitude", nullable = false)
     private Double longitude;
 
     @Column(nullable = false, length = 255)
@@ -59,8 +59,9 @@ public class Vlock extends SoftDeleteBaseEntity {
     @Column(name = "avg_rating")
     private Double avgRating;
 
+    @Builder.Default
     @Column(name = "usage_count", nullable = false)
-    private Integer usageCount;
+    private Integer usageCount = 0;
 
     @Column(name = "is_public", nullable = false)
     private Boolean isPublic;

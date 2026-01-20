@@ -4,8 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.umc.travlocksserver.domain.templateday.entity.TemplateDay;
 import org.umc.travlocksserver.domain.vlock.entity.Vlock;
-
-import java.time.LocalDateTime;
+import org.umc.travlocksserver.global.entity.BaseEntity;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -13,7 +12,7 @@ import java.time.LocalDateTime;
 @Builder
 @Entity
 @Table(name = "template_vlocks")
-public class TemplateVlock {
+public class TemplateVlock extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,10 +36,4 @@ public class TemplateVlock {
     /** 체류 시간 (분) */
     @Column(name = "stay_minutes", nullable = false)
     private Integer stayMinutes;
-
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
 }

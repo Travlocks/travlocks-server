@@ -3,8 +3,7 @@ package org.umc.travlocksserver.domain.memberdeletionlog.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.umc.travlocksserver.domain.member.entity.Member;
-
-import java.time.LocalDateTime;
+import org.umc.travlocksserver.global.entity.CreatedBaseEntity;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -12,7 +11,7 @@ import java.time.LocalDateTime;
 @Builder
 @Entity
 @Table(name = "member_deletion_logs")
-public class MemberDeletionLog {
+public class MemberDeletionLog extends CreatedBaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,7 +24,4 @@ public class MemberDeletionLog {
 
     @Column(length = 255)
     private String reason;
-
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
 }

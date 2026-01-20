@@ -3,8 +3,8 @@ package org.umc.travlocksserver.domain.templateday.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.umc.travlocksserver.domain.template.entity.Template;
+import org.umc.travlocksserver.global.entity.CreatedBaseEntity;
 
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 @Getter
@@ -13,7 +13,7 @@ import java.time.LocalTime;
 @Builder
 @Entity
 @Table(name = "template_day")
-public class TemplateDay {
+public class TemplateDay extends CreatedBaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,7 +35,4 @@ public class TemplateDay {
 
     @Column(name = "vlock_count", nullable = false)
     private Integer vlockCount;
-
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
 }

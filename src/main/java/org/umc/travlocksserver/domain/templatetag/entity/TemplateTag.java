@@ -4,8 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.umc.travlocksserver.domain.tag.entity.Tag;
 import org.umc.travlocksserver.domain.template.entity.Template;
-
-import java.time.LocalDateTime;
+import org.umc.travlocksserver.global.entity.CreatedBaseEntity;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -13,7 +12,7 @@ import java.time.LocalDateTime;
 @Builder
 @Entity
 @Table(name = "template_tag")
-public class TemplateTag {
+public class TemplateTag extends CreatedBaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,7 +35,4 @@ public class TemplateTag {
 
     @Column(name = "version", nullable = false)
     private Integer version;
-
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
 }

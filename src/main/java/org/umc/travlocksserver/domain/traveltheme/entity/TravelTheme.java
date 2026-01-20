@@ -2,8 +2,7 @@ package org.umc.travlocksserver.domain.traveltheme.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-
-import java.time.LocalDateTime;
+import org.umc.travlocksserver.global.entity.CreatedSoftDeleteBaseEntity;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -11,7 +10,7 @@ import java.time.LocalDateTime;
 @Builder
 @Entity
 @Table(name = "travel_themes")
-public class TravelTheme {
+public class TravelTheme extends CreatedSoftDeleteBaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,10 +19,4 @@ public class TravelTheme {
 
     @Column(name = "content", nullable = false, length = 10)
     private String content;
-
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
-    @Column(name = "deleted_at")
-    private LocalDateTime deletedAt;
 }

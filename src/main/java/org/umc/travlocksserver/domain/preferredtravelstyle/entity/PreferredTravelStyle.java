@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.umc.travlocksserver.domain.member.entity.Member;
 import org.umc.travlocksserver.domain.travelstyle.entity.TravelStyle;
-import org.umc.travlocksserver.global.entity.BaseTimeEntity;
+import org.umc.travlocksserver.global.entity.BaseEntity;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -12,11 +12,11 @@ import org.umc.travlocksserver.global.entity.BaseTimeEntity;
 @Builder
 @Entity
 @Table(name = "preferred_travel_styles")
-public class PreferredTravelStyle extends BaseTimeEntity {
+public class PreferredTravelStyle extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "member_travel_style_id")
+    @Column(name = "preferred_travel_style_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)

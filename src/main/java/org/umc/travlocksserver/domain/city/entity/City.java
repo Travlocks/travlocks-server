@@ -10,7 +10,7 @@ import org.umc.travlocksserver.global.entity.SoftDeleteBaseEntity;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
 @Entity
-@Table(name = "city")
+@Table(name = "cities")
 public class City extends SoftDeleteBaseEntity {
 
     @Id
@@ -29,7 +29,7 @@ public class City extends SoftDeleteBaseEntity {
     @Column(nullable = false)
     private Double latitude;
 
-    @Column(name = "longtitude", nullable = false)
+    @Column(name = "longitude", nullable = false)
     private Double longitude;
 
 }

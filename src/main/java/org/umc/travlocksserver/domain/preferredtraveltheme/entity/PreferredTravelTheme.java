@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.umc.travlocksserver.domain.member.entity.Member;
 import org.umc.travlocksserver.domain.traveltheme.entity.TravelTheme;
-import org.umc.travlocksserver.global.entity.BaseTimeEntity;
+import org.umc.travlocksserver.global.entity.BaseEntity;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -12,7 +12,7 @@ import org.umc.travlocksserver.global.entity.BaseTimeEntity;
 @Builder
 @Entity
 @Table(name = "preferred_travel_themes")
-public class PreferredTravelTheme extends BaseTimeEntity {
+public class PreferredTravelTheme extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
