@@ -1,8 +1,7 @@
-package org.umc.travlocksserver.domain.memberdeletionlog.entity;
+package org.umc.travlocksserver.domain.member.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.umc.travlocksserver.domain.member.entity.Member;
 import org.umc.travlocksserver.global.entity.CreatedBaseEntity;
 
 @Getter

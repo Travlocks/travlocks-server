@@ -2,9 +2,8 @@ package org.umc.travlocksserver.domain.vlock.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.umc.travlocksserver.domain.city.entity.City;
+import org.umc.travlocksserver.domain.location.entity.City;
 import org.umc.travlocksserver.domain.member.entity.Member;
-import org.umc.travlocksserver.domain.vlockcategory.entity.VlockCategory;
 import org.umc.travlocksserver.global.entity.SoftDeleteBaseEntity;
 
 @Getter

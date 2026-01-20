@@ -1,7 +1,8 @@
-package org.umc.travlocksserver.domain.policy.entity;
+package org.umc.travlocksserver.domain.member.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.umc.travlocksserver.domain.member.enums.PolicyType;
 import org.umc.travlocksserver.global.entity.SoftDeleteBaseEntity;
 
 @Getter

@@ -1,7 +1,8 @@
-package org.umc.travlocksserver.domain.oauth.entity;
+package org.umc.travlocksserver.domain.auth.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.umc.travlocksserver.domain.auth.enums.OAuthProvider;
 import org.umc.travlocksserver.domain.member.entity.Member;
 import org.umc.travlocksserver.global.entity.CreatedSoftDeleteBaseEntity;
 
