@@ -22,8 +22,9 @@ public class OAuthAccount extends CreatedSoftDeleteBaseEntity {
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 10)
-    private String provider; // GOOGLE, KAKAO, NAVER
+    private OAuthProvider provider; // GOOGLE, KAKAO, NAVER
 
     @Column(name = "provider_id", nullable = false, length = 100)
     private String providerId;

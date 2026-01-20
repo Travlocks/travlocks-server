@@ -11,7 +11,7 @@ import org.umc.travlocksserver.global.entity.CreatedBaseEntity;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
 @Entity
-@Table(name = "template_tag")
+@Table(name = "template_tags")
 public class TemplateTag extends CreatedBaseEntity {
 
     @Id

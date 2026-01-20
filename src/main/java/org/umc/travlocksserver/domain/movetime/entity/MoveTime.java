@@ -31,8 +31,9 @@ public class MoveTime extends BaseEntity {
     @Column(name = "move_minutes", nullable = false)
     private Integer moveMinutes;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "transport_type", nullable = false, length = 10)
-    private String transportType; // WALK, CAR, TRANSIT
+    private TransportType transportType; // WALK, CAR, TRANSIT
 
     @Column(name = "distance_meter", nullable = false)
     private Integer distanceMeter;

@@ -9,7 +9,7 @@ import org.umc.travlocksserver.global.entity.SoftDeleteBaseEntity;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
 @Entity
-@Table(name = "region")
+@Table(name = "regions")
 public class Region extends SoftDeleteBaseEntity {
 
     @Id

@@ -11,7 +11,7 @@ import org.umc.travlocksserver.global.entity.BaseEntity;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
 @Entity
-@Table(name = "template_city")
+@Table(name = "template_cities")
 public class TemplateCity extends BaseEntity {
 
     @Id

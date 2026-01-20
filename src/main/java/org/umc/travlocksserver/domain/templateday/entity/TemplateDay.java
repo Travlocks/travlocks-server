@@ -12,7 +12,7 @@ import java.time.LocalTime;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
 @Entity
-@Table(name = "template_day")
+@Table(name = "template_days")
 public class TemplateDay extends CreatedBaseEntity {
 
     @Id

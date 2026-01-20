@@ -17,8 +17,9 @@ public class Policy extends SoftDeleteBaseEntity {
     @Column(name = "policy_id")
     private Long id;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false, length = 15)
-    private String type; // SERVICE, PRIVACY, MARKETING
+    private PolicyType type; // SERVICE, PRIVACY, MARKETING
 
     @Column(name = "is_required", nullable = false)
     private Boolean isRequired;

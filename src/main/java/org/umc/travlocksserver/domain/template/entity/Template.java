@@ -5,6 +5,7 @@ import lombok.*;
 import org.umc.travlocksserver.domain.member.entity.Member;
 import org.umc.travlocksserver.domain.traveltheme.entity.TravelTheme;
 import org.umc.travlocksserver.global.entity.SoftDeleteBaseEntity;
+import org.umc.travlocksserver.domain.movetime.entity.TransportType;
 
 import java.time.LocalDate;
 
@@ -46,8 +47,9 @@ public class Template extends SoftDeleteBaseEntity {
     @Column(name = "cover_image_url", nullable = false, length = 255)
     private String coverImageUrl;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "transport_type", nullable = false, length = 10)
-    private String transportType; // WALK, CAR, TRANSIT
+    private TransportType transportType; // WALK, CAR, TRANSIT
 
     @Builder.Default
     @Column(name = "progress_rate", nullable = false)
