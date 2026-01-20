@@ -1,8 +1,7 @@
-package org.umc.travlocksserver.domain.templatevlock.entity;
+package org.umc.travlocksserver.domain.template.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.umc.travlocksserver.domain.templateday.entity.TemplateDay;
 import org.umc.travlocksserver.domain.vlock.entity.Vlock;
 import org.umc.travlocksserver.global.entity.BaseEntity;
 

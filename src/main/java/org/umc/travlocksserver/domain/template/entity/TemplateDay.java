@@ -1,8 +1,7 @@
-package org.umc.travlocksserver.domain.templateday.entity;
+package org.umc.travlocksserver.domain.template.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.umc.travlocksserver.domain.template.entity.Template;
 import org.umc.travlocksserver.global.entity.CreatedBaseEntity;
 
 import java.time.LocalTime;

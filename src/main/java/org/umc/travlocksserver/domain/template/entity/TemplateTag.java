@@ -1,9 +1,8 @@
-package org.umc.travlocksserver.domain.templatetag.entity;
+package org.umc.travlocksserver.domain.template.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
 import org.umc.travlocksserver.domain.tag.entity.Tag;
-import org.umc.travlocksserver.domain.template.entity.Template;
 import org.umc.travlocksserver.global.entity.CreatedBaseEntity;
 
 @Getter
