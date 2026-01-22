@@ -1,5 +1,8 @@
 package org.umc.travlocksserver.domain.member.controller;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -26,6 +29,7 @@ public class MemberController implements MemberControllerDocs {
     @GetMapping("/email/exists")
     public SuccessResponse<MemberEmailExistsResponseDTO> checkEmailExists(
             @RequestParam
+            @NotBlank(message = "이메일은 필수입니다.") @Email(message = "올바르지 않은 이메일 형식입니다.")
             String email) {
         MemberEmailExistsResponseDTO data = memberEmailCheckService.checkEmailExists(email);
 
@@ -39,6 +43,7 @@ public class MemberController implements MemberControllerDocs {
     @GetMapping("/nickname/exists")
     public SuccessResponse<MemberNicknameExistsResponseDTO> checkNicknameExists(
             @RequestParam
+            @NotBlank(message = "닉네임은 필수입니다.")
             String nickname) {
         MemberNicknameExistsResponseDTO data = memberNicknameCheckService.checkNicknameExists(nickname);
 
@@ -51,6 +56,7 @@ public class MemberController implements MemberControllerDocs {
 
     @PostMapping("/signup")
     public SuccessResponse<MemberSignupResponseDTO> signup(
+            @Valid
             @RequestBody MemberSignupRequestDTO request
     ) {
         MemberSignupResponseDTO data = memberSignupService.signup(request);

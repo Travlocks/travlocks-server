@@ -10,7 +10,6 @@ import org.umc.travlocksserver.domain.member.dto.response.MemberSignupResponseDT
 import org.umc.travlocksserver.domain.member.entity.Member;
 import org.umc.travlocksserver.domain.member.entity.MemberConsent;
 import org.umc.travlocksserver.domain.member.entity.Policy;
-import org.umc.travlocksserver.domain.member.enums.ConsentStatus;
 import org.umc.travlocksserver.domain.member.enums.MemberStatus;
 import org.umc.travlocksserver.domain.member.exception.MemberException;
 import org.umc.travlocksserver.domain.member.exception.code.MemberErrorCode;
@@ -75,18 +74,18 @@ public class MemberSignupService {
             throw new MemberException(MemberErrorCode.POLICY_NOT_FOUND);
         }
 
-        Map<Long, ConsentStatus> consentMap = request.consents().stream()
+        Map<Long, Boolean> consentMap = request.consents().stream()
                 .collect(Collectors.toMap(
                         MemberSignupRequestDTO.ConsentDTO::policyId,
-                        MemberSignupRequestDTO.ConsentDTO::status,
-                        (a, b) -> b
+                        c -> Boolean.TRUE.equals(c.agreed()),
+                        (a, b) -> b // 중복이면 마지막 값 사용
                 ));
 
         // 필수 약관은 AGREED 아니면 실패
         for (Policy policy : policies) {
             if (policy.isRequired()) {
-                ConsentStatus status = consentMap.get(policy.getId());
-                if (status != ConsentStatus.AGREED) {
+                Boolean agreed = consentMap.get(policy.getId());
+                if (agreed == null || !agreed) {
                     throw new MemberException(MemberErrorCode.REQUIRED_POLICY_NOT_AGREED);
                 }
             }
@@ -111,7 +110,7 @@ public class MemberSignupService {
                 .map(policy -> MemberConsent.builder()
                         .member(savedMember)
                         .policy(policy)
-                        .status(consentMap.get(policy.getId()))
+                        .agreed(Boolean.TRUE.equals(consentMap.get(policy.getId())))
                         .build())
                 .toList();
 

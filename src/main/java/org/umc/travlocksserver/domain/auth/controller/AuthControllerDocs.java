@@ -1,10 +1,10 @@
 package org.umc.travlocksserver.domain.auth.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.Valid;
 import org.umc.travlocksserver.domain.auth.dto.request.AuthLoginRequestDTO;
 import org.umc.travlocksserver.domain.auth.dto.request.AuthResendEmailRequestDTO;
 import org.umc.travlocksserver.domain.auth.dto.request.AuthSendEmailRequestDTO;
@@ -13,7 +13,6 @@ import org.umc.travlocksserver.domain.auth.dto.response.AuthLoginResponseDTO;
 import org.umc.travlocksserver.domain.auth.dto.response.AuthRefreshResponseDTO;
 import org.umc.travlocksserver.domain.auth.dto.response.AuthSendEmailResponseDTO;
 import org.umc.travlocksserver.domain.auth.dto.response.AuthVerifyEmailResponseDTO;
-import org.umc.travlocksserver.domain.auth.exception.code.AuthSuccessCode;
 import org.umc.travlocksserver.global.response.SuccessResponse;
 
 public interface AuthControllerDocs {
@@ -27,7 +26,6 @@ public interface AuthControllerDocs {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "실패")
     })
     SuccessResponse<AuthSendEmailResponseDTO> sendEmailVerificationCode(
-            @Valid
             AuthSendEmailRequestDTO request
     );
 
@@ -40,7 +38,6 @@ public interface AuthControllerDocs {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "실패")
     })
     SuccessResponse<AuthVerifyEmailResponseDTO> confirmEmailVerificationCode(
-            @Valid
             AuthVerifyEmailRequestDTO request
     );
 
@@ -53,7 +50,6 @@ public interface AuthControllerDocs {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "실패")
     })
     SuccessResponse<?> resendEmailVerificationCode(
-            @Valid
             AuthResendEmailRequestDTO request
     );
 
@@ -70,8 +66,8 @@ public interface AuthControllerDocs {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "실패")
     })
     SuccessResponse<AuthLoginResponseDTO> login(
-            @Valid AuthLoginRequestDTO request,
-            HttpServletResponse response
+            AuthLoginRequestDTO request,
+            @Parameter(hidden = true) HttpServletResponse response
     );
 
     @Operation(
@@ -83,6 +79,6 @@ public interface AuthControllerDocs {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "실패")
     })
     SuccessResponse<AuthRefreshResponseDTO> refresh(
-            HttpServletRequest request
+            @Parameter(hidden = true) HttpServletRequest request
     );
 }

@@ -2,7 +2,6 @@ package org.umc.travlocksserver.domain.member.dto.request;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
-import org.umc.travlocksserver.domain.member.enums.ConsentStatus;
 
 import java.util.List;
 
@@ -43,7 +42,7 @@ public record MemberSignupRequestDTO(
             @NotNull(message = "policyId는 필수입니다.")
             Long policyId,
 
-            @NotNull(message = "status는 필수입니다.")
-            ConsentStatus status
+            @NotNull(message = "agreed는 필수입니다.")
+            Boolean agreed
     ) {}
 }

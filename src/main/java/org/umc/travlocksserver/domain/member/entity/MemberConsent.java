@@ -2,8 +2,7 @@ package org.umc.travlocksserver.domain.member.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.umc.travlocksserver.domain.member.enums.ConsentStatus;
-import org.umc.travlocksserver.global.entity.SoftDeleteBaseEntity;
+import org.umc.travlocksserver.global.entity.CreatedSoftDeleteBaseEntity;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -14,7 +13,7 @@ import org.umc.travlocksserver.global.entity.SoftDeleteBaseEntity;
         uniqueConstraints = {
                 @UniqueConstraint(name = "uk_member_policy", columnNames = {"member_id", "policy_id"})
         })
-public class MemberConsent extends SoftDeleteBaseEntity {
+public class MemberConsent extends CreatedSoftDeleteBaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,7 +28,6 @@ public class MemberConsent extends SoftDeleteBaseEntity {
     @JoinColumn(name = "policy_id", nullable = false)
     private Policy policy;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status", length = 10, nullable = false)
-    private ConsentStatus status;
+    @Column(name = "is_agreed", nullable = false)
+    private boolean agreed;
 }
