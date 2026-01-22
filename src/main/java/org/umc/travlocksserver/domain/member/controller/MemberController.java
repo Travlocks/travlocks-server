@@ -33,11 +33,7 @@ public class MemberController implements MemberControllerDocs {
             String email) {
         MemberEmailExistsResponseDTO data = memberEmailCheckService.checkEmailExists(email);
 
-        MemberSuccessCode successCode = data.exists()
-                ? MemberSuccessCode.EMAIL_ALREADY_EXISTS
-                : MemberSuccessCode.EMAIL_AVAILABLE;
-
-        return SuccessResponse.ok(successCode, data);
+        return SuccessResponse.ok(MemberSuccessCode.EMAIL_EXISTS_CHECK_SUCCESS, data);
     }
 
     @GetMapping("/nickname/exists")
@@ -47,11 +43,7 @@ public class MemberController implements MemberControllerDocs {
             String nickname) {
         MemberNicknameExistsResponseDTO data = memberNicknameCheckService.checkNicknameExists(nickname);
 
-        MemberSuccessCode successCode = data.exists()
-                ? MemberSuccessCode.NICKNAME_ALREADY_EXISTS
-                : MemberSuccessCode.NICKNAME_AVAILABLE;
-
-        return SuccessResponse.ok(successCode, data);
+        return SuccessResponse.ok(MemberSuccessCode.NICKNAME_EXISTS_CHECK_SUCCESS, data);
     }
 
     @PostMapping("/signup")
