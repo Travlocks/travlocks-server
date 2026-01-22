@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import org.umc.travlocksserver.domain.auth.dto.request.AuthLoginRequestDTO;
 import org.umc.travlocksserver.domain.auth.dto.request.AuthResendEmailRequestDTO;
 import org.umc.travlocksserver.domain.auth.dto.request.AuthSendEmailRequestDTO;
@@ -32,7 +33,7 @@ public interface AuthControllerDocs {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "이메일 발송 실패")
     })
     SuccessResponse<AuthSendEmailResponseDTO> sendEmailVerificationCode(
-            AuthSendEmailRequestDTO request
+            @Valid AuthSendEmailRequestDTO request
     );
 
     @Operation(
@@ -51,7 +52,7 @@ public interface AuthControllerDocs {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "요청 값 검증 실패 / verificationId 만료·없음 / 인증 코드 불일치")
     })
     SuccessResponse<AuthVerifyEmailResponseDTO> confirmEmailVerificationCode(
-            AuthVerifyEmailRequestDTO request
+            @Valid AuthVerifyEmailRequestDTO request
     );
 
     @Operation(
@@ -69,7 +70,7 @@ public interface AuthControllerDocs {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "이메일 발송 실패")
     })
     SuccessResponse<?> resendEmailVerificationCode(
-            AuthResendEmailRequestDTO request
+            @Valid AuthResendEmailRequestDTO request
     );
 
     @Operation(
@@ -87,7 +88,7 @@ public interface AuthControllerDocs {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "로그인 실패(이메일 또는 비밀번호 불일치)")
     })
     SuccessResponse<AuthLoginResponseDTO> login(
-            AuthLoginRequestDTO request,
+            @Valid AuthLoginRequestDTO request,
             @Parameter(hidden = true) HttpServletResponse response
     );
 
