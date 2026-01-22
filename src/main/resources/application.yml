@@ -34,7 +34,6 @@ mail:
     api-key: ${RESEND_API_KEY}
     from-email: ${RESEND_FROM_EMAIL}
 
-
 jwt:
   secret: ${JWT_SECRET:}
   access-ttl-seconds: ${JWT_ACCESS_TTL_SECONDS:3600} # 1시간

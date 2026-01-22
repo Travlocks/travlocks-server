@@ -7,12 +7,14 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.umc.travlocksserver.global.jwt.JwtAuthFilter;
+import org.umc.travlocksserver.global.security.CustomAuthEntryPoint;
 
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
+    private final CustomAuthEntryPoint customAuthEntryPoint;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -23,6 +25,9 @@ public class SecurityConfig {
 
                 // CSRF 비활성화
                 .csrf(csrf -> csrf.disable())
+
+                //  인증 실패(401) 응답을 커스터마이징
+                .exceptionHandling(e -> e.authenticationEntryPoint(customAuthEntryPoint))
 
                 // 인가 설정
                 .authorizeHttpRequests(auth -> auth
