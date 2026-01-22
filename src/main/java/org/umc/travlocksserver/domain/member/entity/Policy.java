@@ -23,5 +23,5 @@ public class Policy extends SoftDeleteBaseEntity {
     private PolicyType type; // SERVICE, PRIVACY, MARKETING
 
     @Column(name = "is_required", nullable = false)
-    private Boolean isRequired;
+    private boolean required;
 }

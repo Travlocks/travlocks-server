@@ -10,7 +10,10 @@ import org.umc.travlocksserver.global.entity.BaseEntity;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
 @Entity
-@Table(name = "preferred_travel_themes")
+@Table(name = "preferred_travel_themes",
+        uniqueConstraints = {
+                @UniqueConstraint(name = "uk_member_theme", columnNames = {"member_id", "travel_theme_id"})
+        })
 public class PreferredTravelTheme extends BaseEntity {
 
     @Id

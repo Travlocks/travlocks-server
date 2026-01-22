@@ -8,15 +8,15 @@ import org.umc.travlocksserver.global.entity.SoftDeleteBaseEntity;
 import java.time.LocalDateTime;
 
 @Entity
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Builder
 @Table(name = "members",
         uniqueConstraints = {
                 @UniqueConstraint(name = "uk_members_email", columnNames = "email"),
                 @UniqueConstraint(name = "uk_members_nickname", columnNames = "nickname")
         })
-@Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
-@Builder
 public class Member extends SoftDeleteBaseEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
