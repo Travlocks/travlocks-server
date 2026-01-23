@@ -9,21 +9,13 @@ import org.umc.travlocksserver.global.code.BaseCode;
 @AllArgsConstructor
 public enum MemberSuccessCode implements BaseCode {
 
-    EMAIL_AVAILABLE(
+    EMAIL_EXISTS_CHECK_SUCCESS(
             HttpStatus.OK,
-            "사용 가능한 이메일입니다."
+            "이메일 중복 검사에 성공했습니다."
     ),
-    EMAIL_ALREADY_EXISTS(
+    NICKNAME_EXISTS_CHECK_SUCCESS(
             HttpStatus.OK,
-            "이미 가입된 이메일입니다."
-    ),
-    NICKNAME_AVAILABLE(
-            HttpStatus.OK,
-            "사용 가능한 닉네임입니다."
-    ),
-    NICKNAME_ALREADY_EXISTS(
-            HttpStatus.OK,
-            "이미 사용 중인 닉네임입니다."
+            "닉네임 중복 검사에 성공했습니다."
     ),
     MEMBER_SIGNUP_SUCCESS(
             HttpStatus.CREATED,

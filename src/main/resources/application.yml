@@ -25,11 +25,14 @@ spring:
 
 aws:
   region: ${AWS_REGION:ap-northeast-2}
-  ses:
-    from-email: ${AWS_SES_FROM_EMAIL}
   credentials:
     access-key: ${AWS_ACCESS_KEY_ID:}
     secret-key: ${AWS_SECRET_ACCESS_KEY:}
+
+mail:
+  resend:
+    api-key: ${RESEND_API_KEY}
+    from-email: ${RESEND_FROM_EMAIL}
 
 jwt:
   secret: ${JWT_SECRET:}

@@ -4,6 +4,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -25,13 +26,16 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class AuthService {
 
-    private static final Duration REFRESH_TTL = Duration.ofDays(14); // 1209600s
+    @Value("${jwt.refresh-ttl-seconds}")
+    private long refreshTtlSeconds;
+
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final RefreshTokenRedisRepository refreshTokenRedisRepository;
 
     public AuthLoginResponseDTO login(AuthLoginRequestDTO request, HttpServletResponse response) {
+        Duration refreshTtl = Duration.ofSeconds(refreshTtlSeconds);
 
         // 1) 회원 조회
         Member member = memberRepository.findByEmail(request.email())
@@ -51,14 +55,14 @@ public class AuthService {
         String refreshToken = jwtTokenProvider.generateRefreshToken(member.getId(), jti);
 
         // 4) refreshToken -> Redis 저장
-        refreshTokenRedisRepository.save(jti, member.getId(), REFRESH_TTL);
+        refreshTokenRedisRepository.save(jti, member.getId(), refreshTtl);
 
         // 5) refreshToken -> Set-Cookie
         ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
                 .httpOnly(true)
                 .secure(false) // 운영환경에선 true로 변경
                 .path("/api/v1/auth/refresh")
-                .maxAge(REFRESH_TTL)
+                .maxAge(refreshTtl)
                 .sameSite("Lax") // 운영환경에선 None으로 변경
                 .build();
 

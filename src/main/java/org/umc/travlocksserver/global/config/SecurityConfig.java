@@ -10,6 +10,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.umc.travlocksserver.global.jwt.JwtAuthFilter;
+import org.umc.travlocksserver.global.security.CustomAuthEntryPoint;
 
 import java.util.List;
 
@@ -18,6 +19,7 @@ import java.util.List;
 public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
+    private final CustomAuthEntryPoint customAuthEntryPoint;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -31,6 +33,9 @@ public class SecurityConfig {
 
                 // CSRF 비활성화
                 .csrf(csrf -> csrf.disable())
+
+                //  인증 실패(401) 응답을 커스터마이징
+                .exceptionHandling(e -> e.authenticationEntryPoint(customAuthEntryPoint))
 
                 // 인가 설정
                 .authorizeHttpRequests(auth -> auth

@@ -1,6 +1,7 @@
 package org.umc.travlocksserver.global.jwt;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -91,14 +92,13 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
         }
     }
 
+    // AccessToken 검증 + 예외로 만료/무효 구분
     @Override
-    public boolean validateAccessToken(String accessToken) {
-        try {
-            parseClaims(accessToken);
-            return true;
-        } catch (JwtException | IllegalArgumentException e) {
-            return false;
-        }
+    public void validateAccessTokenOrThrow(String accessToken) throws ExpiredJwtException, JwtException {
+        Jwts.parser()
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(accessToken);
     }
 
     @Override

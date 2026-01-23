@@ -29,7 +29,7 @@ public class AuthController implements AuthControllerDocs {
 
 	@PostMapping("/email-verification")
 	public SuccessResponse<AuthSendEmailResponseDTO> sendEmailVerificationCode(
-		@RequestBody
+		@Valid @RequestBody
 		AuthSendEmailRequestDTO request) {
 		AuthSendEmailResponseDTO data = emailVerificationService.sendVerificationCode(request.email());
 
@@ -38,7 +38,7 @@ public class AuthController implements AuthControllerDocs {
 
 	@PostMapping("/email-verification/confirm")
 	public SuccessResponse<AuthVerifyEmailResponseDTO> confirmEmailVerificationCode(
-		@RequestBody
+		@Valid @RequestBody
 		AuthVerifyEmailRequestDTO request) {
 		AuthVerifyEmailResponseDTO data = emailVerificationService.confirmVerificationCode(
 			request.verificationId(),
@@ -49,7 +49,7 @@ public class AuthController implements AuthControllerDocs {
 
 	@PostMapping("/email-verification/resend")
 	public SuccessResponse<?> resendEmailVerificationCode(
-		@RequestBody
+		@Valid @RequestBody
 		AuthResendEmailRequestDTO request) {
 		emailVerificationService.resendVerificationCode(request.verificationId());
 		return SuccessResponse.ok(AuthSuccessCode.EMAIL_VERIFICATION_CODE_RESENT);
