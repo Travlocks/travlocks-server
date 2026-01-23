@@ -2,7 +2,7 @@ name: CI/CD Deploy to EC2 (Docker Hub)
 
 on:
   push:
-    branches: ["deploy/#19-cicd"]
+    branches: ["develop"]
 
 permissions:
   contents: read
