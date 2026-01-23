@@ -22,7 +22,7 @@ public class EmailVerificationRedisRepository {
 
 	public void save(String verificationId, EmailVerificationCache cache, Duration ttl) {
 		try {
-			String value = objectMapper.writeValueAsString(cache); // Java 객체 → JSON 문자열
+			String value = objectMapper.writeValueAsString(cache);
 			redisTemplate.opsForValue().set(key(verificationId), value, ttl);
 		} catch (JsonProcessingException e) {
 			throw new IllegalStateException("Redis 직렬화 실패", e);

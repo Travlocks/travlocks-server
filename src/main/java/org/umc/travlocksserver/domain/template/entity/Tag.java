@@ -9,7 +9,7 @@ import org.umc.travlocksserver.global.entity.CreatedBaseEntity;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
 @Entity
-@Table(name = "tag")
+@Table(name = "tags")
 public class Tag extends CreatedBaseEntity {
 
     @Id

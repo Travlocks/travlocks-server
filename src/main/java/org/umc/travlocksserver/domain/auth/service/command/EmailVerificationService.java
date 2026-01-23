@@ -1,4 +1,4 @@
-package org.umc.travlocksserver.domain.auth.service;
+package org.umc.travlocksserver.domain.auth.service.command;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -9,10 +9,14 @@ import org.umc.travlocksserver.domain.auth.exception.code.AuthErrorCode;
 import org.umc.travlocksserver.domain.auth.repository.EmailVerificationRedisRepository;
 import org.umc.travlocksserver.domain.auth.repository.SignupTokenRedisRepository;
 import org.umc.travlocksserver.domain.member.repository.MemberRepository;
+import org.umc.travlocksserver.global.common.MailTemplateLoader;
+import org.umc.travlocksserver.global.mail.MailSender;
 
 import java.security.SecureRandom;
 import java.time.Duration;
 import java.util.HexFormat;
+
+import static org.umc.travlocksserver.domain.auth.exception.code.AuthErrorCode.EMAIL_SEND_FAILED;
 
 @Service
 @RequiredArgsConstructor
@@ -22,8 +26,9 @@ public class EmailVerificationService {
 	private static final Duration SIGNUP_TOKEN_TTL = Duration.ofMinutes(20);
 
 	private final EmailVerificationRedisRepository redisRepository;
-	private final SesEmailSender emailSender;
-	private final MemberRepository memberRepository;
+    private final MailSender mailSender;
+    private final MailTemplateLoader templateLoader;
+    private final MemberRepository memberRepository;
 	private final SignupTokenRedisRepository signupTokenRedisRepository;
 
 	private static final SecureRandom RANDOM = new SecureRandom();
@@ -34,7 +39,7 @@ public class EmailVerificationService {
 			throw new AuthException(AuthErrorCode.EMAIL_ALREADY_REGISTERED);
 		}
 
-		String code = generate6DigitCode(); // 6자리 숫자 코드
+		String code = generate6DigitCode();
 		String verificationId = generateVerificationId();
 
 		// Redis 저장
@@ -43,14 +48,15 @@ public class EmailVerificationService {
 			new EmailVerificationRedisRepository.EmailVerificationCache(email, code),
 			TTL);
 
-		// SesEmailSender 호출 (이메일 발송)
-		try {
-			emailSender.sendVerificationCode(email, code);
-		} catch (Exception e) {
-			// SES 발송 실패 시 Redis 롤백
-			redisRepository.delete(verificationId);
-			throw new AuthException(AuthErrorCode.EMAIL_SEND_FAILED);
-		}
+        String subject = "[트래블록스] 이메일 인증 코드 안내";
+        String html = templateLoader.load("mail/verification-code.html")
+                .replace("{{CODE}}", code);
+        try {
+            mailSender.send(email, subject, html);
+        } catch (Exception e) {
+            e.printStackTrace();   // ← 이거 하나만으로도 원인 다 나옴
+            throw new RuntimeException("EMAIL_SEND_FAILED");
+        }
 
 		return new AuthSendEmailResponseDTO(verificationId);
 	}
@@ -69,10 +75,9 @@ public class EmailVerificationService {
 			throw new AuthException(AuthErrorCode.EMAIL_VERIFICATION_CODE_MISMATCH);
 		}
 
-		// 성공 -> signupToken 발급 (1회성)
+		// 성공 -> signupToken 발급
 		String signupToken = generateSignupToken();
 
-		// signupToken -> email 저장 (회원가입 때 사용)
 		signupTokenRedisRepository.save(signupToken, cache.email(), SIGNUP_TOKEN_TTL);
 
 		// verificationId는 재사용 방지 위해 삭제
@@ -83,24 +88,27 @@ public class EmailVerificationService {
 
 	public void resendVerificationCode(String verificationId) {
 
-		// 1) 기존 인증 요청 조회
+		// 기존 인증 요청 조회
 		EmailVerificationRedisRepository.EmailVerificationCache oldCache = redisRepository.find(verificationId);
 
 		if (oldCache == null) {
 			throw new AuthException(AuthErrorCode.EMAIL_VERIFICATION_NOT_FOUND);
 		}
 
-		// 2) 새 코드 생성
 		String newCode = generate6DigitCode();
 
-		// 3) 이메일 발송 (실패하면 Redis 그대로 유지)
+
+        String subject = "[트래블록스] 이메일 인증 코드 안내";
+        String htmlBody = templateLoader.load("mail/verification-code.html")
+                .replace("{{CODE}}", newCode);
 		try {
-			emailSender.sendVerificationCode(oldCache.email(), newCode);
+            mailSender.send(oldCache.email(), subject, htmlBody);
 		} catch (Exception e) {
-			throw new AuthException(AuthErrorCode.EMAIL_SEND_FAILED);
+            // 실패하면 Redis 그대로 유지
+			throw new AuthException(EMAIL_SEND_FAILED);
 		}
 
-		// 4) 성공했을 때만 Redis 업데이트 (같은 verificationId로 갱신)
+		// 성공했을 때만 Redis 업데이트 (같은 verificationId로 갱신)
 		redisRepository.save(
 			verificationId,
 			new EmailVerificationRedisRepository.EmailVerificationCache(oldCache.email(), newCode),

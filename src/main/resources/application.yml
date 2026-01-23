@@ -4,31 +4,43 @@ spring:
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: ${DB_URL} # jdbc:mysql://localhost:3306/{???????}
-    username: ${DB_USER} # MySQL ?? ??
-    password: ${DB_PW} # MySQL ????
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
 
   jpa:
     database: mysql
     database-platform: org.hibernate.dialect.MySQLDialect
     show-sql: true
     hibernate:
-      ddl-auto: update
+      ddl-auto: ${DDL_AUTO:update}
     properties:
       hibernate:
         format_sql: true
 
   data:
     redis:
-      host: ${REDIS_HOST:localhost}
-      port: ${REDIS_PORT:6379}
+      host: ${SPRING_DATA_REDIS_HOST:localhost}
+      port: ${SPRING_DATA_REDIS_PORT:6379}
 
 aws:
   region: ${AWS_REGION:ap-northeast-2}
-  ses:
-    from-email: ${AWS_SES_FROM_EMAIL:travlocksserver@gmail.com}
   credentials:
     access-key: ${AWS_ACCESS_KEY_ID:}
     secret-key: ${AWS_SECRET_ACCESS_KEY:}
 
+mail:
+  resend:
+    api-key: ${RESEND_API_KEY}
+    from-email: ${RESEND_FROM_EMAIL}
 
+jwt:
+  secret: ${JWT_SECRET:}
+  access-ttl-seconds: ${JWT_ACCESS_TTL_SECONDS:3600} # 1시간
+  refresh-ttl-seconds: ${JWT_REFRESH_TTL_SECONDS:1209600} # 14일
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true

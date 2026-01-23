@@ -1,14 +1,12 @@
-package org.umc.travlocksserver.global.config;
+package org.umc.travlocksserver.global.aws;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(prefix = "aws")
 public record AwsProperties(
 	String region,
-	Credentials credentials,
-	Ses ses) {
+	Credentials credentials
+) {
 	public record Credentials(String accessKey, String secretKey) {
-	}
-	public record Ses(String fromEmail) {
 	}
 }

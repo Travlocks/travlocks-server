@@ -9,7 +9,10 @@ import org.umc.travlocksserver.global.entity.CreatedSoftDeleteBaseEntity;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
 @Entity
-@Table(name = "member_consents")
+@Table(name = "member_consents",
+        uniqueConstraints = {
+                @UniqueConstraint(name = "uk_member_policy", columnNames = {"member_id", "policy_id"})
+        })
 public class MemberConsent extends CreatedSoftDeleteBaseEntity {
 
     @Id
@@ -25,6 +28,6 @@ public class MemberConsent extends CreatedSoftDeleteBaseEntity {
     @JoinColumn(name = "policy_id", nullable = false)
     private Policy policy;
 
-    @Column(nullable = false, length = 10)
-    private String status;
+    @Column(name = "is_agreed", nullable = false)
+    private boolean agreed;
 }

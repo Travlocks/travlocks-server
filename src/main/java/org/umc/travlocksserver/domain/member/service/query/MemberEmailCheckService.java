@@ -1,4 +1,4 @@
-package org.umc.travlocksserver.domain.member.service;
+package org.umc.travlocksserver.domain.member.service.query;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

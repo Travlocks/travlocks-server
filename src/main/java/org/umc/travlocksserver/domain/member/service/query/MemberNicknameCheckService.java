@@ -1,4 +1,4 @@
-package org.umc.travlocksserver.domain.member.service;
+package org.umc.travlocksserver.domain.member.service.query;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -14,7 +14,6 @@ public class MemberNicknameCheckService {
 	public MemberNicknameExistsResponseDTO checkNicknameExists(String nickname) {
 		boolean exists = memberRepository.existsByNickname(nickname);
 
-		// exists == true → 이미 사용 중 → available = false
-		return new MemberNicknameExistsResponseDTO(!exists);
+		return new MemberNicknameExistsResponseDTO(exists);
 	}
 }
