@@ -5,8 +5,6 @@ import lombok.*;
 import org.umc.travlocksserver.domain.member.enums.MemberStatus;
 import org.umc.travlocksserver.global.entity.SoftDeleteBaseEntity;
 
-import java.time.LocalDateTime;
-
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -34,6 +32,9 @@ public class Member extends SoftDeleteBaseEntity {
 
     @Column(name = "email", length = 255, nullable = false)
     private String email;
+
+	@Column(name = "profile_image_url", nullable = false, length = 255)
+	private String profileImageUrl;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", length = 10, nullable = false)
