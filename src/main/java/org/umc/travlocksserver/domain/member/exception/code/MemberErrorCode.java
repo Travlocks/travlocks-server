@@ -19,7 +19,9 @@ public enum MemberErrorCode implements BaseCode {
     REQUIRED_POLICY_NOT_AGREED(HttpStatus.BAD_REQUEST, "필수 약관에 동의해야 합니다."),
 
     TRAVEL_STYLE_NOT_FOUND(HttpStatus.BAD_REQUEST, "존재하지 않는 여행 스타일 ID가 포함되어 있습니다."),
-    TRAVEL_THEME_NOT_FOUND(HttpStatus.BAD_REQUEST, "존재하지 않는 여행 테마 ID가 포함되어 있습니다.");
+    TRAVEL_THEME_NOT_FOUND(HttpStatus.BAD_REQUEST, "존재하지 않는 여행 테마 ID가 포함되어 있습니다."),
+
+	MEMBER_NOT_FOUND(HttpStatus.BAD_REQUEST, "존재하지 않는 회원입니다.");
 
     private final HttpStatus status;
     private final String message;
