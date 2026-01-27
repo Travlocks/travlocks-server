@@ -5,6 +5,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.umc.travlocksserver.domain.vlock.dto.vlock.VlockRequestDTO;
 import org.umc.travlocksserver.domain.vlock.dto.vlock.VlockResponseDTO;
+import org.umc.travlocksserver.global.response.SuccessResponse;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -23,7 +24,7 @@ public interface VlockControllerDocs {
 		@ApiResponse(responseCode = "201", description = "블록 생성 성공"),
 		@ApiResponse(responseCode = "404", description = "categoryId or cityId가 누락된 경우 실패")
 	})
-	ResponseEntity<VlockResponseDTO> createVlock(
+	ResponseEntity<SuccessResponse<VlockResponseDTO>> createVlock(
 		@AuthenticationPrincipal Long memberId,
 		@Valid @RequestBody VlockRequestDTO request);
 }
