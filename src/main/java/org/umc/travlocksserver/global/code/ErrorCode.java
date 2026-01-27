@@ -17,7 +17,6 @@ public enum ErrorCode implements BaseCode {
 
 	// 404
 	NOT_FOUND_URL(HttpStatus.NOT_FOUND, "존재하지 않는 URL 입니다."),
-	MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 회원입니다."),
 
 	// 405
 	METHOD_NOT_ALLOWED(HttpStatus.METHOD_NOT_ALLOWED, "지원하지 않는 HTTP 메서드입니다."),

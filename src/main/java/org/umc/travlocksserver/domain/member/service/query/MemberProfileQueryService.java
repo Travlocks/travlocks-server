@@ -7,12 +7,12 @@ import org.springframework.transaction.annotation.Transactional;
 import org.umc.travlocksserver.domain.member.dto.response.MemberProfileResponseDTO;
 import org.umc.travlocksserver.domain.member.entity.Member;
 import org.umc.travlocksserver.domain.member.exception.MemberException;
+import org.umc.travlocksserver.domain.member.exception.code.MemberErrorCode;
 import org.umc.travlocksserver.domain.member.repository.MemberRepository;
 import org.umc.travlocksserver.domain.template.dto.response.TemplateCursorResponseDTO;
 import org.umc.travlocksserver.domain.template.dto.response.TemplateSummaryDTO;
 import org.umc.travlocksserver.domain.template.entity.Template;
 import org.umc.travlocksserver.domain.template.repository.TemplateRepository;
-import org.umc.travlocksserver.global.code.ErrorCode;
 
 import lombok.RequiredArgsConstructor;
 
@@ -26,7 +26,7 @@ public class MemberProfileQueryService {
 
 	public MemberProfileResponseDTO getMemberProfile(Long memberId, Long cursor, int limit) {
 		Member member = memberRepository.findById(memberId)
-			.orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND));
+			.orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
 
 		int safeLimit = Math.min(Math.max(limit, 1), 50);
 
