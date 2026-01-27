@@ -17,7 +17,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/vlocks")
-public class VlockController {
+public class VlockController implements VlockControllerDocs {
 
 	private final VlockService vlockService;
 
