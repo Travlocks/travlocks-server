@@ -1,5 +1,6 @@
 package org.umc.travlocksserver.domain.member.controller;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -67,13 +68,17 @@ public class MemberController implements MemberControllerDocs {
 	}
 
 	@GetMapping("/{memberId}/profile")
-	public SuccessResponse<MemberProfileResponseDTO> getMemberProfile(
+	public ResponseEntity<SuccessResponse<MemberProfileResponseDTO>> getMemberProfile(
 		@PathVariable Long memberId,
 		@RequestParam(name = "cursor", required = false) Long cursor,
 		@RequestParam(name = "limit", defaultValue = "9") int limit
 	) {
+		MemberSuccessCode successCode = MemberSuccessCode.MEMBER_PROFILE_GET_SUCCESS;
+
 		MemberProfileResponseDTO data = memberProfileQueryService.getMemberProfile(memberId, cursor, limit);
 
-		return SuccessResponse.ok(MemberSuccessCode.MEMBER_PROFILE_GET_SUCCESS, data);
+		return ResponseEntity
+			.status(successCode.getStatus())
+			.body(SuccessResponse.ok(successCode, data));
 	}
 }

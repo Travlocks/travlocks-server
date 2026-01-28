@@ -1,5 +1,6 @@
 package org.umc.travlocksserver.domain.member.controller;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.umc.travlocksserver.domain.member.dto.request.MemberSignupRequestDTO;
@@ -93,7 +94,7 @@ public interface MemberControllerDocs {
 		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "요청 값 검증 실패 (cursor/limit 범위 오류 등)", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
 		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "존재하지 않는 유저", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 	})
-	SuccessResponse<MemberProfileResponseDTO> getMemberProfile(
+	ResponseEntity<SuccessResponse<MemberProfileResponseDTO>> getMemberProfile(
 		@PathVariable Long memberId,
 		@RequestParam(name = "cursor", defaultValue = "0") Long cursor,
 		@RequestParam(name = "limit", defaultValue = "9") int limit
