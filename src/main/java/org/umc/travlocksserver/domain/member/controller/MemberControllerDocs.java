@@ -2,6 +2,7 @@ package org.umc.travlocksserver.domain.member.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -11,6 +12,7 @@ import org.umc.travlocksserver.domain.member.dto.response.MemberNicknameExistsRe
 import org.umc.travlocksserver.domain.member.dto.response.MemberSignupResponseDTO;
 import org.umc.travlocksserver.global.response.SuccessResponse;
 
+@Tag(name = "템플릿 API", description = "템플릿 관련 API입니다.")
 public interface MemberControllerDocs {
 
     @Operation(
