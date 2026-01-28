@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.umc.travlocksserver.domain.template.dto.response.TemplateRecommendationsDTO;
 import org.umc.travlocksserver.domain.template.exception.code.TemplateSuccessCode;
-import org.umc.travlocksserver.domain.template.service.TemplateService;
+import org.umc.travlocksserver.domain.template.service.query.TemplateQueryService;
 import org.umc.travlocksserver.global.response.SuccessResponse;
 
 @RestController
@@ -16,13 +16,13 @@ import org.umc.travlocksserver.global.response.SuccessResponse;
 @RequiredArgsConstructor
 public class TemplateController implements TemplateControllerDocs {
 
-    private final TemplateService templateService;
+    private final TemplateQueryService templateQueryService;
 
     @GetMapping("/recommendations")
     public ResponseEntity<SuccessResponse<TemplateRecommendationsDTO>> getRecommendedTemplates(
             @AuthenticationPrincipal Long memberId
     ) {
-        TemplateRecommendationsDTO response = templateService.getRecommendedTemplates(memberId);
+        TemplateRecommendationsDTO response = templateQueryService.getRecommendedTemplates(memberId);
         return ResponseEntity.ok(SuccessResponse.ok(TemplateSuccessCode.TEMPLATE_RECOMMEND_SUCCESS, response));
     }
 }

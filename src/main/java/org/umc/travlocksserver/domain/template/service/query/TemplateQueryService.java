@@ -1,4 +1,4 @@
-package org.umc.travlocksserver.domain.template.service;
+package org.umc.travlocksserver.domain.template.service.query;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +18,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 @Slf4j
-public class TemplateService {
+public class TemplateQueryService {
 
     private static final int RECENT_TEMPLATE_LIMIT = 5;
     private static final int RECOMMEND_TEMPLATE_LIMIT = 10;
