@@ -10,9 +10,9 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum VlockSuccessCode implements BaseCode {
 
-	VLOCK_CREATE_SUCCESS(
-		HttpStatus.CREATED,
-		"블록 생성이 완료되었습니다."
+	VLOCK_CREATE_ACCEPTED(
+		HttpStatus.ACCEPTED,
+		"블록 생성 요청이 완료되었습니다."
 	)
 	;
 
