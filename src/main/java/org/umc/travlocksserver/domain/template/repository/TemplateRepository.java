@@ -12,6 +12,20 @@ import org.umc.travlocksserver.domain.template.entity.Template;
 public interface TemplateRepository extends JpaRepository<Template, Long> {
 
 	@Query("""
+		    SELECT t
+		    FROM Template t
+		    JOIN FETCH t.travelTheme
+		    JOIN FETCH t.owner
+		    WHERE t.isPublic = true
+		      AND t.deletedAt IS NULL
+		    ORDER BY
+		        t.remixCount DESC,
+		        t.favoriteCount DESC,
+		        t.avgRating DESC
+		""")
+	List<Template> findPopularTemplates(Pageable pageable);
+
+	@Query("""
 		    select t from Template t
 		    where t.owner.id = :memberId
 		      and t.isPublic = true

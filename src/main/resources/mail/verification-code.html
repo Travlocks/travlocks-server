@@ -1,27 +1,92 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>[트래블록스] 이메일 인증 코드 안내</title>
 </head>
-<body style="font-family: Arial, sans-serif; max-width: 520px; margin: 0 auto; padding: 24px;">
+<body style="margin:0; padding:0; background-color:#eef2f7;">
+<!-- 전체 래퍼 -->
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#eef2f7;">
+    <tr>
+        <td align="center" style="padding:24px 12px;">
+            <!-- 카드 -->
+            <table role="presentation" width="640" cellspacing="0" cellpadding="0" border="0"
+                   style="width:100%; max-width:640px; background-color:#ffffff; border:1px solid #D9D9D9; border-radius:30px; overflow:hidden;">
+                <!-- 로고 -->
+                <tr>
+                    <td align="center" style="padding:41px 40px 0 40px;">
+                        <img
+                                src="https://raw.githubusercontent.com/dinah05/email-template/9a715697f119f350d8be457c24ad4d3f49349239/assets/travlocks_logo.png"
+                                alt="Travlocks"
+                                width="360"
+                                style="display:block; width:360px; max-width:100%; height:auto;"
+                        />
+                    </td>
+                </tr>
 
-<h2 style="margin: 0 0 12px;">[트래블록스] 이메일 인증 코드 안내</h2>
+                <!-- 타이틀 -->
+                <tr>
+                    <td style="padding:45px 40px 0 40px; font-family:-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Noto Sans KR','Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+                        <div style="font-size:28px; font-weight:600; line-height:1.2;">
+                            <span style="color:#3C4EF4;">[트래블록스]</span>
+                            <span style="color:#222222;"> 이메일 인증 코드 안내</span>
+                        </div>
+                    </td>
+                </tr>
 
-<p style="margin: 0 0 16px; color: #444;">
-    아래의 일회용 인증 코드를 입력해주세요. (유효시간 5분)
-</p>
+                <!-- 서브문구 -->
+                <tr>
+                    <td style="padding:12px 40px 0 40px; font-family:-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Noto Sans KR','Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+                        <div style="color:#4A5569; font-size:20px; font-weight:500; line-height:1.4;">
+                            아래의 일회용 인증 코드를 입력해주세요. (유효시간 5분)
+                        </div>
+                    </td>
+                </tr>
 
-<div style="border: 1px solid #eee; border-radius: 12px; padding: 18px; text-align: center;">
-    <span style="font-size: 28px; letter-spacing: 6px; font-weight: 700;">
-      {{CODE}}
-    </span>
-</div>
+                <!-- 코드 박스 -->
+                <tr>
+                    <td align="center" style="padding:32px 40px 0 40px;">
+                        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%"
+                               style="max-width:500px; background-color:rgba(60,78,244,0.10); border-radius:5px;">
+                            <tr>
+                                <td align="center" style="padding:24px 16px; font-family:-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Noto Sans KR','Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+                                    <div style="color:#3C4EF4; font-size:50px; font-weight:600; letter-spacing:12px;">
+                                        {{CODE}}
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
 
-<p style="margin: 16px 0 0; color: #777; font-size: 12px;">
-    본인이 요청한 인증이 아니라면<br/>
-    별도의 조치 없이 이 메일을 무시해주세요.
-</p>
+                <!-- 안내문구 -->
+                <tr>
+                    <td style="padding:28px 40px 36px 40px; font-family:-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Noto Sans KR','Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+                        <div style="color:#4A5569; font-size:20px; font-weight:500; line-height:1.5;">
+                            <div>본인이 요청한 인증이 아니라면</div>
+                            <div style="margin-top:8px;">별도의 조치 없이 이 메일을 무시해 주세요.</div>
+                        </div>
+                    </td>
+                </tr>
 
+                <!-- 하단 라인 -->
+                <tr>
+                    <td style="border-top:1px solid #D9D9D9;"></td>
+                </tr>
+
+                <!-- 카피라이트 -->
+                <tr>
+                    <td style="padding:18px 40px 22px 40px; font-family:-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Noto Sans KR','Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+                        <div style="color:#989898; font-size:20px; font-weight:500;">
+                            ⓒ 2026 | Travlocks
+                        </div>
+                    </td>
+                </tr>
+            </table>
+            <!-- /카드 -->
+        </td>
+    </tr>
+</table>
 </body>
 </html>
