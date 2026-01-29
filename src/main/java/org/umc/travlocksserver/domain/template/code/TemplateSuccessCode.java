@@ -8,7 +8,7 @@ import org.umc.travlocksserver.global.code.BaseCode;
 
 @Getter
 @RequiredArgsConstructor
-public enum SuccessCode implements BaseCode {
+public enum TemplateSuccessCode implements BaseCode {
 
     HOME_GET_POPULAR_TEMPLATES_SUCCESS(HttpStatus.OK, "홈 화면 인기 템플릿 조회에 성공했습니다.");
 
