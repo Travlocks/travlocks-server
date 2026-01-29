@@ -10,6 +10,7 @@ import org.umc.travlocksserver.global.entity.SoftDeleteBaseEntity;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Entity
+@Table(name = "vlocks")
 public class Vlock extends SoftDeleteBaseEntity {
 
     @Id
