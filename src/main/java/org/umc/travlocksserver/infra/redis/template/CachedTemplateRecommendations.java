@@ -6,12 +6,9 @@ import java.util.List;
 import java.util.UUID;
 
 public record CachedTemplateRecommendations(
-        String recommendationId,
         List<TemplateRecommendationCardDTO>  templates
 ) {
     public static CachedTemplateRecommendations from(List<TemplateRecommendationCardDTO> templates) {
-        return new CachedTemplateRecommendations(
-                UUID.randomUUID().toString(), templates
-        );
+        return new CachedTemplateRecommendations(templates);
     }
 }
