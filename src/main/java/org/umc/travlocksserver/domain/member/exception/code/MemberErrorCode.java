@@ -15,13 +15,12 @@ public enum MemberErrorCode implements BaseCode {
     SIGNUP_TOKEN_INVALID(HttpStatus.UNAUTHORIZED, "유효하지 않은 signupToken입니다."),
     SIGNUP_TOKEN_EMAIL_MISMATCH(HttpStatus.UNAUTHORIZED, "signupToken의 이메일 정보가 일치하지 않습니다."),
 
-    POLICY_NOT_FOUND(HttpStatus.BAD_REQUEST, "존재하지 않는 약관이 포함되어 있습니다."),
     REQUIRED_POLICY_NOT_AGREED(HttpStatus.BAD_REQUEST, "필수 약관에 동의해야 합니다."),
 
-    TRAVEL_STYLE_NOT_FOUND(HttpStatus.BAD_REQUEST, "존재하지 않는 여행 스타일 ID가 포함되어 있습니다."),
-    TRAVEL_THEME_NOT_FOUND(HttpStatus.BAD_REQUEST, "존재하지 않는 여행 테마 ID가 포함되어 있습니다."),
-
-	MEMBER_NOT_FOUND(HttpStatus.BAD_REQUEST, "존재하지 않는 회원입니다.");
+	POLICY_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 약관이 포함되어 있습니다."),
+	TRAVEL_STYLE_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 여행 스타일 ID가 포함되어 있습니다."),
+    TRAVEL_THEME_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 여행 테마 ID가 포함되어 있습니다."),
+	MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 회원입니다.");
 
     private final HttpStatus status;
     private final String message;
