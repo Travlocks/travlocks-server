@@ -1,15 +1,21 @@
 package org.umc.travlocksserver.domain.vlock.controller;
 
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.umc.travlocksserver.domain.vlock.constant.VlockSuccessCode;
 import org.umc.travlocksserver.domain.vlock.dto.vlock.VlockRequestDTO;
-import org.umc.travlocksserver.domain.vlock.service.VlockService;
+import org.umc.travlocksserver.domain.vlock.dto.vlock.VlockResponseDTO;
+import org.umc.travlocksserver.domain.vlock.service.VlockCommandService;
+import org.umc.travlocksserver.domain.vlock.service.VlockQueryService;
 import org.umc.travlocksserver.global.response.SuccessResponse;
 
 import jakarta.validation.Valid;
@@ -20,16 +26,29 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/v1/vlocks")
 public class VlockController implements VlockControllerDocs {
 
-	private final VlockService vlockService;
+	private final VlockCommandService vlockCommandService;
+	private final VlockQueryService vlockQueryService;
 
 	@PostMapping
 	public ResponseEntity<SuccessResponse<Void>> createVlock(
 		@AuthenticationPrincipal Long memberId,
 		@Valid @RequestBody VlockRequestDTO request) {
-		vlockService.createVlock(memberId, request);
+		vlockCommandService.createVlock(memberId, request);
 
 		return ResponseEntity
 			.status(HttpStatus.ACCEPTED)
-			.body(SuccessResponse.ok(VlockSuccessCode.VLOCK_CREATE_ACCEPTED));
+			.body(SuccessResponse.ok(VlockSuccessCode.VLOCK_CREATE_ACCEPTED_SUCCESS));
+	}
+
+	@GetMapping("/cities/{cityId}")
+	public ResponseEntity<SuccessResponse<List<VlockResponseDTO>>> getMyVlock(
+		@AuthenticationPrincipal Long memberId,
+		@PathVariable Long cityId
+	) {
+		List<VlockResponseDTO> responses = vlockQueryService.getMyVlock(memberId, cityId);
+
+		return ResponseEntity
+			.status(HttpStatus.OK)
+			.body(SuccessResponse.ok(VlockSuccessCode.VLOCK_GET_SUCCESS, responses));
 	}
 }

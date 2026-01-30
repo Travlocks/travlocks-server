@@ -20,7 +20,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class VlockService {
+public class VlockCommandService {
 
 	private final VlockCategoryRepository vlockCategoryRepository;
 	private final CityRepository cityRepository;
@@ -29,7 +29,6 @@ public class VlockService {
 
 	@Transactional
 	public void createVlock(Long memberId, VlockRequestDTO request) {
-
 		Member member = memberRepository.findById(memberId)
 			.orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
 
