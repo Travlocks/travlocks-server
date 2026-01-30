@@ -9,7 +9,10 @@ import org.springframework.web.bind.annotation.RestController;
 import org.umc.travlocksserver.domain.template.dto.response.TemplateRecommendationsDTO;
 import org.umc.travlocksserver.domain.template.exception.code.TemplateSuccessCode;
 import org.umc.travlocksserver.domain.template.service.query.TemplateQueryService;
+import org.umc.travlocksserver.domain.template.dto.response.PopularTemplateResponse;
 import org.umc.travlocksserver.global.response.SuccessResponse;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/templates")
@@ -24,5 +27,18 @@ public class TemplateController implements TemplateControllerDocs {
     ) {
         TemplateRecommendationsDTO response = templateQueryService.getRecommendedTemplates(memberId);
         return ResponseEntity.ok(SuccessResponse.ok(TemplateSuccessCode.TEMPLATE_RECOMMEND_SUCCESS, response));
+    }
+
+    @GetMapping("/popular")
+    public ResponseEntity<SuccessResponse<List<PopularTemplateResponse>>> getPopularTemplates() {
+        org.umc.travlocksserver.domain.template.code.TemplateSuccessCode successCode = org.umc.travlocksserver.domain.template.code.TemplateSuccessCode.HOME_GET_POPULAR_TEMPLATES_SUCCESS;
+        return ResponseEntity
+                .status(successCode.getStatus())
+                .body(
+                        SuccessResponse.ok(
+                                successCode,
+                                templateQueryService.getPopularTemplates(10)
+                        )
+                );
     }
 }
