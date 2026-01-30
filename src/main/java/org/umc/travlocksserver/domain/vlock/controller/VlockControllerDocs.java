@@ -20,8 +20,9 @@ public interface VlockControllerDocs {
 		"""
 	)
 	@ApiResponses({
-		@ApiResponse(responseCode = "201", description = "블록 생성 성공"),
-		@ApiResponse(responseCode = "404", description = "categoryId or cityId가 누락된 경우 실패")
+		@ApiResponse(responseCode = "202", description = "Vlock creation request accepted"),
+		@ApiResponse(responseCode = "400", description = "Category Id or City Id is required"),
+		@ApiResponse(responseCode = "404", description = "Category Id, City Id is invalid")
 	})
 	ResponseEntity<SuccessResponse<Void>> createVlock(
 		@AuthenticationPrincipal Long memberId,
