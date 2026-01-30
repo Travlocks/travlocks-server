@@ -7,13 +7,13 @@ public record VlockCategoryDTO(
 
 	String name,
 
-	Integer stayMinutes
+	Float stayHours
 ) {
 	public static VlockCategoryDTO from(VlockCategory vlockCategory) {
 		return new VlockCategoryDTO(
 			vlockCategory.getId(),
 			vlockCategory.getName(),
-			vlockCategory.getStayMinutes()
+			vlockCategory.getStayHours()
 		);
 	}
 }
