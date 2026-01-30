@@ -94,7 +94,7 @@ public class Template extends SoftDeleteBaseEntity {
 		this.remixCount = (this.remixCount == null ? 0 : this.remixCount) + 1;
 	}
 
-	public static Template remixOf(Template original, Member remixer) {
+	public static Template remixOf(Template original, Member remixer, String shareToken) {
 		return Template.builder()
 			.parentTemplate(original)
 			.owner(remixer)
@@ -104,13 +104,14 @@ public class Template extends SoftDeleteBaseEntity {
 			.coverImageUrl(original.getCoverImageUrl())
 			.transportType(original.getTransportType())
 			.tripDays(original.getTripDays())
+			.vlockCount(original.getVlockCount())
 
-			// 진행/일정/카운트 초기화
+			// 초기화
 			.progressRate(0)
 			.startDate(null)
 			.endDate(null)
-			.vlockCount(0)
 			.isPublic(false)
+			.shareToken(shareToken)
 			.favoriteCount(0)
 			.remixCount(0)
 			.ratingCount(0)

@@ -59,30 +59,7 @@ public class TemplateRemixService {
 	 * Template 복제 + 생성
 	 */
 	private Template createRemixedTemplate(Template original, Member remixer) {
-		Template remixed = Template.builder()
-			// 복제
-			.parentTemplate(original)
-			.owner(remixer)
-			.travelTheme(original.getTravelTheme())
-			.title(original.getTitle() + " (리믹스)")
-			.description(original.getDescription())
-			.coverImageUrl(original.getCoverImageUrl())
-			.transportType(original.getTransportType())
-			.tripDays(original.getTripDays())
-			.vlockCount(original.getVlockCount())
-
-			// 초기화
-			.progressRate(0)
-			.startDate(null)
-			.endDate(null)
-			.isPublic(false)
-			.shareToken(generateShareToken())
-			.favoriteCount(0)
-			.remixCount(0)
-			.ratingCount(0)
-			.avgRating(0.0)
-			.build();
-
+		Template remixed = Template.remixOf(original, remixer, generateShareToken());
 		return templateRepository.save(remixed);
 	}
 
