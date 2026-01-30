@@ -3,6 +3,7 @@ package org.umc.travlocksserver.domain.template.controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.umc.travlocksserver.domain.template.dto.response.TemplateCanvasResponseDTO;
 import org.umc.travlocksserver.domain.template.dto.response.TemplateRemixResponseDTO;
 import org.umc.travlocksserver.global.response.ErrorResponse;
 import org.umc.travlocksserver.global.response.SuccessResponse;
@@ -30,5 +31,25 @@ public interface TemplateControllerDocs {
 	ResponseEntity<SuccessResponse<TemplateRemixResponseDTO>> remix(
 		@PathVariable Long templateId,
 		@AuthenticationPrincipal Long memberId
+	);
+
+	@Operation(
+		summary = "템플릿 리믹스 캔버스 조회 API",
+		description = """
+			특정 템플릿의 N일차 캔버스를 조회합니다.
+			캔버스에는 블록 목록이 포함됩니다.
+				
+			[Path Variable]
+			- templateId: 조회할 템플릿 ID
+			- dayNo: 조회할 일차(1부터 시작)
+			"""
+	)
+	@ApiResponses({
+		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "템플릿 캔버스 조회 성공"),
+		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "존재하지 않는 템플릿 캔버스", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+	})
+	ResponseEntity<SuccessResponse<TemplateCanvasResponseDTO>> getTemplateCanvas(
+		@PathVariable Long templateId,
+		@PathVariable Integer dayNo
 	);
 }
