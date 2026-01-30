@@ -33,6 +33,19 @@ public interface VlockControllerDocs {
 		@Valid @RequestBody VlockRequestDTO request);
 
 	@Operation(
+		summary = "인기 블록 조회 API",
+		description = """
+		해당 도시의 인기 블록을 조회합니다.
+		"""
+	)
+	@ApiResponses({
+		@ApiResponse(responseCode = "200", description = "Popular vlock retrieved"),
+		@ApiResponse(responseCode = "404", description = "City Id is invalid")
+	})
+	ResponseEntity<SuccessResponse<List<VlockResponseDTO>>> getPopularVlocks(
+		@PathVariable Long cityId);
+
+	@Operation(
 		summary = "생성 블록 조회 API",
 		description = """
 		사용자가 생성한 블록을 조회합니다.

@@ -8,7 +8,7 @@ import org.umc.travlocksserver.domain.vlock.entity.Vlock;
 import java.util.List;
 
 @Repository
-public interface VlockRepository extends JpaRepository<Vlock,Long> {
+public interface VlockRepository extends JpaRepository<Vlock,Long>, VlockRepositoryCustom {
 
     @EntityGraph(attributePaths = {"vlockCategory", "city", "city.region"})
     List<Vlock> findAllByOwnerIdAndCityIdAndDeletedAtIsNull(Long ownerId, Long cityId);

@@ -23,17 +23,35 @@ public class VlockQueryService {
 	private final CityRepository cityRepository;
 	private final VlockRepository vlockRepository;
 
+	/** 생성 블록 조회 */
 	@Transactional(readOnly = true)
 	public List<VlockResponseDTO> getMyVlock(Long memberId, Long cityId) {
-		memberRepository.findById(memberId)
-			.orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
-
-		cityRepository.findWithRegionById(cityId)
-			.orElseThrow(() -> new CityException(CityErrorCode.CITY_NOT_FOUND));
+		validateMemberExists(memberId);
+		validateCityExists(cityId);
 
 		return vlockRepository.findAllByOwnerIdAndCityIdAndDeletedAtIsNull(memberId, cityId)
 			.stream()
 			.map(VlockResponseDTO::from)
 			.toList();
+	}
+
+	/** 인기 블록 조회 */
+	@Transactional(readOnly = true)
+	public List<VlockResponseDTO> getPopularVlocks(Long cityId) {
+		validateCityExists(cityId);
+
+		return vlockRepository.findAllByCityIdOrderByUsageCountDesc(cityId);
+	}
+
+	private void validateMemberExists(Long memberId) {
+		if (!memberRepository.existsById(memberId)) {
+			throw new MemberException(MemberErrorCode.MEMBER_NOT_FOUND);
+		}
+	}
+
+	private void validateCityExists(Long cityId) {
+		if (!cityRepository.existsById(cityId)) {
+			throw new CityException(CityErrorCode.CITY_NOT_FOUND);
+		}
 	}
 }

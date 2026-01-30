@@ -29,6 +29,7 @@ public class VlockController implements VlockControllerDocs {
 	private final VlockCommandService vlockCommandService;
 	private final VlockQueryService vlockQueryService;
 
+	/** 블록 생성 */
 	@PostMapping
 	public ResponseEntity<SuccessResponse<Void>> createVlock(
 		@AuthenticationPrincipal Long memberId,
@@ -40,6 +41,19 @@ public class VlockController implements VlockControllerDocs {
 			.body(SuccessResponse.ok(VlockSuccessCode.VLOCK_CREATE_ACCEPTED_SUCCESS));
 	}
 
+	/** 인기 블록 조회 */
+	@GetMapping("/cities/{cityId}/popular")
+	public ResponseEntity<SuccessResponse<List<VlockResponseDTO>>> getPopularVlocks(
+		@PathVariable Long cityId
+	) {
+		List<VlockResponseDTO> responses = vlockQueryService.getPopularVlocks(cityId);
+
+		return ResponseEntity
+			.status(HttpStatus.OK)
+			.body(SuccessResponse.ok(VlockSuccessCode.VLOCK_GET_SUCCESS, responses));
+	}
+
+	/** 생성 블록 조회 */
 	@GetMapping("/cities/{cityId}")
 	public ResponseEntity<SuccessResponse<List<VlockResponseDTO>>> getMyVlock(
 		@AuthenticationPrincipal Long memberId,
