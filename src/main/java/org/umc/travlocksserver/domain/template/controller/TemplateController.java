@@ -1,5 +1,6 @@
 package org.umc.travlocksserver.domain.template.controller;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
@@ -13,9 +14,11 @@ import org.umc.travlocksserver.domain.template.dto.response.TemplateCanvasRespon
 import org.umc.travlocksserver.domain.template.dto.response.TemplateRemixResponseDTO;
 import org.umc.travlocksserver.domain.template.service.command.TemplateRemixService;
 import org.umc.travlocksserver.domain.template.service.query.TemplateCanvasQueryService;
+import org.umc.travlocksserver.domain.template.dto.response.PopularTemplateResponse;
+import org.umc.travlocksserver.domain.template.service.TemplateQueryService;
 import org.umc.travlocksserver.global.response.SuccessResponse;
 
-import lombok.RequiredArgsConstructor;
+import java.util.List;
 
 @Validated
 @RestController
@@ -23,8 +26,22 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/v1/templates")
 public class TemplateController implements TemplateControllerDocs {
 
+    private final TemplateQueryService templateQueryService;
 	private final TemplateRemixService templateRemixService;
 	private final TemplateCanvasQueryService templateCanvasQueryService;
+
+	@GetMapping("/popular")
+	public ResponseEntity<SuccessResponse<List<PopularTemplateResponse>>> getPopularTemplates() {
+		TemplateSuccessCode successCode = TemplateSuccessCode.HOME_GET_POPULAR_TEMPLATES_SUCCESS;
+		return ResponseEntity
+			.status(successCode.getStatus())
+			.body(
+				SuccessResponse.ok(
+					successCode,
+					templateQueryService.getPopularTemplates(10)
+				)
+			);
+	}
 
 	@PostMapping("/{templateId}/remix")
 	public ResponseEntity<SuccessResponse<TemplateRemixResponseDTO>> remix(

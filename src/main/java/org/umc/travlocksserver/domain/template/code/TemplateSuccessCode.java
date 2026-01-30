@@ -10,14 +10,9 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum TemplateSuccessCode implements BaseCode {
 
-	TEMPLATE_REMIX_SUCCESS(
-		HttpStatus.CREATED,
-		"템플릿 리믹스(복제)에 성공했습니다."
-	),
-	TEMPLATE_GET_CANVAS_SUCCESS(
-		HttpStatus.OK,
-		"템플릿 캔버스 조회에 성공했습니다."
-	);
+	HOME_GET_POPULAR_TEMPLATES_SUCCESS(HttpStatus.OK, "홈 화면 인기 템플릿 조회에 성공했습니다."),
+	TEMPLATE_REMIX_SUCCESS(HttpStatus.CREATED, "템플릿 리믹스(복제)에 성공했습니다."),
+	TEMPLATE_GET_CANVAS_SUCCESS(HttpStatus.OK, "템플릿 캔버스 조회에 성공했습니다.");
 
 	private final HttpStatus status;
 	private final String message;
