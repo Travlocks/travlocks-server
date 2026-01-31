@@ -9,7 +9,6 @@ import org.umc.travlocksserver.global.entity.SoftDeleteBaseEntity;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-@Builder
 @Entity
 @Table(name = "vlocks")
 public class Vlock extends SoftDeleteBaseEntity {
@@ -37,31 +36,73 @@ public class Vlock extends SoftDeleteBaseEntity {
     @Column(nullable = false, length = 20)
     private String name;
 
-    @Column(name = "cover_img_url", nullable = false, length = 255)
+    @Column(nullable = false)
     private String coverImgUrl;
 
     @Column(nullable = false)
     private Double latitude;
 
-    @Column(name = "longitude", nullable = false)
+    @Column(nullable = false)
     private Double longitude;
 
-    @Column(nullable = false, length = 255)
+    @Column(nullable = false)
     private String address;
 
     @Column(length = 200)
     private String memo;
 
-    @Column(name = "link_url", length = 255)
     private String linkUrl;
 
-    @Column(name = "avg_rating")
-    private Double avgRating;
+    @Column(nullable = false)
+    private Integer usageCount;
 
-    @Builder.Default
-    @Column(name = "usage_count", nullable = false)
-    private Integer usageCount = 0;
-
-    @Column(name = "is_public", nullable = false)
+    @Column(nullable = false)
     private Boolean isPublic;
+
+	@Builder(access = AccessLevel.PRIVATE)
+	private Vlock(
+		VlockCategory vlockCategory,
+		City city,
+		Member owner,
+		String name,
+		Double latitude,
+		Double longitude,
+		String address,
+		String memo
+	) {
+		this.vlockCategory = vlockCategory;
+		this.city = city;
+		this.owner = owner;
+		this.name = name;
+		this.latitude = latitude;
+		this.longitude = longitude;
+		this.address = address;
+		this.memo = memo;
+		this.coverImgUrl = "";
+		this.linkUrl = "";
+		this.usageCount = 0;
+		this.isPublic = false;
+	}
+
+	public static Vlock create(
+		VlockCategory category,
+		City city,
+		Member owner,
+		String name,
+		Double latitude,
+		Double longitude,
+		String address,
+		String memo
+	) {
+		return Vlock.builder()
+			.vlockCategory(category)
+			.city(city)
+			.owner(owner)
+			.name(name)
+			.latitude(latitude)
+			.longitude(longitude)
+			.address(address)
+			.memo(memo)
+			.build();
+	}
 }

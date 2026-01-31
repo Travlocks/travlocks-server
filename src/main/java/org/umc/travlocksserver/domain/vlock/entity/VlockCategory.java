@@ -14,12 +14,12 @@ public class VlockCategory extends CreatedSoftDeleteBaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "vlock_category_id")
+	@Column(name = "vlock_category_id")
     private Long id;
 
     @Column(nullable = false, length = 10)
     private String name;
 
-    @Column(name = "stay_minutes", nullable = false)
-    private Integer stayMinutes;
+    @Column(nullable = false)
+    private Float stayHours;
 }
