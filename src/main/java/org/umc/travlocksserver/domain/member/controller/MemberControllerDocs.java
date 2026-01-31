@@ -1,5 +1,6 @@
 package org.umc.travlocksserver.domain.member.controller;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -64,6 +65,7 @@ public interface MemberControllerDocs {
 			            
 			- 이메일 인증 성공 후 발급된 signupToken이 필요합니다.
 			- signupToken에 매핑된 email과 요청 email이 일치해야 합니다.
+			- 회원가입 성공 시 accessToken과 refreshToken이 발급됩니다.
 			"""
 	)
 	@ApiResponses({
@@ -73,7 +75,8 @@ public interface MemberControllerDocs {
 		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "409", description = "충돌(예: 이메일/닉네임 중복)")
 	})
 	SuccessResponse<MemberSignupResponseDTO> signup(
-		@Valid MemberSignupRequestDTO request
+		@Valid MemberSignupRequestDTO request,
+        HttpServletResponse response
 	);
 
 	@Operation(

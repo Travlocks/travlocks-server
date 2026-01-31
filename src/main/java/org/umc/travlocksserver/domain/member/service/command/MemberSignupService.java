@@ -1,9 +1,11 @@
 package org.umc.travlocksserver.domain.member.service.command;
 
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.umc.travlocksserver.domain.auth.service.command.AuthService;
 import org.umc.travlocksserver.domain.auth.service.command.SignupTokenService;
 import org.umc.travlocksserver.domain.member.dto.request.MemberSignupRequestDTO;
 import org.umc.travlocksserver.domain.member.dto.response.MemberSignupResponseDTO;
@@ -22,6 +24,7 @@ import org.umc.travlocksserver.domain.traveltheme.entity.PreferredTravelTheme;
 import org.umc.travlocksserver.domain.traveltheme.entity.TravelTheme;
 import org.umc.travlocksserver.domain.traveltheme.repository.PreferredTravelThemeRepository;
 import org.umc.travlocksserver.domain.traveltheme.repository.TravelThemeRepository;
+import org.umc.travlocksserver.global.profile.DefaultProfileImageProvider;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -33,21 +36,20 @@ public class MemberSignupService {
     private final MemberRepository memberRepository;
     private final PolicyRepository policyRepository;
     private final MemberConsentRepository memberConsentRepository;
-
     private final TravelStyleRepository travelStyleRepository;
     private final TravelThemeRepository travelThemeRepository;
     private final PreferredTravelStyleRepository preferredTravelStyleRepository;
     private final PreferredTravelThemeRepository preferredTravelThemeRepository;
-
     private final SignupTokenService signupTokenService;
     private final PasswordEncoder passwordEncoder;
+    private final AuthService authService;
+    private final DefaultProfileImageProvider defaultProfileImageProvider;
 
     @Transactional
-    public MemberSignupResponseDTO signup(MemberSignupRequestDTO request) {
+    public MemberSignupResponseDTO signup(MemberSignupRequestDTO request, HttpServletResponse response) {
 
         // 1) signupToken 검증 + 토큰에 저장된 email 조회
         String tokenEmail = signupTokenService.getEmail(request.signupToken());
-
         if (tokenEmail == null) {
             throw new MemberException(MemberErrorCode.SIGNUP_TOKEN_INVALID);
         }
@@ -92,12 +94,16 @@ public class MemberSignupService {
         }
 
         // 4) Member 생성
+        // 기본 프로필 이미지 랜덤 고정 배정
+        String profileImageUrl = defaultProfileImageProvider.pickRandomUrl();
+
         Member member = Member.builder()
                 .email(request.email())
                 .nickname(request.nickname())
                 .passwordHash(passwordEncoder.encode(request.password()))
                 .status(MemberStatus.ACTIVE)
                 .emailVerified(true)
+                .profileImageUrl(profileImageUrl)
                 .vlockCount(0)
                 .templateCount(0)
                 .starCount(0)
@@ -127,7 +133,16 @@ public class MemberSignupService {
         // 7) 회원가입 성공 시 signupToken 삭제
         signupTokenService.consume(request.signupToken());
 
-        return new MemberSignupResponseDTO(savedMember.getId(), savedMember.getNickname());
+        // AccessToken, RefreshToken 발급
+        AuthService.IssuedTokens tokens = authService.issueTokens(savedMember.getId(), response);
+
+        return new MemberSignupResponseDTO(
+                savedMember.getId(),
+                savedMember.getNickname(),
+                tokens.accessToken(),
+                tokens.accessTokenExpiresIn(),
+                savedMember.getProfileImageUrl()
+        );
     }
 
     private void savePreferredStyles(Member member, List<Long> styleIds) {

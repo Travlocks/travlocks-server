@@ -1,5 +1,6 @@
 package org.umc.travlocksserver.domain.member.controller;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -59,10 +60,10 @@ public class MemberController implements MemberControllerDocs {
 
 	@PostMapping("/signup")
 	public SuccessResponse<MemberSignupResponseDTO> signup(
-		@Valid
-		@RequestBody MemberSignupRequestDTO request
+		@Valid @RequestBody MemberSignupRequestDTO request,
+        HttpServletResponse response
 	) {
-		MemberSignupResponseDTO data = memberSignupService.signup(request);
+		MemberSignupResponseDTO data = memberSignupService.signup(request, response);
 
 		return SuccessResponse.ok(MemberSuccessCode.MEMBER_SIGNUP_SUCCESS, data);
 	}
