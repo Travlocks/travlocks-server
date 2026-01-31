@@ -3,11 +3,11 @@ package org.umc.travlocksserver.domain.vlock.constant;
 import org.springframework.http.HttpStatus;
 import org.umc.travlocksserver.global.code.BaseCode;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 @Getter
-@AllArgsConstructor
+@RequiredArgsConstructor
 public enum VlockSuccessCode implements BaseCode {
 
 	VLOCK_CREATE_ACCEPTED_SUCCESS(HttpStatus.ACCEPTED, "블록 생성 요청이 완료되었습니다."),
