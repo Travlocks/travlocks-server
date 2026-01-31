@@ -11,5 +11,5 @@ import java.util.List;
 public interface VlockRepository extends JpaRepository<Vlock,Long>, VlockRepositoryCustom {
 
     @EntityGraph(attributePaths = {"vlockCategory", "city", "city.region"})
-    List<Vlock> findAllByOwnerIdAndCityIdAndDeletedAtIsNull(Long ownerId, Long cityId);
+    List<Vlock> findAllByOwnerIdAndCityIdAndDeletedAtIsNullOrderByUsageCountDescIdDesc(Long ownerId, Long cityId);
 }
