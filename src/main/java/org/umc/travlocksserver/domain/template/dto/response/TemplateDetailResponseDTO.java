@@ -16,7 +16,8 @@ public record TemplateDetailResponseDTO(
         Integer remixCount,
         String description,
         List<String> tags,
-        List<BlockDTO> blocks
+        List<BlockDTO> blocks,
+        Boolean isFavorited
 ) {
     public record BlockDTO(
             Long blockId,

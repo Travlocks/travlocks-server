@@ -100,4 +100,14 @@ public class Template extends SoftDeleteBaseEntity {
 
     @OneToMany(mappedBy = "template")
     private List<TemplateCity> templateCities = new ArrayList<>();
+
+    public void increaseFavoriteCount() {
+        this.favoriteCount++;
+    }
+
+    public void decreaseFavoriteCount() {
+        if (this.favoriteCount > 0) {
+            this.favoriteCount--;
+        }
+    }
 }

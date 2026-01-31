@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.umc.travlocksserver.domain.favorite.repository.FavoriteRepository;
 import org.umc.travlocksserver.domain.template.code.TemplateErrorCode;
 import org.umc.travlocksserver.domain.template.dto.response.PopularTemplateResponse;
 import org.umc.travlocksserver.domain.template.dto.response.TemplateDetailResponseDTO;
@@ -18,6 +19,7 @@ import java.util.List;
 public class TemplateQueryService {
 
     private final TemplateRepository templateRepository;
+    private final FavoriteRepository favoriteRepository;
 
     /**
      * 인기있는 템플릿 조회
@@ -46,12 +48,19 @@ public class TemplateQueryService {
      * 템플릿 상세 조회
      */
     @Transactional(readOnly = true)
-    public TemplateDetailResponseDTO getTemplateDetail(Long templateId) {
+    public TemplateDetailResponseDTO getTemplateDetail(Long templateId, Long memberId) {
         Template template = templateRepository.findById(templateId)
                 .orElseThrow(() -> new TemplateException(TemplateErrorCode.TEMPLATE_NOT_FOUND));
 
         if (!template.getIsPublic()) {
             throw new TemplateException(TemplateErrorCode.TEMPLATE_NOT_PUBLIC);
+        }
+
+        // 즐겨찾기 여부
+        boolean isFavorited = false;
+        if (memberId != null) {
+            isFavorited = favoriteRepository
+                    .existsByMemberIdAndTemplateId(memberId, templateId);
         }
 
         // 태그 목록
@@ -91,7 +100,8 @@ public class TemplateQueryService {
                 template.getRemixCount(),
                 template.getDescription(),
                 tags,
-                blocks
+                blocks,
+                isFavorited
         );
     }
 }

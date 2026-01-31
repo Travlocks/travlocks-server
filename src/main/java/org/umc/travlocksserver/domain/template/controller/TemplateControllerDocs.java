@@ -1,12 +1,13 @@
 package org.umc.travlocksserver.domain.template.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.umc.travlocksserver.domain.member.entity.Member;
 import org.umc.travlocksserver.domain.template.dto.response.PopularTemplateResponse;
 import org.umc.travlocksserver.domain.template.dto.response.TemplateDetailResponseDTO;
 import org.umc.travlocksserver.global.response.SuccessResponse;
@@ -42,7 +43,6 @@ public interface TemplateControllerDocs {
             summary = "템플릿 상세 조회",
             description = """
                 templateId에 해당하는 템플릿 상세 정보를 조회합니다.
-                - 공개 여부와 관계없이 템플릿 상세 정보를 조회합니다.
                 - 공개되지 않은 템플릿 조회 시 에러가 발생합니다.
                 """
     )
@@ -66,5 +66,5 @@ public interface TemplateControllerDocs {
                     )
             )
     )
-    ResponseEntity<SuccessResponse<TemplateDetailResponseDTO>> getTemplateDetail(Long templateId);
+    ResponseEntity<SuccessResponse<TemplateDetailResponseDTO>> getTemplateDetail(Long templateId, @Parameter(hidden = true) Member member);
 }
