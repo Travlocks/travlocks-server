@@ -3,10 +3,13 @@ package org.umc.travlocksserver.domain.template.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.umc.travlocksserver.domain.template.code.TemplateSuccessCode;
 import org.umc.travlocksserver.domain.template.dto.response.PopularTemplateResponse;
+import org.umc.travlocksserver.domain.template.dto.response.TemplateDetailResponseDTO;
+import org.umc.travlocksserver.domain.template.exception.TemplateException;
 import org.umc.travlocksserver.domain.template.service.TemplateQueryService;
 import org.umc.travlocksserver.global.response.SuccessResponse;
 
@@ -30,5 +33,24 @@ public class TemplateController implements TemplateControllerDocs {
                                 templateQueryService.getPopularTemplates(10)
                         )
                 );
+    }
+
+    @GetMapping("/{templateId}")
+    @Override
+    public ResponseEntity<SuccessResponse<TemplateDetailResponseDTO>> getTemplateDetail(@PathVariable Long templateId) {
+        TemplateSuccessCode successCode = TemplateSuccessCode.TEMPLATE_DETAIL_GET_SUCCESS;
+        try {
+            TemplateDetailResponseDTO dto = templateQueryService.getTemplateDetail(templateId);
+            return ResponseEntity.ok(SuccessResponse.ok(successCode, dto));
+        } catch (TemplateException e) {
+            var errorCode = e.getErrorCode();
+            return ResponseEntity.status(errorCode.getStatus())
+                    .body(new SuccessResponse<>(
+                            false,
+                            ((Enum<?>) errorCode).name(),
+                            errorCode.getMessage(),
+                            null
+                    ));
+        }
     }
 }

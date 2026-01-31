@@ -8,6 +8,8 @@ import org.umc.travlocksserver.domain.traveltheme.entity.TravelTheme;
 import org.umc.travlocksserver.global.entity.SoftDeleteBaseEntity;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -89,4 +91,13 @@ public class Template extends SoftDeleteBaseEntity {
     @Builder.Default
     @Column(name = "avg_rating", nullable = false)
     private Double avgRating = 0.0;
+
+    @OneToMany(mappedBy = "template")
+    private List<TemplateDay> templateDays = new ArrayList<>();
+
+    @OneToMany(mappedBy = "template")
+    private List<TemplateTag> templateTags = new ArrayList<>();
+
+    @OneToMany(mappedBy = "template")
+    private List<TemplateCity> templateCities = new ArrayList<>();
 }
