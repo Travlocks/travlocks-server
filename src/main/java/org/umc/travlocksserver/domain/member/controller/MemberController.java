@@ -33,53 +33,62 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/v1/members")
 public class MemberController implements MemberControllerDocs {
 
-	private final MemberEmailCheckService memberEmailCheckService;
-	private final MemberNicknameCheckService memberNicknameCheckService;
-	private final MemberSignupService memberSignupService;
-	private final MemberProfileQueryService memberProfileQueryService;
+    private final MemberEmailCheckService memberEmailCheckService;
+    private final MemberNicknameCheckService memberNicknameCheckService;
+    private final MemberSignupService memberSignupService;
+    private final MemberProfileQueryService memberProfileQueryService;
 
-	@GetMapping("/email/exists")
-	public SuccessResponse<MemberEmailExistsResponseDTO> checkEmailExists(
-		@RequestParam
-		@NotBlank(message = "이메일은 필수입니다.") @Email(message = "올바르지 않은 이메일 형식입니다.")
-		String email) {
-		MemberEmailExistsResponseDTO data = memberEmailCheckService.checkEmailExists(email);
+    @GetMapping("/email/exists")
+    public ResponseEntity<SuccessResponse<MemberEmailExistsResponseDTO>> checkEmailExists(
+            @RequestParam
+            @NotBlank(message = "이메일은 필수입니다.") @Email(message = "올바르지 않은 이메일 형식입니다.")
+            String email) {
+        MemberSuccessCode successCode = MemberSuccessCode.EMAIL_EXISTS_CHECK_SUCCESS;
+        MemberEmailExistsResponseDTO data = memberEmailCheckService.checkEmailExists(email);
 
-		return SuccessResponse.ok(MemberSuccessCode.EMAIL_EXISTS_CHECK_SUCCESS, data);
-	}
+        return ResponseEntity
+                .status(successCode.getStatus())
+                .body(SuccessResponse.ok(successCode, data));
+    }
 
-	@GetMapping("/nickname/exists")
-	public SuccessResponse<MemberNicknameExistsResponseDTO> checkNicknameExists(
-		@RequestParam
-		@NotBlank(message = "닉네임은 필수입니다.")
-		String nickname) {
-		MemberNicknameExistsResponseDTO data = memberNicknameCheckService.checkNicknameExists(nickname);
+    @GetMapping("/nickname/exists")
+    public ResponseEntity<SuccessResponse<MemberNicknameExistsResponseDTO>> checkNicknameExists(
+            @RequestParam
+            @NotBlank(message = "닉네임은 필수입니다.")
+            String nickname) {
+        MemberSuccessCode successCode = MemberSuccessCode.NICKNAME_EXISTS_CHECK_SUCCESS;
+        MemberNicknameExistsResponseDTO data = memberNicknameCheckService.checkNicknameExists(nickname);
 
-		return SuccessResponse.ok(MemberSuccessCode.NICKNAME_EXISTS_CHECK_SUCCESS, data);
-	}
+        return ResponseEntity
+                .status(successCode.getStatus())
+                .body(SuccessResponse.ok(successCode, data));
+    }
 
-	@PostMapping("/signup")
-	public SuccessResponse<MemberSignupResponseDTO> signup(
-		@Valid @RequestBody MemberSignupRequestDTO request,
-        HttpServletResponse response
-	) {
-		MemberSignupResponseDTO data = memberSignupService.signup(request, response);
+    @PostMapping("/signup")
+    public ResponseEntity<SuccessResponse<MemberSignupResponseDTO>> signup(
+            @Valid @RequestBody MemberSignupRequestDTO request,
+            HttpServletResponse response
+    ) {
+        MemberSuccessCode successCode = MemberSuccessCode.MEMBER_SIGNUP_SUCCESS;
+        MemberSignupResponseDTO data = memberSignupService.signup(request, response);
 
-		return SuccessResponse.ok(MemberSuccessCode.MEMBER_SIGNUP_SUCCESS, data);
-	}
+        return ResponseEntity
+                .status(successCode.getStatus())
+                .body(SuccessResponse.ok(successCode, data));
+    }
 
-	@GetMapping("/{memberId}/profile")
-	public ResponseEntity<SuccessResponse<MemberProfileResponseDTO>> getMemberProfile(
-		@PathVariable Long memberId,
-		@RequestParam(name = "cursor", required = false) Long cursor,
-		@RequestParam(name = "limit", defaultValue = "9") int limit
-	) {
-		MemberSuccessCode successCode = MemberSuccessCode.MEMBER_PROFILE_GET_SUCCESS;
+    @GetMapping("/{memberId}/profile")
+    public ResponseEntity<SuccessResponse<MemberProfileResponseDTO>> getMemberProfile(
+            @PathVariable Long memberId,
+            @RequestParam(name = "cursor", required = false) Long cursor,
+            @RequestParam(name = "limit", defaultValue = "9") int limit
+    ) {
+        MemberSuccessCode successCode = MemberSuccessCode.MEMBER_PROFILE_GET_SUCCESS;
 
-		MemberProfileResponseDTO data = memberProfileQueryService.getMemberProfile(memberId, cursor, limit);
+        MemberProfileResponseDTO data = memberProfileQueryService.getMemberProfile(memberId, cursor, limit);
 
-		return ResponseEntity
-			.status(successCode.getStatus())
-			.body(SuccessResponse.ok(successCode, data));
-	}
+        return ResponseEntity
+                .status(successCode.getStatus())
+                .body(SuccessResponse.ok(successCode, data));
+    }
 }
