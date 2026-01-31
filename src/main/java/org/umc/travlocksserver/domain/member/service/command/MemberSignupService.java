@@ -18,20 +18,28 @@ import org.umc.travlocksserver.domain.member.exception.code.MemberErrorCode;
 import org.umc.travlocksserver.domain.member.repository.*;
 import org.umc.travlocksserver.domain.travelstyle.entity.PreferredTravelStyle;
 import org.umc.travlocksserver.domain.travelstyle.entity.TravelStyle;
+import org.umc.travlocksserver.domain.travelstyle.exception.TravelStyleException;
+import org.umc.travlocksserver.domain.travelstyle.exception.code.TravelStyleErrorCode;
 import org.umc.travlocksserver.domain.travelstyle.repository.PreferredTravelStyleRepository;
 import org.umc.travlocksserver.domain.travelstyle.repository.TravelStyleRepository;
 import org.umc.travlocksserver.domain.traveltheme.entity.PreferredTravelTheme;
 import org.umc.travlocksserver.domain.traveltheme.entity.TravelTheme;
+import org.umc.travlocksserver.domain.traveltheme.exception.TravelThemeException;
+import org.umc.travlocksserver.domain.traveltheme.exception.code.TravelThemeErrorCode;
 import org.umc.travlocksserver.domain.traveltheme.repository.PreferredTravelThemeRepository;
 import org.umc.travlocksserver.domain.traveltheme.repository.TravelThemeRepository;
+import org.umc.travlocksserver.global.code.BaseCode;
 import org.umc.travlocksserver.global.profile.DefaultProfileImageProvider;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class MemberSignupService {
+
+    private static final int MAX_PREFERENCES = 2;
 
     private final MemberRepository memberRepository;
     private final PolicyRepository policyRepository;
@@ -122,12 +130,32 @@ public class MemberSignupService {
 
         memberConsentRepository.saveAll(memberConsents);
 
-        // 6) 선호 스타일/테마 저장 (선택)
+        // 6) 선호 스타일/테마 저장
+        validateMax2(
+                request.preferredTravelStyleIds(),
+                TravelStyleErrorCode.TRAVEL_STYLE_MAX_EXCEEDED,
+                TravelStyleException::new
+        );
+        validateMax2(
+                request.preferredTravelThemeIds(),
+                TravelThemeErrorCode.TRAVEL_THEME_MAX_EXCEEDED,
+                TravelThemeException::new
+        );
+
+        List<MemberSignupResponseDTO.PreferredStyleItem> preferredStyles = List.of();
+        List<MemberSignupResponseDTO.PreferredThemeItem> preferredThemes = List.of();
+
         if (request.preferredTravelStyleIds() != null && !request.preferredTravelStyleIds().isEmpty()) {
-            savePreferredStyles(savedMember, request.preferredTravelStyleIds());
+            List<TravelStyle> styles = savePreferredStyles(savedMember, request.preferredTravelStyleIds());
+            preferredStyles = styles.stream()
+                    .map(s -> new MemberSignupResponseDTO.PreferredStyleItem(s.getId(), s.getContent()))
+                    .toList();
         }
         if (request.preferredTravelThemeIds() != null && !request.preferredTravelThemeIds().isEmpty()) {
-            savePreferredThemes(savedMember, request.preferredTravelThemeIds());
+            List<TravelTheme> themes = savePreferredThemes(savedMember, request.preferredTravelThemeIds());
+            preferredThemes = themes.stream()
+                    .map(t -> new MemberSignupResponseDTO.PreferredThemeItem(t.getId(), t.getContent()))
+                    .toList();
         }
 
         // 7) 회원가입 성공 시 signupToken 삭제
@@ -141,15 +169,27 @@ public class MemberSignupService {
                 savedMember.getNickname(),
                 tokens.accessToken(),
                 tokens.accessTokenExpiresIn(),
-                savedMember.getProfileImageUrl()
+                profileImageUrl,
+                preferredThemes,
+                preferredStyles
         );
     }
 
-    private void savePreferredStyles(Member member, List<Long> styleIds) {
+    private <E extends BaseCode> void validateMax2(
+            List<Long> ids,
+            E errorCode,
+            Function<E, ? extends RuntimeException> exceptionFactory
+    ) {
+        if (ids != null && ids.size() > MAX_PREFERENCES) {
+            throw exceptionFactory.apply(errorCode);
+        }
+    }
+
+    private List<TravelStyle> savePreferredStyles(Member member, List<Long> styleIds) {
         List<Long> distinct = styleIds.stream().distinct().toList();
         List<TravelStyle> styles = travelStyleRepository.findAllByIdIn(distinct);
         if (styles.size() != distinct.size()) {
-            throw new MemberException(MemberErrorCode.TRAVEL_STYLE_NOT_FOUND);
+            throw new TravelStyleException(TravelStyleErrorCode.TRAVEL_STYLE_NOT_FOUND);
         }
 
         List<PreferredTravelStyle> rows = styles.stream()
@@ -160,13 +200,14 @@ public class MemberSignupService {
                 .toList();
 
         preferredTravelStyleRepository.saveAll(rows);
+        return styles;
     }
 
-    private void savePreferredThemes(Member member, List<Long> themeIds) {
+    private List<TravelTheme> savePreferredThemes(Member member, List<Long> themeIds) {
         List<Long> distinct = themeIds.stream().distinct().toList();
         List<TravelTheme> themes = travelThemeRepository.findAllByIdIn(distinct);
         if (themes.size() != distinct.size()) {
-            throw new MemberException(MemberErrorCode.TRAVEL_THEME_NOT_FOUND);
+            throw new TravelThemeException(TravelThemeErrorCode.TRAVEL_THEME_NOT_FOUND);
         }
 
         List<PreferredTravelTheme> rows = themes.stream()
@@ -177,6 +218,7 @@ public class MemberSignupService {
                 .toList();
 
         preferredTravelThemeRepository.saveAll(rows);
+        return themes;
     }
 }
 
