@@ -37,16 +37,16 @@ public class TemplateCanvasQueryService {
 		TemplateDay day = templateDayRepository.findByTemplateIdAndDayNo(templateId, dayNo)
 			.orElseThrow(() -> new TemplateException(TemplateErrorCode.TEMPLATE_CANVAS_NOT_FOUND));
 
-		List<TemplateVlock> blocks = templateVlockRepository.findAllByTemplateDayIdFetchVlock(day.getId());
+		List<TemplateVlock> templateVlocks = templateVlockRepository.findAllByTemplateDayIdFetchVlock(day.getId());
 
 		int totalStayMinutes = 0;
 		int totalMoveMinutes = 0;
 
-		List<TemplateCanvasVlockDTO> vlocks = new ArrayList<>(blocks.size());
+		List<TemplateCanvasVlockDTO> vlocks = new ArrayList<>(templateVlocks.size());
 
-		for (int i = 0; i < blocks.size(); i++) {
-			TemplateVlock cur = blocks.get(i);
-			TemplateVlock next = (i + 1 < blocks.size()) ? blocks.get(i + 1) : null;
+		for (int i = 0; i < templateVlocks.size(); i++) {
+			TemplateVlock cur = templateVlocks.get(i);
+			TemplateVlock next = (i + 1 < templateVlocks.size()) ? templateVlocks.get(i + 1) : null;
 
 			int nextMoveMinutes = (next == null) ? 0 : calcNextMoveMinutes(cur.getVlock(), next.getVlock());
 

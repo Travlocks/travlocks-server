@@ -1,4 +1,4 @@
-package org.umc.travlocksserver.domain.template.service;
+package org.umc.travlocksserver.domain.template.service.query;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;

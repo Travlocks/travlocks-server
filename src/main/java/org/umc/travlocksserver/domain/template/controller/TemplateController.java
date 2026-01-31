@@ -15,7 +15,7 @@ import org.umc.travlocksserver.domain.template.dto.response.TemplateRemixRespons
 import org.umc.travlocksserver.domain.template.service.command.TemplateRemixService;
 import org.umc.travlocksserver.domain.template.service.query.TemplateCanvasQueryService;
 import org.umc.travlocksserver.domain.template.dto.response.PopularTemplateResponse;
-import org.umc.travlocksserver.domain.template.service.TemplateQueryService;
+import org.umc.travlocksserver.domain.template.service.query.TemplateQueryService;
 import org.umc.travlocksserver.global.response.SuccessResponse;
 
 import java.util.List;
