@@ -10,37 +10,51 @@ import org.umc.travlocksserver.domain.location.repository.CityRepository;
 import org.umc.travlocksserver.domain.member.exception.MemberException;
 import org.umc.travlocksserver.domain.member.exception.code.MemberErrorCode;
 import org.umc.travlocksserver.domain.member.repository.MemberRepository;
+import org.umc.travlocksserver.domain.vlock.constant.VlockErrorCode;
 import org.umc.travlocksserver.domain.vlock.dto.vlock.VlockResponseDTO;
+import org.umc.travlocksserver.domain.vlock.exception.VlockException;
+import org.umc.travlocksserver.domain.vlock.repository.VlockCategoryRepository;
 import org.umc.travlocksserver.domain.vlock.repository.VlockRepository;
 
 import lombok.RequiredArgsConstructor;
 
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class VlockQueryService {
 
 	private final MemberRepository memberRepository;
 	private final CityRepository cityRepository;
+	private final VlockCategoryRepository categoryRepository;
 	private final VlockRepository vlockRepository;
 
-	/** 생성 블록 조회 */
-	@Transactional(readOnly = true)
-	public List<VlockResponseDTO> getMyVlock(Long memberId, Long cityId) {
-		validateMemberExists(memberId);
-		validateCityExists(cityId);
-
-		return vlockRepository.findAllByOwnerIdAndCityIdAndDeletedAtIsNull(memberId, cityId)
-			.stream()
-			.map(VlockResponseDTO::from)
-			.toList();
-	}
-
 	/** 인기 블록 조회 */
-	@Transactional(readOnly = true)
 	public List<VlockResponseDTO> getPopularVlocks(Long cityId) {
 		validateCityExists(cityId);
 
-		return vlockRepository.findAllByCityIdOrderByUsageCountDesc(cityId);
+		return vlockRepository
+			.findAllByCityIdOrderByUsageCountDesc(cityId);
+	}
+
+	/** 카테고리 블록 조회 */
+	public List<VlockResponseDTO> getCategoriesVlocks(Long cityId, Long categoryId) {
+		validateCityExists(cityId);
+		validateCategoryExists(categoryId);
+
+		return vlockRepository
+			.findAllByCityIdAndCategoryIdByUsageCountDesc(cityId, categoryId);
+	}
+
+	/** 생성 블록 조회 */
+	public List<VlockResponseDTO> getMyVlocks(Long memberId, Long cityId) {
+		validateMemberExists(memberId);
+		validateCityExists(cityId);
+
+		return vlockRepository
+			.findAllByOwnerIdAndCityIdAndDeletedAtIsNullOrderByUsageCountDescIdDesc(memberId, cityId)
+			.stream()
+			.map(VlockResponseDTO::from)
+			.toList();
 	}
 
 	private void validateMemberExists(Long memberId) {
@@ -52,6 +66,12 @@ public class VlockQueryService {
 	private void validateCityExists(Long cityId) {
 		if (!cityRepository.existsById(cityId)) {
 			throw new CityException(CityErrorCode.CITY_NOT_FOUND);
+		}
+	}
+
+	private void validateCategoryExists(Long categoryId) {
+		if (!categoryRepository.existsById(categoryId)) {
+			throw new VlockException(VlockErrorCode.CATEGORY_NOT_FOUND);
 		}
 	}
 }

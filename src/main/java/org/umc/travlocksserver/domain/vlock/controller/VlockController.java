@@ -53,13 +53,26 @@ public class VlockController implements VlockControllerDocs {
 			.body(SuccessResponse.ok(VlockSuccessCode.VLOCK_GET_SUCCESS, responses));
 	}
 
+	/** 카테고리 블록 조회 */
+	@GetMapping("/cities/{cityId}/categories/{categoryId}")
+	public ResponseEntity<SuccessResponse<List<VlockResponseDTO>>> getCategoriesVlocks(
+		@PathVariable Long cityId,
+		@PathVariable Long categoryId
+	) {
+		List<VlockResponseDTO> responses = vlockQueryService.getCategoriesVlocks(cityId, categoryId);
+
+		return ResponseEntity
+			.status(HttpStatus.OK)
+			.body(SuccessResponse.ok(VlockSuccessCode.VLOCK_GET_SUCCESS, responses));
+	}
+
 	/** 생성 블록 조회 */
 	@GetMapping("/cities/{cityId}")
-	public ResponseEntity<SuccessResponse<List<VlockResponseDTO>>> getMyVlock(
+	public ResponseEntity<SuccessResponse<List<VlockResponseDTO>>> getMyVlocks(
 		@AuthenticationPrincipal Long memberId,
 		@PathVariable Long cityId
 	) {
-		List<VlockResponseDTO> responses = vlockQueryService.getMyVlock(memberId, cityId);
+		List<VlockResponseDTO> responses = vlockQueryService.getMyVlocks(memberId, cityId);
 
 		return ResponseEntity
 			.status(HttpStatus.OK)
