@@ -92,6 +92,35 @@ public class Template extends SoftDeleteBaseEntity {
     @Column(name = "avg_rating", nullable = false)
     private Double avgRating = 0.0;
 
+	public void increaseRemixCount() {
+		this.remixCount = (this.remixCount == null ? 0 : this.remixCount) + 1;
+	}
+
+	public static Template remixOf(Template original, Member remixer, String shareToken) {
+		return Template.builder()
+			.parentTemplate(original)
+			.owner(remixer)
+			.travelTheme(original.getTravelTheme())
+			.title(original.getTitle() + " (리믹스)")
+			.description(original.getDescription())
+			.coverImageUrl(original.getCoverImageUrl())
+			.transportType(original.getTransportType())
+			.tripDays(original.getTripDays())
+			.vlockCount(original.getVlockCount())
+
+			// 초기화
+			.progressRate(0)
+			.startDate(null)
+			.endDate(null)
+			.isPublic(false)
+			.shareToken(shareToken)
+			.favoriteCount(0)
+			.remixCount(0)
+			.ratingCount(0)
+			.avgRating(0.0)
+			.build();
+	}
+
     @OneToMany(mappedBy = "template")
     private List<TemplateDay> templateDays = new ArrayList<>();
 

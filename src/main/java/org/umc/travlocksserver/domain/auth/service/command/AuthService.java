@@ -34,45 +34,25 @@ public class AuthService {
     private final JwtTokenProvider jwtTokenProvider;
     private final RefreshTokenRedisRepository refreshTokenRedisRepository;
 
-    public AuthLoginResponseDTO login(AuthLoginRequestDTO request, HttpServletResponse response) {
-        Duration refreshTtl = Duration.ofSeconds(refreshTtlSeconds);
+    public record IssuedTokens(String accessToken, long accessTokenExpiresIn) {
+    }
 
-        // 1) 회원 조회
+    public AuthLoginResponseDTO login(AuthLoginRequestDTO request, HttpServletResponse response) {
+        // 회원 조회
         Member member = memberRepository.findByEmail(request.email())
                 .orElseThrow(() -> new AuthException(AuthErrorCode.INVALID_CREDENTIALS));
 
-        // 2) 비밀번호 검증
+        // 비밀번호 검증
         if (!passwordEncoder.matches(request.password(), member.getPasswordHash())) {
             throw new AuthException(AuthErrorCode.INVALID_CREDENTIALS);
         }
-        
-        // 3) 토큰 생성
-        // AccessToken
-        String accessToken = jwtTokenProvider.generateAccessToken(member.getId());
 
-        // RefreshToken (jti 포함)
-        String jti = UUID.randomUUID().toString();
-        String refreshToken = jwtTokenProvider.generateRefreshToken(member.getId(), jti);
+        IssuedTokens tokens = issueTokens(member.getId(), response);
 
-        // 4) refreshToken -> Redis 저장
-        refreshTokenRedisRepository.save(jti, member.getId(), refreshTtl);
-
-        // 5) refreshToken -> Set-Cookie
-        ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
-                .httpOnly(true)
-                .secure(false) // 운영환경에선 true로 변경
-                .path("/api/v1/auth/refresh")
-                .maxAge(refreshTtl)
-                .sameSite("Lax") // 운영환경에선 None으로 변경
-                .build();
-
-        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
-
-        // 6) Response Body
         return new AuthLoginResponseDTO(
                 member.getId(),
-                accessToken,
-                jwtTokenProvider.getAccessTokenExpiresInSeconds()
+                tokens.accessToken(),
+                tokens.accessTokenExpiresIn()
         );
     }
 
@@ -114,6 +94,34 @@ public class AuthService {
                 newAccessToken,
                 jwtTokenProvider.getAccessTokenExpiresInSeconds()
         );
+    }
+
+    // AccessToken, RefreshToken 발급
+    public IssuedTokens issueTokens(Long memberId, HttpServletResponse response) {
+        Duration refreshTtl = Duration.ofSeconds(refreshTtlSeconds);
+
+        // AccessToken
+        String accessToken = jwtTokenProvider.generateAccessToken(memberId);
+
+        // RefreshToken (jti 포함)
+        String jti = UUID.randomUUID().toString();
+        String refreshToken = jwtTokenProvider.generateRefreshToken(memberId, jti);
+
+        // refreshToken -> Redis 저장
+        refreshTokenRedisRepository.save(jti, memberId, refreshTtl);
+
+        // refreshToken -> Set-Cookie
+        ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
+                .httpOnly(true)
+                .secure(false) // 운영환경에선 true로 변경
+                .path("/")
+                .maxAge(refreshTtl)
+                .sameSite("Lax") // 운영환경에선 None으로 변경
+                .build();
+
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+
+        return new IssuedTokens(accessToken, jwtTokenProvider.getAccessTokenExpiresInSeconds());
     }
 
     private String extractRefreshTokenFromCookie(HttpServletRequest request) {

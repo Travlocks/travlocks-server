@@ -1,5 +1,6 @@
 package org.umc.travlocksserver.domain.member.controller;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -15,10 +16,12 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
+@Tag(name = "템플릿 API", description = "템플릿 관련 API입니다.")
 public interface MemberControllerDocs {
 
 	@Operation(
@@ -32,9 +35,9 @@ public interface MemberControllerDocs {
 	)
 	@ApiResponses({
 		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "이메일 중복 검사 성공"),
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "요청 값 검증 실패(이메일 형식/빈 값 등)")
+		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "요청 값 검증 실패(이메일 형식/빈 값 등)", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 	})
-	SuccessResponse<MemberEmailExistsResponseDTO> checkEmailExists(
+    ResponseEntity<SuccessResponse<MemberEmailExistsResponseDTO>> checkEmailExists(
 		@NotBlank(message = "이메일은 필수입니다.") @Email(message = "올바르지 않은 이메일 형식입니다.")
 		String email
 	);
@@ -50,9 +53,9 @@ public interface MemberControllerDocs {
 	)
 	@ApiResponses({
 		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "닉네임 중복 검사 성공"),
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "요청 값 검증 실패(빈 값 등)")
+		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "요청 값 검증 실패(빈 값 등)", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 	})
-	SuccessResponse<MemberNicknameExistsResponseDTO> checkNicknameExists(
+    ResponseEntity<SuccessResponse<MemberNicknameExistsResponseDTO>> checkNicknameExists(
 		@NotBlank(message = "닉네임은 필수입니다.")
 		String nickname
 	);
@@ -64,16 +67,18 @@ public interface MemberControllerDocs {
 			            
 			- 이메일 인증 성공 후 발급된 signupToken이 필요합니다.
 			- signupToken에 매핑된 email과 요청 email이 일치해야 합니다.
+			- 회원가입 성공 시 accessToken과 refreshToken이 발급됩니다.
 			"""
 	)
 	@ApiResponses({
 		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "회원가입 성공"),
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "요청 값 검증 실패 / 약관 오류 / 존재하지 않는 여행 스타일·테마 ID 포함"),
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "인증 실패(예: signupToken 만료/불일치)"),
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "409", description = "충돌(예: 이메일/닉네임 중복)")
+		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "요청 값 검증 실패 / 약관 오류 / 존재하지 않는 여행 스타일·테마 ID 포함", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "인증 실패(예: signupToken 만료/불일치)",content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "409", description = "충돌(예: 이메일/닉네임 중복)",content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 	})
-	SuccessResponse<MemberSignupResponseDTO> signup(
-		@Valid MemberSignupRequestDTO request
+    ResponseEntity<SuccessResponse<MemberSignupResponseDTO>> signup(
+		@Valid MemberSignupRequestDTO request,
+        HttpServletResponse response
 	);
 
 	@Operation(
