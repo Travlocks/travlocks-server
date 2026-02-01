@@ -20,7 +20,7 @@ public class FavoriteController implements FavoriteControllerDocs {
     /**
      * 즐겨찾기 추가
      */
-    @PostMapping("/{templateId}/favorite")
+    @PutMapping("/{templateId}/favorite")
     @Override
     public ResponseEntity<SuccessResponse<Void>> addFavorite(
             @PathVariable Long templateId,

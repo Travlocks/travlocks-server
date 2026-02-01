@@ -11,6 +11,7 @@ import org.umc.travlocksserver.domain.member.entity.Member;
 import org.umc.travlocksserver.domain.template.dto.response.PopularTemplateResponse;
 import org.umc.travlocksserver.domain.template.dto.response.TemplateDetailResponseDTO;
 import org.umc.travlocksserver.global.response.SuccessResponse;
+import org.umc.travlocksserver.global.response.ErrorResponse;
 
 import java.util.List;
 
