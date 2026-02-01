@@ -1,5 +1,6 @@
 package org.umc.travlocksserver.global.config;
 
+import io.swagger.v3.oas.models.servers.Server;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -9,18 +10,23 @@ import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 
+import java.util.List;
+
 @Configuration
 public class SwaggerConfig {
 
 	private static final String JWT_SCHEME_NAME = "JWT";
 
-	@Bean
-	public OpenAPI openAPI() {
-		return new OpenAPI()
-			.info(apiInfo())
-			.components(components())
-			.addSecurityItem(new SecurityRequirement().addList(JWT_SCHEME_NAME));
-	}
+    @Bean
+    public OpenAPI openAPI() {
+        return new OpenAPI()
+                .info(apiInfo())
+                .servers(List.of(
+                        new Server().url("https://api.travlocks.kro.kr")
+                ))
+                .components(components())
+                .addSecurityItem(new SecurityRequirement().addList(JWT_SCHEME_NAME));
+    }
 
 	private Info apiInfo() {
 		return new Info()
