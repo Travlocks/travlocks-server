@@ -62,7 +62,7 @@ public interface TemplateControllerDocs {
             content = @Content(
                     mediaType = "application/json",
                     schema = @Schema(
-                            implementation = SuccessResponse.class
+                            implementation = ErrorResponse.class
                     )
             )
     )
