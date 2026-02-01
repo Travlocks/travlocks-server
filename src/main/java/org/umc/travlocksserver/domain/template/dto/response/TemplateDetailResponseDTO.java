@@ -10,17 +10,17 @@ public record TemplateDetailResponseDTO(
         String ownerProfileImage,
         String ownerNickname,
         String coverImageUrl,
-        Long memberId,
+        Long ownerId,
         Double rating,
         String tripDays,
         Integer remixCount,
         String description,
         List<String> tags,
-        List<BlockDTO> blocks,
+        List<VlockDTO> vlocks,
         Boolean isFavorited
 ) {
-    public record BlockDTO(
-            Long blockId,
+    public record VlockDTO(
+            Long vlockId,
             String name,
             Double latitude,
             Double longitude,

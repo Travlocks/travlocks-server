@@ -69,9 +69,9 @@ public class TemplateQueryService {
                 .toList();
 
         // 블록 목록
-        List<TemplateDetailResponseDTO.BlockDTO> blocks = template.getTemplateDays().stream()
+        List<TemplateDetailResponseDTO.VlockDTO> blocks = template.getTemplateDays().stream()
                 .flatMap(day -> day.getTemplateVlocks().stream())
-                .map(tv -> new TemplateDetailResponseDTO.BlockDTO(
+                .map(tv -> new TemplateDetailResponseDTO.VlockDTO(
                         tv.getVlock().getId(),
                         tv.getVlock().getName(),
                         tv.getVlock().getLatitude(),
