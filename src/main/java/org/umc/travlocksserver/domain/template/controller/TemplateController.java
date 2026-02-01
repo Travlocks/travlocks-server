@@ -41,21 +41,16 @@ public class TemplateController implements TemplateControllerDocs {
     @GetMapping("/{templateId}")
     @Override
     public ResponseEntity<SuccessResponse<TemplateDetailResponseDTO>> getTemplateDetail(@PathVariable Long templateId, @Parameter(hidden = true) @LoginUser Member member) {
-        TemplateSuccessCode successCode = TemplateSuccessCode.TEMPLATE_DETAIL_GET_SUCCESS;
-        try {
-            Long memberId = (member != null) ? member.getId() : null;
+        Long memberId = (member != null) ? member.getId() : null;
 
-            TemplateDetailResponseDTO dto = templateQueryService.getTemplateDetail(templateId,memberId);
-            return ResponseEntity.ok(SuccessResponse.ok(successCode, dto));
-        } catch (TemplateException e) {
-            var errorCode = e.getErrorCode();
-            return ResponseEntity.status(errorCode.getStatus())
-                    .body(new SuccessResponse<>(
-                            false,
-                            ((Enum<?>) errorCode).name(),
-                            errorCode.getMessage(),
-                            null
-                    ));
-        }
+        TemplateDetailResponseDTO dto =
+                templateQueryService.getTemplateDetail(templateId, memberId);
+
+        return ResponseEntity.ok(
+                SuccessResponse.ok(
+                        TemplateSuccessCode.TEMPLATE_DETAIL_GET_SUCCESS,
+                        dto
+                )
+        );
     }
 }
