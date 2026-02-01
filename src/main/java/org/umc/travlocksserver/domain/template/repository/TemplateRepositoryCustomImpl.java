@@ -1,11 +1,11 @@
 package org.umc.travlocksserver.domain.template.repository;
 
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.JPAExpressions;
-import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -52,7 +52,7 @@ public class TemplateRepositoryCustomImpl implements TemplateRepositoryCustom {
         QTemplateCity tc2 = new QTemplateCity("tc2");
         QRegion r = QRegion.region;
 
-        JPQLQuery<Long> firstTcIdOfTemplate = getFirstTcIdOfTemplate(t, tc2);
+        Expression<Long> firstTcIdOfTemplate = getFirstTcIdOfTemplate(t, tc2);
         BooleanBuilder builder = buildCondition(t, excludedTemplateIds);
         NumberExpression<Double> totalScore = calculateTotalScore(t, preferredThemeIds, recentThemeIds);
 
@@ -80,7 +80,7 @@ public class TemplateRepositoryCustomImpl implements TemplateRepositoryCustom {
     }
 
     // 템플릿의 city들 중 가장 작은 id 조회 (대표도시)
-    private JPQLQuery<Long> getFirstTcIdOfTemplate(QTemplate t, QTemplateCity tc) {
+    private Expression<Long> getFirstTcIdOfTemplate(QTemplate t, QTemplateCity tc) {
         return JPAExpressions
                 .select(tc.id.min())
                 .from(tc)
