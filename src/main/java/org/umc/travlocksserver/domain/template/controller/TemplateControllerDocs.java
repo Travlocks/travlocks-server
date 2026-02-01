@@ -19,12 +19,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.umc.travlocksserver.domain.template.dto.response.TemplateRecommendationsDTO;
-import org.springframework.http.ResponseEntity;
 import org.umc.travlocksserver.domain.member.entity.Member;
-import org.umc.travlocksserver.domain.template.dto.response.PopularTemplateResponse;
 import org.umc.travlocksserver.domain.template.dto.response.TemplateDetailResponseDTO;
-import org.umc.travlocksserver.global.response.SuccessResponse;
-import org.umc.travlocksserver.global.response.ErrorResponse;
 
 import java.util.List;
 
@@ -130,5 +126,5 @@ public interface TemplateControllerDocs {
                     )
             )
     )
-    ResponseEntity<SuccessResponse<TemplateDetailResponseDTO>> getTemplateDetail(Long templateId, @Parameter(hidden = true) Member member);
+    ResponseEntity<SuccessResponse<TemplateDetailResponseDTO>> getTemplateDetail(@PathVariable Long templateId, @Parameter(hidden = true) Member member);
 }

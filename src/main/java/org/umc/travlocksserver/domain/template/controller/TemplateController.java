@@ -20,8 +20,6 @@ import org.umc.travlocksserver.domain.template.dto.response.TemplateRecommendati
 import org.umc.travlocksserver.domain.template.service.query.TemplateQueryService;
 import org.umc.travlocksserver.domain.template.dto.response.PopularTemplateResponse;
 import org.umc.travlocksserver.domain.template.dto.response.TemplateDetailResponseDTO;
-import org.umc.travlocksserver.domain.template.exception.TemplateException;
-import org.umc.travlocksserver.domain.template.service.TemplateQueryService;
 import org.umc.travlocksserver.global.annotation.LoginUser;
 import org.umc.travlocksserver.global.response.SuccessResponse;
 
