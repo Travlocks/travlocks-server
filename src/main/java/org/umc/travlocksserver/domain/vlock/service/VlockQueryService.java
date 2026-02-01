@@ -33,7 +33,7 @@ public class VlockQueryService {
 		validateCityExists(cityId);
 
 		return vlockRepository
-			.findAllByCityIdOrderByUsageCountDesc(cityId);
+			.findPopularVlocks(cityId);
 	}
 
 	/** 카테고리 블록 조회 */
@@ -42,7 +42,7 @@ public class VlockQueryService {
 		validateCategoryExists(categoryId);
 
 		return vlockRepository
-			.findAllByCityIdAndCategoryIdByUsageCountDesc(cityId, categoryId);
+			.findCategoryVlocks(cityId, categoryId);
 	}
 
 	/** 생성 블록 조회 */

@@ -6,7 +6,7 @@ import org.umc.travlocksserver.domain.vlock.dto.vlock.VlockResponseDTO;
 
 public interface VlockRepositoryCustom {
 
-	List<VlockResponseDTO> findAllByCityIdOrderByUsageCountDesc(Long cityId);
+	List<VlockResponseDTO> findPopularVlocks(Long cityId);
 
-	List<VlockResponseDTO> findAllByCityIdAndCategoryIdByUsageCountDesc(Long cityId,Long categoryId);
+	List<VlockResponseDTO> findCategoryVlocks(Long cityId,Long categoryId);
 }

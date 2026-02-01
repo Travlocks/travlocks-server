@@ -28,7 +28,7 @@ public class VlockRepositoryImpl implements VlockRepositoryCustom {
 
 	/** 인기 블록 조회 */
 	@Override
-	public List<VlockResponseDTO> findAllByCityIdOrderByUsageCountDesc(Long cityId) {
+	public List<VlockResponseDTO> findPopularVlocks(Long cityId) {
 		return baseQuery(cityId)
 			.orderBy(vlock.usageCount.desc(), vlock.id.desc())
 			.limit(POPULAR_VLOCK_LIMIT)
@@ -37,7 +37,7 @@ public class VlockRepositoryImpl implements VlockRepositoryCustom {
 
 	/** 카테고리 블록 조회 */
 	@Override
-	public List<VlockResponseDTO> findAllByCityIdAndCategoryIdByUsageCountDesc(Long cityId, Long categoryId) {
+	public List<VlockResponseDTO> findCategoryVlocks(Long cityId, Long categoryId) {
 		return baseQuery(cityId)
 			.where(vlockCategory.id.eq(categoryId))
 			.orderBy(vlock.usageCount.desc(), vlock.id.desc())
@@ -88,7 +88,11 @@ public class VlockRepositoryImpl implements VlockRepositoryCustom {
 			vlock.longitude,
 
 			vlock.usageCount,
-			vlock.isPublic
+
+			vlock.isPublic,
+
+			vlock.createdAt,
+			vlock.updatedAt
 		);
 	}
 }
