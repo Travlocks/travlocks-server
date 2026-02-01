@@ -14,8 +14,9 @@ import org.umc.travlocksserver.domain.template.dto.response.TemplateCanvasRespon
 import org.umc.travlocksserver.domain.template.dto.response.TemplateRemixResponseDTO;
 import org.umc.travlocksserver.domain.template.service.command.TemplateRemixService;
 import org.umc.travlocksserver.domain.template.service.query.TemplateCanvasQueryService;
-import org.umc.travlocksserver.domain.template.dto.response.PopularTemplateResponse;
+import org.umc.travlocksserver.domain.template.dto.response.TemplateRecommendationsDTO;
 import org.umc.travlocksserver.domain.template.service.query.TemplateQueryService;
+import org.umc.travlocksserver.domain.template.dto.response.PopularTemplateResponse;
 import org.umc.travlocksserver.global.response.SuccessResponse;
 
 import java.util.List;
@@ -30,18 +31,26 @@ public class TemplateController implements TemplateControllerDocs {
 	private final TemplateRemixService templateRemixService;
 	private final TemplateCanvasQueryService templateCanvasQueryService;
 
-	@GetMapping("/popular")
-	public ResponseEntity<SuccessResponse<List<PopularTemplateResponse>>> getPopularTemplates() {
-		TemplateSuccessCode successCode = TemplateSuccessCode.HOME_GET_POPULAR_TEMPLATES_SUCCESS;
-		return ResponseEntity
-			.status(successCode.getStatus())
-			.body(
-				SuccessResponse.ok(
-					successCode,
-					templateQueryService.getPopularTemplates(10)
-				)
-			);
-	}
+    @GetMapping("/recommendations")
+    public ResponseEntity<SuccessResponse<TemplateRecommendationsDTO>> getRecommendedTemplates(
+            @AuthenticationPrincipal Long memberId
+    ) {
+        TemplateRecommendationsDTO response = templateQueryService.getRecommendedTemplates(memberId);
+        return ResponseEntity.ok(SuccessResponse.ok(TemplateSuccessCode.TEMPLATE_RECOMMEND_SUCCESS, response));
+    }
+
+    @GetMapping("/popular")
+    public ResponseEntity<SuccessResponse<List<PopularTemplateResponse>>> getPopularTemplates() {
+        org.umc.travlocksserver.domain.template.code.TemplateSuccessCode successCode = org.umc.travlocksserver.domain.template.code.TemplateSuccessCode.HOME_GET_POPULAR_TEMPLATES_SUCCESS;
+        return ResponseEntity
+                .status(successCode.getStatus())
+                .body(
+                        SuccessResponse.ok(
+                                successCode,
+                                templateQueryService.getPopularTemplates(10)
+                        )
+                );
+    }
 
 	@PostMapping("/{templateId}/remix")
 	public ResponseEntity<SuccessResponse<TemplateRemixResponseDTO>> remix(

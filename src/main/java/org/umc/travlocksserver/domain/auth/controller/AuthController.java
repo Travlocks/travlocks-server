@@ -3,6 +3,7 @@ package org.umc.travlocksserver.domain.auth.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.umc.travlocksserver.domain.auth.dto.request.AuthLoginRequestDTO;
 import org.umc.travlocksserver.domain.auth.dto.request.AuthResendEmailRequestDTO;
@@ -28,45 +29,64 @@ public class AuthController implements AuthControllerDocs {
     private final AuthService authService;
 
 	@PostMapping("/email-verification")
-	public SuccessResponse<AuthSendEmailResponseDTO> sendEmailVerificationCode(
+	public ResponseEntity<SuccessResponse<AuthSendEmailResponseDTO>> sendEmailVerificationCode(
 		@Valid @RequestBody
 		AuthSendEmailRequestDTO request) {
-		AuthSendEmailResponseDTO data = emailVerificationService.sendVerificationCode(request.email());
+        AuthSuccessCode successCode = AuthSuccessCode.EMAIL_VERIFICATION_CODE_SENT;
+        AuthSendEmailResponseDTO data = emailVerificationService.sendVerificationCode(request.email());
 
-		return SuccessResponse.ok(AuthSuccessCode.EMAIL_VERIFICATION_CODE_SENT, data);
+        return ResponseEntity
+                .status(successCode.getStatus())
+                .body(SuccessResponse.ok(successCode, data));
 	}
 
 	@PostMapping("/email-verification/confirm")
-	public SuccessResponse<AuthVerifyEmailResponseDTO> confirmEmailVerificationCode(
+	public ResponseEntity<SuccessResponse<AuthVerifyEmailResponseDTO>> confirmEmailVerificationCode(
 		@Valid @RequestBody
 		AuthVerifyEmailRequestDTO request) {
+        AuthSuccessCode successCode = AuthSuccessCode.EMAIL_VERIFICATION_CONFIRMED;
 		AuthVerifyEmailResponseDTO data = emailVerificationService.confirmVerificationCode(
 			request.verificationId(),
-			request.code());
+			request.code()
+        );
 
-		return SuccessResponse.ok(AuthSuccessCode.EMAIL_VERIFICATION_CONFIRMED, data);
+        return ResponseEntity
+                .status(successCode.getStatus())
+                .body(SuccessResponse.ok(successCode, data));
 	}
 
 	@PostMapping("/email-verification/resend")
-	public SuccessResponse<?> resendEmailVerificationCode(
+	public ResponseEntity<SuccessResponse<?>> resendEmailVerificationCode(
 		@Valid @RequestBody
 		AuthResendEmailRequestDTO request) {
+        AuthSuccessCode successCode = AuthSuccessCode.EMAIL_VERIFICATION_CODE_RESENT;
 		emailVerificationService.resendVerificationCode(request.verificationId());
-		return SuccessResponse.ok(AuthSuccessCode.EMAIL_VERIFICATION_CODE_RESENT);
+
+        return ResponseEntity
+                .status(successCode.getStatus())
+                .body(SuccessResponse.ok(successCode, null));
 	}
 
     @PostMapping("/login")
-    public SuccessResponse<AuthLoginResponseDTO> login(
+    public ResponseEntity<SuccessResponse<AuthLoginResponseDTO>> login(
             @Valid @RequestBody AuthLoginRequestDTO request,
             HttpServletResponse response) {
+        AuthSuccessCode successCode = AuthSuccessCode.AUTH_LOGIN_SUCCESS;
         AuthLoginResponseDTO data = authService.login(request, response);
-        return SuccessResponse.ok(AuthSuccessCode.AUTH_LOGIN_SUCCESS, data);
+
+        return ResponseEntity
+                .status(successCode.getStatus())
+                .body(SuccessResponse.ok(successCode, data));
     }
 
     @PostMapping("/refresh")
-    public SuccessResponse<AuthRefreshResponseDTO> refresh(
+    public ResponseEntity<SuccessResponse<AuthRefreshResponseDTO>> refresh(
             HttpServletRequest request) {
+        AuthSuccessCode successCode = AuthSuccessCode.AUTH_ACCESS_TOKEN_REISSUED;
         AuthRefreshResponseDTO data = authService.refreshAccessToken(request);
-        return SuccessResponse.ok(AuthSuccessCode.AUTH_ACCESS_TOKEN_REISSUED, data);
+
+        return ResponseEntity
+                .status(successCode.getStatus())
+                .body(SuccessResponse.ok(successCode, data));
     }
 }
