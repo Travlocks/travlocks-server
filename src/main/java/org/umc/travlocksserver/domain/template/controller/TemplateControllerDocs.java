@@ -5,13 +5,17 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.umc.travlocksserver.domain.template.dto.response.BatchRouteResponseDTO;
 import org.umc.travlocksserver.domain.template.dto.response.PopularTemplateResponse;
 import org.umc.travlocksserver.domain.template.dto.response.TemplateCanvasResponseDTO;
 import org.umc.travlocksserver.domain.template.dto.response.TemplateRemixResponseDTO;
+import org.umc.travlocksserver.domain.template.enums.TransportType;
 import org.umc.travlocksserver.global.response.ErrorResponse;
 import org.umc.travlocksserver.global.response.SuccessResponse;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -81,7 +85,7 @@ public interface TemplateControllerDocs {
 				
 			[Path Variable]
 			- templateId: 조회할 템플릿 ID
-			- dayNo: 조회할 일차(1부터 시작)
+			- dayNo: 조회할 일차 (1부터 시작)
 			"""
 	)
 	@ApiResponses({
@@ -91,5 +95,29 @@ public interface TemplateControllerDocs {
 	ResponseEntity<SuccessResponse<TemplateCanvasResponseDTO>> getTemplateCanvas(
 		@PathVariable Long templateId,
 		@PathVariable Integer dayNo
+	);
+
+	@Operation(
+		summary = "템플릿 이동 루트 조회 API",
+		description = """
+			특정 템플릿의 N일차에 포함된 블록 간 이동 루트를 조회합니다.
+	
+			[Path Variable]
+			- templateId: 조회할 템플릿 ID
+			- dayNo: 조회할 일차 (1부터 시작)
+
+			[Query Parameter]
+			- transportType: 이동 수단 (WALK)			
+        """
+	)
+	@ApiResponses({
+		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "템플릿 이동 루트 조회 성공"),
+		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "지원하지 않는 이동 수단", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "존재하지 않는 템플릿 또는 일차", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+	})
+	ResponseEntity<SuccessResponse<BatchRouteResponseDTO>> getRoutes(
+		@PathVariable Long templateId,
+		@PathVariable Integer dayNo,
+		@RequestParam TransportType transportType
 	);
 }
