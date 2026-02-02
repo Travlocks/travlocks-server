@@ -38,12 +38,10 @@ public class AuthService {
     }
 
     public AuthLoginResponseDTO login(AuthLoginRequestDTO request, HttpServletResponse response) {
-        // 회원 조회
         Member member = memberRepository.findByEmail(request.email())
                 .orElseThrow(() -> new AuthException(AuthErrorCode.INVALID_CREDENTIALS));
 
-        // 비밀번호 검증
-        if (!passwordEncoder.matches(request.password(), member.getPasswordHash())) {
+        if (!member.matchesPassword(passwordEncoder, request.password())) {
             throw new AuthException(AuthErrorCode.INVALID_CREDENTIALS);
         }
 

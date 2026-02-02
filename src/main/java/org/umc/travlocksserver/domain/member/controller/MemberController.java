@@ -92,7 +92,7 @@ public class MemberController implements MemberControllerDocs {
                 .body(SuccessResponse.ok(successCode, data));
     }
 
-    @PatchMapping("/password")
+    @PatchMapping("/me/password")
     public ResponseEntity<SuccessResponse<Void>> updatePassword(
             @LoginUser Member member,
             @Valid @RequestBody MemberPasswordUpdateRequestDTO request) {

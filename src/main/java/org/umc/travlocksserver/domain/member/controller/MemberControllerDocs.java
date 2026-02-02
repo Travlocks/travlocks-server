@@ -10,6 +10,7 @@ import org.umc.travlocksserver.domain.member.dto.response.MemberEmailExistsRespo
 import org.umc.travlocksserver.domain.member.dto.response.MemberNicknameExistsResponseDTO;
 import org.umc.travlocksserver.domain.member.dto.response.MemberProfileResponseDTO;
 import org.umc.travlocksserver.domain.member.dto.response.MemberSignupResponseDTO;
+import org.umc.travlocksserver.domain.member.entity.Member;
 import org.umc.travlocksserver.global.response.ErrorResponse;
 import org.umc.travlocksserver.global.response.SuccessResponse;
 
@@ -122,6 +123,7 @@ public interface MemberControllerDocs {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "존재하지 않는 유저", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     ResponseEntity<SuccessResponse<Void>> updatePassword(
+            Member member,
             @Valid MemberPasswordUpdateRequestDTO request
     );
 }

@@ -61,6 +61,9 @@ public class Member extends SoftDeleteBaseEntity {
     }
 
     public boolean matchesPassword(PasswordEncoder encoder, String rawPassword) {
+        if (this.passwordHash == null) {
+            return false; // OAuth 계정 대비
+        }
         return encoder.matches(rawPassword, this.passwordHash);
     }
 
