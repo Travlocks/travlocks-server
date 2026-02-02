@@ -5,10 +5,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.umc.travlocksserver.domain.favorite.repository.FavoriteRepository;
+import org.umc.travlocksserver.domain.template.code.TemplateErrorCode;
 import org.umc.travlocksserver.domain.template.dto.response.PopularTemplateResponse;
+import org.umc.travlocksserver.domain.template.dto.response.TemplateDetailResponseDTO;
 import org.umc.travlocksserver.domain.template.dto.response.TemplateRecommendationCardDTO;
 import org.umc.travlocksserver.domain.template.dto.response.TemplateRecommendationsDTO;
 import org.umc.travlocksserver.domain.template.entity.Template;
+import org.umc.travlocksserver.domain.template.exception.TemplateException;
 import org.umc.travlocksserver.domain.template.repository.TemplateRepository;
 import org.umc.travlocksserver.domain.traveltheme.repository.PreferredTravelThemeRepository;
 import org.umc.travlocksserver.infra.redis.template.CachedTemplateRecommendations;
@@ -28,6 +32,7 @@ public class TemplateQueryService {
     private final TemplateRecommendationCache cache;
     private final PreferredTravelThemeRepository preferredTravelThemeRepository;
     private final TemplateRepository templateRepository;
+    private final FavoriteRepository favoriteRepository;
 
     public TemplateRecommendationsDTO getRecommendedTemplates(Long memberId) {
         CachedTemplateRecommendations cached = cache.get(memberId);
@@ -80,5 +85,62 @@ public class TemplateQueryService {
                 .travelTheme(template.getTravelTheme().getContent())
                 .ownerNickname(template.getOwner().getNickname())
                 .build();
+    }
+
+    public TemplateDetailResponseDTO getTemplateDetail(Long templateId, Long memberId) {
+        Template template = templateRepository.findById(templateId)
+                .orElseThrow(() -> new TemplateException(TemplateErrorCode.TEMPLATE_NOT_FOUND));
+
+        if (!template.getIsPublic()) {
+            throw new TemplateException(TemplateErrorCode.TEMPLATE_NOT_PUBLIC);
+        }
+
+        // 즐겨찾기 여부
+        boolean isFavorited = false;
+        if (memberId != null) {
+            isFavorited = favoriteRepository
+                    .existsByMemberIdAndTemplateId(memberId, templateId);
+        }
+
+        // 태그 목록
+        List<String> tags = template.getTemplateTags().stream()
+                .map(tt -> tt.getTag().getName())
+                .toList();
+
+        // 블록 목록
+        List<TemplateDetailResponseDTO.VlockDTO> blocks = template.getTemplateDays().stream()
+                .flatMap(day -> day.getTemplateVlocks().stream())
+                .map(tv -> new TemplateDetailResponseDTO.VlockDTO(
+                        tv.getVlock().getId(),
+                        tv.getVlock().getName(),
+                        tv.getVlock().getLatitude(),
+                        tv.getVlock().getLongitude(),
+                        tv.getVlock().getAddress()
+                ))
+                .toList();
+
+        // 도시명 (첫 번째 도시만)
+        String cityName = template.getTemplateCities().stream()
+                .map(tc -> tc.getCity().getName())
+                .findFirst()
+                .orElse("");
+
+        return new TemplateDetailResponseDTO(
+                template.getId(),
+                template.getTitle(),
+                cityName,
+                template.getTravelTheme().getContent(),
+                template.getOwner().getProfileImageUrl(),
+                template.getOwner().getNickname(),
+                template.getCoverImageUrl(),
+                template.getOwner().getId(),
+                template.getAvgRating(),
+                template.getTripDays(),
+                template.getRemixCount(),
+                template.getDescription(),
+                tags,
+                blocks,
+                isFavorited
+        );
     }
 }

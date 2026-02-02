@@ -33,7 +33,7 @@ public class Member extends SoftDeleteBaseEntity {
     @Column(name = "email", length = 255, nullable = false)
     private String email;
 
-	@Column(name = "profile_image_url", nullable = false, length = 255)
+	@Column(name = "profile_image_url", length = 255)
 	private String profileImageUrl;
 
     @Enumerated(EnumType.STRING)
@@ -52,4 +52,9 @@ public class Member extends SoftDeleteBaseEntity {
     @Column(name = "star_count", nullable = false)
     private int starCount;
 
+    public static Member of(Long id) {
+        Member member = new Member();
+        member.id = id;
+        return member;
+    }
 }

@@ -1,5 +1,7 @@
 package org.umc.travlocksserver.domain.template.repository;
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -7,10 +9,9 @@ import org.springframework.stereotype.Repository;
 import org.umc.travlocksserver.domain.template.entity.TemplateCity;
 import org.umc.travlocksserver.domain.template.projection.CityProjectionDTO;
 
-import java.util.List;
-
 @Repository
 public interface TemplateCityRepository extends JpaRepository<TemplateCity, Long> {
+	List<TemplateCity> findByTemplateId(Long templateId);
 
     @Query("""
         SELECT tc.city.id

@@ -5,6 +5,8 @@ import lombok.*;
 import org.umc.travlocksserver.global.entity.CreatedBaseEntity;
 
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -34,4 +36,7 @@ public class TemplateDay extends CreatedBaseEntity {
 
     @Column(name = "vlock_count", nullable = false)
     private Integer vlockCount;
+
+    @OneToMany(mappedBy = "templateDay")
+    private List<TemplateVlock> templateVlocks = new ArrayList<>();
 }

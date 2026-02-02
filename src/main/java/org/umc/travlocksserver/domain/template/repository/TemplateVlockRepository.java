@@ -1,5 +1,8 @@
 package org.umc.travlocksserver.domain.template.repository;
 
+import java.util.Collection;
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -7,10 +10,9 @@ import org.springframework.stereotype.Repository;
 import org.umc.travlocksserver.domain.template.entity.TemplateVlock;
 import org.umc.travlocksserver.domain.vlock.entity.Vlock;
 
-import java.util.List;
-
 @Repository
 public interface TemplateVlockRepository extends JpaRepository<TemplateVlock, Long> {
+	List<TemplateVlock> findByTemplateDayIdIn(Collection<Long> templateDayIds);
 
     @Query("""
         SELECT DISTINCT v
@@ -22,4 +24,13 @@ public interface TemplateVlockRepository extends JpaRepository<TemplateVlock, Lo
     List<Vlock> findDistinctVlocksByTemplateDayId(@Param("templateDayId") Long templateDayId);
 
     List<Long> findAllVlockIdsByTemplateDayTemplateId(Long templateId);
+
+	@Query("""
+			select tv
+			from TemplateVlock tv
+			join fetch tv.vlock v
+			where tv.templateDay.id = :templateDayId
+			order by tv.orderNo asc
+		""")
+	List<TemplateVlock> findAllByTemplateDayIdFetchVlock(Long templateDayId);
 }
