@@ -1,4 +1,4 @@
-package org.umc.travlocksserver.domain.vlock.dto.vlockCategory;
+package org.umc.travlocksserver.domain.vlock.dto.response;
 
 import org.umc.travlocksserver.domain.vlock.entity.VlockCategory;
 

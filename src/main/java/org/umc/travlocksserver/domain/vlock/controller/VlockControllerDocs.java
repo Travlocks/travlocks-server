@@ -6,8 +6,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.umc.travlocksserver.domain.vlock.dto.vlock.VlockRequestDTO;
-import org.umc.travlocksserver.domain.vlock.dto.vlock.VlockResponseDTO;
+import org.umc.travlocksserver.domain.vlock.dto.request.VlockRequestDTO;
+import org.umc.travlocksserver.domain.vlock.dto.response.VlockResponseDTO;
 import org.umc.travlocksserver.global.response.SuccessResponse;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -23,16 +23,16 @@ public interface VlockControllerDocs {
 		템플릿에 사용될 블록을 생성합니다.
 		
 		• 요청에 포함된 카테고리와 도시는 필수입니다.
-		• 모든 검증이 완료되면 블록 생성 요청이 접수됩니다.
-		• 실제 저장은 비동기 처리되며, 요청 성공 시 202(ACCEPTED)를 반환합니다.
+		• 모든 검증이 완료되면 블록이 생성됩니다.
+		• 생성된 블록을 반환합니다.
 		"""
 	)
 	@ApiResponses({
-		@ApiResponse(responseCode = "202", description = "Vlock creation request accepted"),
+		@ApiResponse(responseCode = "201", description = "Vlock creat successfully"),
 		@ApiResponse(responseCode = "400", description = "Category Id or City Id is required"),
 		@ApiResponse(responseCode = "404", description = "Category Id or City Id is invalid")
 	})
-	ResponseEntity<SuccessResponse<Void>> createVlock(
+	ResponseEntity<SuccessResponse<VlockResponseDTO>> createVlock(
 		@AuthenticationPrincipal Long memberId,
 		@Valid @RequestBody VlockRequestDTO request);
 
