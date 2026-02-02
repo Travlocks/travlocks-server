@@ -45,6 +45,16 @@ springdoc:
   swagger-ui:
     enabled: true
 
+kakao:
+  rest-api-key: ${KAKAO_REST_API_KEY}
+  base-url: https://dapi.kakao.com
+  keyword-search:
+    path: /v2/local/search/keyword.json
+    size: 15
+  timeout:
+    connect-ms: 1000
+    response-ms: 3000
+
 cache:
   recommendation:
     templates:
