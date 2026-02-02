@@ -63,15 +63,21 @@ public class Vlock extends SoftDeleteBaseEntity {
 
 	@Builder(access = AccessLevel.PRIVATE)
 	private Vlock(
+		String externalPlaceId,
 		VlockCategory vlockCategory,
 		City city,
 		Member owner,
 		String name,
+		String coverImgUrl,
 		Double latitude,
 		Double longitude,
 		String address,
-		String memo
+		String linkUrl,
+		String memo,
+		int usageCount,
+		boolean isPublic
 	) {
+		this.externalPlaceId = externalPlaceId;
 		this.vlockCategory = vlockCategory;
 		this.city = city;
 		this.owner = owner;
@@ -80,10 +86,10 @@ public class Vlock extends SoftDeleteBaseEntity {
 		this.longitude = longitude;
 		this.address = address;
 		this.memo = memo;
-		this.coverImgUrl = "";
-		this.linkUrl = "";
-		this.usageCount = 0;
-		this.isPublic = false;
+		this.coverImgUrl = coverImgUrl;
+		this.linkUrl = linkUrl;
+		this.usageCount = usageCount;
+		this.isPublic = isPublic;
 	}
 
 	public static Vlock create(
@@ -97,14 +103,42 @@ public class Vlock extends SoftDeleteBaseEntity {
 		String memo
 	) {
 		return Vlock.builder()
-			.vlockCategory(category)
-			.city(city)
-			.owner(owner)
-			.name(name)
-			.latitude(latitude)
-			.longitude(longitude)
-			.address(address)
-			.memo(memo)
-			.build();
+				.vlockCategory(category)
+				.city(city)
+				.owner(owner)
+				.name(name)
+				.coverImgUrl("")
+				.latitude(latitude)
+				.longitude(longitude)
+				.address(address)
+				.memo(memo)
+				.usageCount(0)
+				.isPublic(false)
+				.build();
+	}
+
+	public static Vlock createByExternal(
+			String externalPlaceId,
+			VlockCategory vlockCategory,
+			City city,
+			String name,
+			Double latitude,
+			Double longitude,
+			String address,
+			String linkUrl
+	) {
+		return Vlock.builder()
+				.externalPlaceId(externalPlaceId)
+				.vlockCategory(vlockCategory)
+				.city(city)
+				.name(name)
+				.coverImgUrl("")
+				.latitude(latitude)
+				.longitude(longitude)
+				.address(address)
+				.linkUrl(linkUrl)
+				.usageCount(0)
+				.isPublic(true)
+				.build();
 	}
 }
