@@ -8,9 +8,24 @@ import org.springframework.stereotype.Repository;
 import org.umc.travlocksserver.domain.vlock.entity.Vlock;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface VlockRepository extends JpaRepository<Vlock,Long> {
+
+    @Query("""
+        SELECT v
+        FROM Vlock v
+            JOIN FETCH v.vlockCategory vc
+        WHERE v.city.id IN :cityIds
+            AND v.isPublic = true
+            AND vc.name != "숙소"
+        ORDER BY v.usageCount DESC
+    """)
+    List<Vlock> findPopularByCityIds(
+            @Param("cityIds") List<Long> cityId,
+            Pageable pageable
+    );
 
     @Query("""
         SELECT v
@@ -32,4 +47,6 @@ public interface VlockRepository extends JpaRepository<Vlock,Long> {
             @Param("maxLng") double maxLng,
             Pageable pageable
     );
+
+    Optional<Vlock> findByExternalPlaceIdAndIsPublicTrue(String externalPlaceId);
 }
