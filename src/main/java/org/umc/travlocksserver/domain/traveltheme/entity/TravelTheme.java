@@ -17,6 +17,6 @@ public class TravelTheme extends CreatedSoftDeleteBaseEntity {
     @Column(name = "travel_theme_id")
     private Long id;
 
-    @Column(name = "content", nullable = false, length = 10)
+    @Column(name = "content", nullable = false, length = 20)
     private String content;
 }

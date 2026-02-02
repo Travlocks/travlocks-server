@@ -39,6 +39,11 @@ jwt:
   access-ttl-seconds: ${JWT_ACCESS_TTL_SECONDS:3600} # 1시간
   refresh-ttl-seconds: ${JWT_REFRESH_TTL_SECONDS:1209600} # 14일
 
+app:
+  profile:
+    default-base-url: ${DEFAULT_PROFILE_BASE_URL:https://travlocks-bucket.s3.ap-northeast-2.amazonaws.com/profiles/defaults}
+    default-files: ${DEFAULT_PROFILE_FILES:amaze.svg,happy.svg,normal.svg,playful.svg,sad.svg,wink.png}
+
 springdoc:
   api-docs:
     enabled: true

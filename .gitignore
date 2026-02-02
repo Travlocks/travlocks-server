@@ -38,3 +38,6 @@ out/
 
 .env
 .env.*
+
+# Generated source files
+src/main/generated/
