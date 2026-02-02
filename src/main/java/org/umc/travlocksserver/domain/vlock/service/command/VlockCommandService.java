@@ -4,13 +4,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.umc.travlocksserver.domain.location.entity.City;
-import org.umc.travlocksserver.domain.location.repository.CityRepository;
+import org.umc.travlocksserver.domain.location.service.query.CityQueryService;
 import org.umc.travlocksserver.domain.vlock.constant.VlockCategoryErrorCode;
 import org.umc.travlocksserver.domain.vlock.entity.Vlock;
 import org.umc.travlocksserver.domain.vlock.entity.VlockCategory;
 import org.umc.travlocksserver.domain.vlock.exception.VlockCategoryException;
-import org.umc.travlocksserver.domain.vlock.repository.VlockCategoryRepository;
 import org.umc.travlocksserver.domain.vlock.repository.VlockRepository;
+import org.umc.travlocksserver.domain.vlock.service.query.VlockCategoryQueryService;
 import org.umc.travlocksserver.infra.kakao.KakaoPlace;
 
 import java.util.List;
@@ -21,12 +21,12 @@ import java.util.List;
 public class VlockCommandService {
 
     private final VlockRepository vlockRepository;
-    private final CityRepository cityRepository;
-    private final VlockCategoryRepository vlockCategoryRepository;
+    private final CityQueryService cityQueryService;
+    private final VlockCategoryQueryService vlockCategoryQueryService;
 
     // ⚪ 외부(카카오맵) API를 통해 블록을 삽입하는 메서드 (추천시 블록에 데이터가 너무 적을 경우 사용)
     public void upsertVlocksFromExternal(Long cityId, List<KakaoPlace> places) {
-        City city = cityRepository.getReferenceById(cityId);
+        City city = cityQueryService.getReferenceById(cityId);
 
         for (KakaoPlace place : places) {
             if (place.placeId() == null || place.placeId().isBlank()) continue;
@@ -60,8 +60,8 @@ public class VlockCommandService {
             default -> "기타";
         };
 
-        return vlockCategoryRepository.findByName(name)
-                .orElseGet(() -> vlockCategoryRepository.findByName("기타")
+        return vlockCategoryQueryService.getByName(name)
+                .orElseGet(() -> vlockCategoryQueryService.getByName("기타")
                         .orElseThrow(() -> new VlockCategoryException(VlockCategoryErrorCode.DEFAULT_BLOCK_CATEGORY_NOT_FOUND)));
     };
 }

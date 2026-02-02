@@ -3,6 +3,7 @@ package org.umc.travlocksserver.domain.template.service.query;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.umc.travlocksserver.domain.template.projection.CityProjectionDTO;
 import org.umc.travlocksserver.domain.template.repository.TemplateCityRepository;
 
 import java.util.List;
@@ -16,5 +17,9 @@ public class TemplateCityQueryService {
 
     public List<Long> getCityIdsByTemplateId(Long templateId) {
         return templateCityRepository.findCityIdsByTemplateId(templateId);
+    }
+
+    public List<CityProjectionDTO> getCitiesByTemplateId(Long templateId) {
+        return templateCityRepository.findCitiesByTemplateId(templateId);
     }
 }

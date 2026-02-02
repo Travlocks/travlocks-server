@@ -12,13 +12,12 @@ import org.umc.travlocksserver.domain.template.enums.TransportType;
 import org.umc.travlocksserver.domain.template.exception.TemplateDayException;
 import org.umc.travlocksserver.domain.template.exception.code.TemplateDayErrorCode;
 import org.umc.travlocksserver.domain.template.projection.CityProjectionDTO;
-import org.umc.travlocksserver.domain.template.repository.TemplateCityRepository;
 import org.umc.travlocksserver.domain.template.repository.TemplateDayRepository;
-import org.umc.travlocksserver.domain.template.repository.TemplateVlockRepository;
 import org.umc.travlocksserver.domain.template.service.query.TemplateCityQueryService;
+import org.umc.travlocksserver.domain.template.service.query.TemplateVlockQueryService;
 import org.umc.travlocksserver.domain.vlock.entity.Vlock;
-import org.umc.travlocksserver.domain.vlock.repository.VlockRepository;
 import org.umc.travlocksserver.domain.vlock.service.command.VlockCommandService;
+import org.umc.travlocksserver.domain.vlock.service.query.VlockQueryService;
 import org.umc.travlocksserver.global.geo.BoundingBox;
 import org.umc.travlocksserver.global.geo.GeoUtil;
 import org.umc.travlocksserver.global.geo.LatLng;
@@ -38,12 +37,11 @@ import java.util.stream.Collectors;
 public class TemplateDayCommandService {
 
     private final TemplateDayRepository templateDayRepository;
-    private final TemplateVlockRepository templateVlockRepository;
-    private final VlockRepository vlockRepository;
-    private final TemplateCityRepository templateCityRepository;
 
     private final TemplateCityQueryService templateCityQueryService;
     private final VlockCommandService vlockCommandService;
+    private final TemplateVlockQueryService templateVlockQueryService;
+    private final VlockQueryService vlockQueryService;
 
     private final VlockSuggestionCache vlockSuggestionCache;
 
@@ -113,10 +111,10 @@ public class TemplateDayCommandService {
         List<Long> cityIdsOfTemplate = templateCityQueryService.getCityIdsByTemplateId(templateId);
 
         // 해당 템플릿에서 사용중인 블록 조회 (중복 제외)
-        Set<Long> usedVlockIdsInTemplate = new HashSet<>(templateVlockRepository.findAllVlockIdsByTemplateDayTemplateId(templateId));
+        Set<Long> usedVlockIdsInTemplate = new HashSet<>(templateVlockQueryService.getAllVlockIdsByTemplateDayTemplateId(templateId));
 
         // 해당 템플릿 데이에 사용중인 블록 조회
-        List<Vlock> usedVlocksInDay = templateVlockRepository.findDistinctVlocksByTemplateDayId(templateDay.getId());
+        List<Vlock> usedVlocksInDay = templateVlockQueryService.getDistinctVlocksByTemplateDayId(templateDay.getId());
 
         // 추천 블록 후보
         List<Vlock> candidates;
@@ -130,12 +128,12 @@ public class TemplateDayCommandService {
         // 추천 블록 후보 조회 또는 추가
         if (usedVlocksInDay.isEmpty()) {
             // 템플릿에 해당 day 블록이 0개면 지역 인기 추천
-            candidates = vlockRepository.findPopularByCityIds(cityIdsOfTemplate, PageRequest.of(0, popularPool));
+            candidates = vlockQueryService.getPopularByCityIds(cityIdsOfTemplate, PageRequest.of(0, popularPool));
 
             // 블록 추천 후보 수가 minPool 이하면 외부 API(카카오맵)에서 가져와서 저장
             if (candidates.size() < minPool) {
                 fetchFromExternal(templateId, null, null);
-                candidates = vlockRepository.findPopularByCityIds(cityIdsOfTemplate, PageRequest.of(0, popularPool));
+                candidates = vlockQueryService.getPopularByCityIds(cityIdsOfTemplate, PageRequest.of(0, popularPool));
             }
 
         } else {
@@ -343,7 +341,7 @@ public class TemplateDayCommandService {
         recent.addAll(pickedVlockIds);
         vlockSuggestionCache.set(templateDayId, cached.withRecentPickedIds(recent));
 
-        List<Vlock> vlocks = vlockRepository.findAllById(pickedVlockIds);
+        List<Vlock> vlocks = vlockQueryService.getAllById(pickedVlockIds);
         Map<Long, Vlock> map = vlocks.stream().collect(Collectors.toMap(Vlock::getId, v -> v));
 
         List<VlockSuggestionsResponseDTO.VlockSuggestionCardDTO> cards = new ArrayList<>(vlockSuggestionSize);
@@ -374,7 +372,7 @@ public class TemplateDayCommandService {
     ) {
         List<Long> excludeVlockIds = exVlockIds.isEmpty() ? List.of(-1L) : new ArrayList<>(exVlockIds);
         BoundingBox box = GeoUtil.box(center, radiusKm);
-        List<Vlock> vlockCandidatesInBox = vlockRepository.findVlocksInBoxExcluding(
+        List<Vlock> vlockCandidatesInBox = vlockQueryService.getVlocksInBoxExcluding(
                 cityIds,
                 excludeVlockIds,
                 box.minLat(), box.maxLat(), box.minLng(), box.maxLng(),
@@ -391,7 +389,7 @@ public class TemplateDayCommandService {
      * 카카오맵 API로부터 Vlock들을 추가하는 메서드
      */
     private void fetchFromExternal(Long templateId, LatLng center, Integer radiusKm) {
-        List<CityProjectionDTO> cities = templateCityRepository.findCitiesByTemplateId(templateId);
+        List<CityProjectionDTO> cities = templateCityQueryService.getCitiesByTemplateId(templateId);
         if (cities.isEmpty()) return;
 
         Double x = (center == null) ? null : center.lng();
