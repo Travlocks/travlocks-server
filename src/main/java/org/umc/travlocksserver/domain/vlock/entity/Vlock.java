@@ -18,6 +18,9 @@ public class Vlock extends SoftDeleteBaseEntity {
     @Column(name = "vlock_id")
     private Long id;
 
+    // 외부 장소 ID(Kakao place_id 등)
+    private String externalPlaceId;
+
     /** 블록 카테고리 */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "vlock_category_id", nullable = false)
@@ -36,7 +39,6 @@ public class Vlock extends SoftDeleteBaseEntity {
     @Column(nullable = false, length = 20)
     private String name;
 
-    @Column(nullable = false)
     private String coverImgUrl;
 
     @Column(nullable = false)
