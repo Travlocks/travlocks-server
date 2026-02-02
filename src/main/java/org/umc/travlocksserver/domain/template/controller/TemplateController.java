@@ -1,5 +1,6 @@
 package org.umc.travlocksserver.domain.template.controller;
 
+import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.umc.travlocksserver.domain.member.entity.Member;
 import org.umc.travlocksserver.domain.template.code.TemplateSuccessCode;
 import org.umc.travlocksserver.domain.template.dto.response.BatchRouteResponseDTO;
 import org.umc.travlocksserver.domain.template.dto.response.TemplateCanvasResponseDTO;
@@ -22,6 +24,8 @@ import org.umc.travlocksserver.domain.template.dto.response.TemplateRecommendati
 import org.umc.travlocksserver.domain.template.service.query.TemplateQueryService;
 import org.umc.travlocksserver.domain.template.dto.response.PopularTemplateResponse;
 import org.umc.travlocksserver.domain.template.service.query.TemplateRouteQueryService;
+import org.umc.travlocksserver.domain.template.dto.response.TemplateDetailResponseDTO;
+import org.umc.travlocksserver.global.annotation.LoginUser;
 import org.umc.travlocksserver.global.response.SuccessResponse;
 
 import java.util.List;
@@ -47,7 +51,7 @@ public class TemplateController implements TemplateControllerDocs {
 
     @GetMapping("/popular")
     public ResponseEntity<SuccessResponse<List<PopularTemplateResponse>>> getPopularTemplates() {
-        org.umc.travlocksserver.domain.template.code.TemplateSuccessCode successCode = org.umc.travlocksserver.domain.template.code.TemplateSuccessCode.HOME_GET_POPULAR_TEMPLATES_SUCCESS;
+        TemplateSuccessCode successCode = TemplateSuccessCode.HOME_GET_POPULAR_TEMPLATES_SUCCESS;
         return ResponseEntity
                 .status(successCode.getStatus())
                 .body(
@@ -57,6 +61,22 @@ public class TemplateController implements TemplateControllerDocs {
                         )
                 );
     }
+
+	@GetMapping("/{templateId}")
+	@Override
+	public ResponseEntity<SuccessResponse<TemplateDetailResponseDTO>> getTemplateDetail(@PathVariable Long templateId, @Parameter(hidden = true) @LoginUser Member member) {
+		Long memberId = (member != null) ? member.getId() : null;
+
+		TemplateDetailResponseDTO dto =
+			templateQueryService.getTemplateDetail(templateId, memberId);
+
+		return ResponseEntity.ok(
+			SuccessResponse.ok(
+				TemplateSuccessCode.TEMPLATE_DETAIL_GET_SUCCESS,
+				dto
+			)
+		);
+	}
 
 	@PostMapping("/{templateId}/remix")
 	public ResponseEntity<SuccessResponse<TemplateRemixResponseDTO>> remix(
