@@ -54,3 +54,8 @@ cache:
   recommendation:
     templates:
       cache-ttl-minutes: 15
+
+tmap:
+  api:
+    key: ${TMAP_API_KEY}
+    base-url: ${TMAP_BASE_URL:https://apis.openapi.sk.com}

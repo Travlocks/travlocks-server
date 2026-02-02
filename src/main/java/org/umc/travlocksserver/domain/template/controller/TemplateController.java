@@ -8,15 +8,20 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.umc.travlocksserver.domain.template.code.TemplateSuccessCode;
+import org.umc.travlocksserver.domain.template.dto.response.BatchRouteResponseDTO;
 import org.umc.travlocksserver.domain.template.dto.response.TemplateCanvasResponseDTO;
+import org.umc.travlocksserver.domain.template.dto.response.TemplateDayRouteResponseDTO;
 import org.umc.travlocksserver.domain.template.dto.response.TemplateRemixResponseDTO;
+import org.umc.travlocksserver.domain.template.enums.TransportType;
 import org.umc.travlocksserver.domain.template.service.command.TemplateRemixService;
 import org.umc.travlocksserver.domain.template.service.query.TemplateCanvasQueryService;
 import org.umc.travlocksserver.domain.template.dto.response.TemplateRecommendationsDTO;
 import org.umc.travlocksserver.domain.template.service.query.TemplateQueryService;
 import org.umc.travlocksserver.domain.template.dto.response.PopularTemplateResponse;
+import org.umc.travlocksserver.domain.template.service.query.TemplateRouteQueryService;
 import org.umc.travlocksserver.global.response.SuccessResponse;
 
 import java.util.List;
@@ -30,6 +35,7 @@ public class TemplateController implements TemplateControllerDocs {
     private final TemplateQueryService templateQueryService;
 	private final TemplateRemixService templateRemixService;
 	private final TemplateCanvasQueryService templateCanvasQueryService;
+	private final TemplateRouteQueryService templateRouteQueryService;
 
     @GetMapping("/recommendations")
     public ResponseEntity<SuccessResponse<TemplateRecommendationsDTO>> getRecommendedTemplates(
@@ -74,6 +80,26 @@ public class TemplateController implements TemplateControllerDocs {
 		TemplateSuccessCode successCode = TemplateSuccessCode.TEMPLATE_GET_CANVAS_SUCCESS;
 
 		TemplateCanvasResponseDTO data = templateCanvasQueryService.getTemplateCanvas(templateId, dayNo);
+
+		return ResponseEntity
+			.status(successCode.getStatus())
+			.body(SuccessResponse.ok(successCode, data));
+	}
+
+	@GetMapping("/{templateId}/days/{dayNo}/routes")
+	public ResponseEntity<SuccessResponse<BatchRouteResponseDTO>> getRoutes(
+		@PathVariable Long templateId,
+		@PathVariable Integer dayNo,
+		@RequestParam(defaultValue = "WALK") TransportType transportType
+	) {
+		TemplateSuccessCode successCode = TemplateSuccessCode.TEMPLATE_GET_ROUTES_SUCCESS;
+
+		List<TemplateDayRouteResponseDTO> routes = templateRouteQueryService.getDayRoutes(
+			templateId,
+			dayNo,
+			transportType);
+
+		BatchRouteResponseDTO data = new BatchRouteResponseDTO(routes);
 
 		return ResponseEntity
 			.status(successCode.getStatus())

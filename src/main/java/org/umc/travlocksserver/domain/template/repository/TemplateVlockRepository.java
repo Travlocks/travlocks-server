@@ -10,6 +10,8 @@ import org.umc.travlocksserver.domain.template.entity.TemplateVlock;
 public interface TemplateVlockRepository extends JpaRepository<TemplateVlock, Long> {
 	List<TemplateVlock> findByTemplateDayIdIn(Collection<Long> templateDayIds);
 
+	List<TemplateVlock> findByTemplateDayIdOrderByOrderNo(Long templateDayId);
+
 	@Query("""
 			select tv
 			from TemplateVlock tv
