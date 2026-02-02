@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.umc.travlocksserver.domain.member.dto.request.MemberPasswordUpdateRequestDTO;
 import org.umc.travlocksserver.domain.member.dto.request.MemberSignupRequestDTO;
 import org.umc.travlocksserver.domain.member.dto.response.MemberEmailExistsResponseDTO;
 import org.umc.travlocksserver.domain.member.dto.response.MemberNicknameExistsResponseDTO;
@@ -21,7 +22,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
-@Tag(name = "템플릿 API", description = "템플릿 관련 API입니다.")
+@Tag(name = "Member", description = "회원 관련 API")
 public interface MemberControllerDocs {
 
 	@Operation(
@@ -104,4 +105,23 @@ public interface MemberControllerDocs {
 		@RequestParam(name = "cursor", defaultValue = "0") Long cursor,
 		@RequestParam(name = "limit", defaultValue = "9") int limit
 	);
+
+    @Operation(
+            summary = "비밀번호 변경 API",
+            description = """
+			로그인한 사용자의 비밀번호를 변경합니다.
+			            
+			- currentPassword가 현재 비밀번호와 일치해야 합니다.
+			- newPassword는 기존 비밀번호와 달라야 합니다.
+			"""
+    )
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "비밀번호 변경 성공"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "요청 값 검증 실패 / 현재 비밀번호 불일치 / 새 비밀번호가 기존과 동일", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "인증 실패(토큰 없음/만료 등)", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "존재하지 않는 유저", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    ResponseEntity<SuccessResponse<Void>> updatePassword(
+            @Valid MemberPasswordUpdateRequestDTO request
+    );
 }

@@ -2,6 +2,7 @@ package org.umc.travlocksserver.domain.member.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.umc.travlocksserver.domain.member.enums.MemberStatus;
 import org.umc.travlocksserver.global.entity.SoftDeleteBaseEntity;
 
@@ -21,6 +22,7 @@ public class Member extends SoftDeleteBaseEntity {
     @Column(name = "member_id")
     private Long id;
 
+    @Getter(AccessLevel.NONE)
     @Column(name = "password_hash", length = 255)
     private String passwordHash; // OAuth면 NULL 가능
 
@@ -57,4 +59,13 @@ public class Member extends SoftDeleteBaseEntity {
         member.id = id;
         return member;
     }
+
+    public boolean matchesPassword(PasswordEncoder encoder, String rawPassword) {
+        return encoder.matches(rawPassword, this.passwordHash);
+    }
+
+    public void changePassword(String encodedPassword) {
+        this.passwordHash = encodedPassword;
+    }
+
 }
