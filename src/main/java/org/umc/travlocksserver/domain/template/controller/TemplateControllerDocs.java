@@ -22,9 +22,7 @@ import org.umc.travlocksserver.domain.template.dto.response.TemplateRecommendati
 import org.umc.travlocksserver.domain.member.entity.Member;
 import org.umc.travlocksserver.domain.template.dto.response.TemplateDetailResponseDTO;
 
-import java.util.List;
-
-@Tag(name = "Template")
+@Tag(name = "Template API", description = "템플릿 관련 API 입니다.")
 public interface TemplateControllerDocs {
 
     @Operation(

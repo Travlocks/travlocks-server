@@ -15,7 +15,7 @@ import org.umc.travlocksserver.global.response.SuccessResponse;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/template-days")
-public class TemplateDayController {
+public class TemplateDayController implements TemplateDayControllerDocs {
 
     private final TemplateDayCommandService templateDayCommandService;
 

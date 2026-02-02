@@ -9,7 +9,7 @@ import org.umc.travlocksserver.global.code.BaseCode;
 @RequiredArgsConstructor
 public enum TemplateDayErrorCode implements BaseCode {
 
-    TEMPLATE_DAY_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 템플릿 일정입니다.")
+    TEMPLATE_DAY_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 템플릿 Day 입니다.")
     ;
 
     private final HttpStatus status;
