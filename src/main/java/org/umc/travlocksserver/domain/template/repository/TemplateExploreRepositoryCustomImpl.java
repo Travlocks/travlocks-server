@@ -117,7 +117,7 @@ public class TemplateExploreRepositoryCustomImpl implements TemplateExploreRepos
         } else if ("별점순".equals(sort)) {
             return t.avgRating.desc();
         } else {
-            return t.createdAt.desc(); // 기본값 최신순
+            return t.avgRating.desc();  //기본값 별점순
         }
     }
 
