@@ -156,4 +156,25 @@ public interface TemplateControllerDocs {
 			@PathVariable Long templateDayId,
 			@PathVariable Integer dayNo
 	);
+
+	@Operation(
+			summary = "최적 동선 생성 API",
+			description = "거리 기반으로 최적 동선을 생성하는 API 입니다."
+	)
+	@ApiResponse(
+			responseCode = "200",
+			description = "최적 동선 정렬이 완료되었습니다."
+	)
+	@ApiResponse(
+			responseCode = "404",
+			description = "존재하지 않는 템플릿 Day 입니다.",
+			content = @Content(
+					schema = @Schema(implementation = ErrorResponse.class)
+			)
+	)
+	ResponseEntity<SuccessResponse<OptimizeResponseDTO>> optimize(
+				@AuthenticationPrincipal Long memberId,
+				@PathVariable Long templateId,
+				@PathVariable Integer dayNo
+		);
 }
