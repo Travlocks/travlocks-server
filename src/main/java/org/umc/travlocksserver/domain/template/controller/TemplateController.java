@@ -2,24 +2,20 @@ package org.umc.travlocksserver.domain.template.controller;
 
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.umc.travlocksserver.domain.member.entity.Member;
 import org.umc.travlocksserver.domain.template.code.TemplateSuccessCode;
-import org.umc.travlocksserver.domain.template.dto.response.TemplateCanvasResponseDTO;
-import org.umc.travlocksserver.domain.template.dto.response.TemplateRemixResponseDTO;
+import org.umc.travlocksserver.domain.template.dto.response.*;
 import org.umc.travlocksserver.domain.template.service.command.TemplateRemixService;
 import org.umc.travlocksserver.domain.template.service.query.TemplateCanvasQueryService;
-import org.umc.travlocksserver.domain.template.dto.response.TemplateRecommendationsDTO;
 import org.umc.travlocksserver.domain.template.service.query.TemplateQueryService;
-import org.umc.travlocksserver.domain.template.dto.response.PopularTemplateResponse;
-import org.umc.travlocksserver.domain.template.dto.response.TemplateDetailResponseDTO;
 import org.umc.travlocksserver.global.annotation.LoginUser;
 import org.umc.travlocksserver.global.response.SuccessResponse;
 
@@ -99,4 +95,25 @@ public class TemplateController implements TemplateControllerDocs {
                 )
         );
     }
+
+	@GetMapping("/explore")
+	public ResponseEntity<SuccessResponse<List<TemplateExploreResponseDTO>>> exploreTemplates(
+			String keyword,
+			List<String> cities,
+			List<String> themes,
+			List<String> tripDays,
+			List<String> transportTypes,
+			String sort,
+			int page
+	) {
+		return ResponseEntity.ok(
+				SuccessResponse.ok(
+						TemplateSuccessCode.TEMPLATE_EXPLORE_SUCCESS,
+						templateQueryService.exploreTemplates(
+								keyword, cities, themes, tripDays, transportTypes, sort, page
+						)
+				)
+		);
+	}
+
 }
