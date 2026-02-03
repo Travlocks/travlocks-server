@@ -75,12 +75,14 @@ public class TemplateDayCommandService {
     /**
      * Vlock 추천 결과를 반환하는 메서드
      */
-    public VlockSuggestionsResponseDTO suggestVlocks(Long memberId, Long templateDayId) {
+    public VlockSuggestionsResponseDTO suggestVlocks(Long memberId, Long templateId, Integer dayNo) {
         long seed = System.currentTimeMillis();
 
-        // TemplateDay 존재 및 권한 검증
-        TemplateDay templateDay = templateDayRepository.findByIdAndTemplateOwnerId(templateDayId, memberId)
+        // TemplateDay 존재 및 권한검증
+        TemplateDay templateDay = templateDayRepository.findTemplateDayAccesible(memberId, templateId, dayNo)
                 .orElseThrow(() -> new TemplateDayException(TemplateDayErrorCode.TEMPLATE_DAY_NOT_FOUND));
+
+        Long templateDayId = templateDay.getId();
 
         // 캐시 hit
         CachedVlockSuggestions cached = vlockSuggestionCache.get(templateDayId);
