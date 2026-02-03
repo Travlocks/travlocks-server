@@ -13,7 +13,9 @@ import org.umc.travlocksserver.domain.traveltheme.entity.QTravelTheme;
 import org.umc.travlocksserver.domain.template.entity.QTemplateCity;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Repository
 @RequiredArgsConstructor
@@ -73,24 +75,41 @@ public class TemplateExploreRepositoryCustomImpl implements TemplateExploreRepos
     }
 
     private com.querydsl.core.types.Predicate tripDaysIn(List<String> tripDays, QTemplate t) {
-        if (tripDays == null || tripDays.isEmpty()) {
-            return null;
-        }
+        if (tripDays == null || tripDays.isEmpty()) return null;
 
-        List<String> dbValues = new ArrayList<>();
+        Set<String> dbValues = new HashSet<>();
+
         for (String front : tripDays) {
             switch (front) {
                 case "당일치기" -> dbValues.add("당일치기");
-                case "1박 2일" -> dbValues.add("1박 2일");
-                case "2박 3일" -> dbValues.add("2박 3일");
-                case "3박 4일" -> dbValues.add("3박 4일");
-                case "4일 이상" -> { // 4박 5일 이상 모두 포함
-                    dbValues.add("4박 5일");
-                    dbValues.add("6박 7일");
+                case "1박 2일", "2박 3일", "3박 4일" -> dbValues.add(front);
+                case "4일 이상" -> {
+                    List<String> allTripDaysFromDB = fetchAllTripDaysFromDB();
+                    allTripDaysFromDB.stream()
+                            .filter(d -> {
+                                if (d.equals("당일치기")) return false;
+                                try {
+                                    int days = Integer.parseInt(d.split("박")[0]);
+                                    return days >= 4;
+                                } catch (Exception e) {
+                                    return false;
+                                }
+                            })
+                            .forEach(dbValues::add);
                 }
             }
         }
+
         return t.tripDays.in(dbValues);
+    }
+
+    public List<String> fetchAllTripDaysFromDB() {
+        QTemplate t = QTemplate.template;
+        return queryFactory
+                .select(t.tripDays)
+                .distinct()
+                .from(t)
+                .fetch();
     }
 
     private com.querydsl.core.types.Predicate transportTypesIn(List<String> transportTypes, QTemplate t) {

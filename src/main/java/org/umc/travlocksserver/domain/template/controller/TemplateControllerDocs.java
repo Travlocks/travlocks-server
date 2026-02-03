@@ -164,7 +164,7 @@ public interface TemplateControllerDocs {
 			@RequestParam(required = false) List<String> themes,
 			@RequestParam(required = false) List<String> tripDays,
 			@RequestParam(required = false) List<String> transportTypes,
-			@RequestParam(defaultValue = "최신순") String sort,
+			@RequestParam(defaultValue = "별점순") String sort,
 			@RequestParam(defaultValue = "0") int page
 	);
 }
