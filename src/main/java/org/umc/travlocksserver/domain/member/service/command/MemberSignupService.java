@@ -187,7 +187,7 @@ public class MemberSignupService {
 
     private List<TravelStyle> savePreferredStyles(Member member, List<Long> styleIds) {
         List<Long> distinct = styleIds.stream().distinct().toList();
-        List<TravelStyle> styles = travelStyleRepository.findAllByIdIn(distinct);
+        List<TravelStyle> styles = travelStyleRepository.findAllById(distinct);
         if (styles.size() != distinct.size()) {
             throw new TravelStyleException(TravelStyleErrorCode.TRAVEL_STYLE_NOT_FOUND);
         }
@@ -205,7 +205,7 @@ public class MemberSignupService {
 
     private List<TravelTheme> savePreferredThemes(Member member, List<Long> themeIds) {
         List<Long> distinct = themeIds.stream().distinct().toList();
-        List<TravelTheme> themes = travelThemeRepository.findAllByIdIn(distinct);
+        List<TravelTheme> themes = travelThemeRepository.findAllById(distinct);
         if (themes.size() != distinct.size()) {
             throw new TravelThemeException(TravelThemeErrorCode.TRAVEL_THEME_NOT_FOUND);
         }

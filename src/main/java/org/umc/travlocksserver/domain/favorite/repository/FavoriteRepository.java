@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.umc.travlocksserver.domain.favorite.entity.Favorite;
@@ -41,4 +42,8 @@ public interface FavoriteRepository extends JpaRepository<Favorite, Long> {
 	default List<Template> findFavoriteTemplatesAfterCursor(Long memberId, Long cursor, int limit) {
 		return findFavoriteTemplatesAfterCursor(memberId, cursor, PageRequest.of(0, limit));
 	}
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("delete from Favorite f where f.member.id = :memberId")
+    void deleteByMemberId(@io.lettuce.core.dynamic.annotation.Param("memberId") Long memberId);
 }

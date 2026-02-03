@@ -2,8 +2,11 @@ package org.umc.travlocksserver.domain.member.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.umc.travlocksserver.domain.member.enums.MemberStatus;
 import org.umc.travlocksserver.global.entity.SoftDeleteBaseEntity;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -21,6 +24,7 @@ public class Member extends SoftDeleteBaseEntity {
     @Column(name = "member_id")
     private Long id;
 
+    @Getter(AccessLevel.NONE)
     @Column(name = "password_hash", length = 255)
     private String passwordHash; // OAuth면 NULL 가능
 
@@ -57,4 +61,36 @@ public class Member extends SoftDeleteBaseEntity {
         member.id = id;
         return member;
     }
+
+    public boolean matchesPassword(PasswordEncoder encoder, String rawPassword) {
+        if (this.passwordHash == null) {
+            return false; // OAuth 계정 대비
+        }
+        return encoder.matches(rawPassword, this.passwordHash);
+    }
+
+    public void changePassword(String encodedPassword) {
+        this.passwordHash = encodedPassword;
+    }
+
+    public void changeNickname(String nickname) {
+        this.nickname = nickname;
+    }
+
+    public void changeIntroduction(String introduction) {
+        this.introduction = introduction;
+    }
+
+    public void withdrawAndAnonymize(String anonymizedEmail, String anonymizedNickname) {
+        this.status = MemberStatus.DELETED;
+        this.softDelete();
+        this.email = anonymizedEmail;
+        this.nickname = anonymizedNickname;
+        this.introduction = null;
+        this.passwordHash = null;
+        this.vlockCount = 0;
+        this.templateCount = 0;
+        this.starCount = 0;
+    }
+
 }

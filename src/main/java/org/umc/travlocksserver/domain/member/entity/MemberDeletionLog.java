@@ -23,4 +23,11 @@ public class MemberDeletionLog extends CreatedBaseEntity {
 
     @Column(length = 255)
     private String reason;
+
+    public static MemberDeletionLog create(Member member, String reason) {
+        MemberDeletionLog log = new MemberDeletionLog();
+        log.member = member;
+        log.reason = reason;
+        return log;
+    }
 }
