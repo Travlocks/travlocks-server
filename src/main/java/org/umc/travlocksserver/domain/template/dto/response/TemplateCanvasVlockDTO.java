@@ -5,7 +5,7 @@ import org.umc.travlocksserver.domain.vlock.dto.response.VlockBriefDTO;
 public record TemplateCanvasVlockDTO(
 	Long templateVlockId,
 	Integer orderNo,
-	Integer stayMinutes,
+	Double stayHours,
 	Integer nextMoveMinutes,
 	VlockBriefDTO vlock
 ) {

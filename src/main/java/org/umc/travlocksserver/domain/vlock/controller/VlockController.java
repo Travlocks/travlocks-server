@@ -16,8 +16,8 @@ import org.umc.travlocksserver.domain.vlock.code.VlockSuccessCode;
 import org.umc.travlocksserver.domain.vlock.dto.request.VlockRequestDTO;
 import org.umc.travlocksserver.domain.vlock.dto.request.VlockUpdateRequestDTO;
 import org.umc.travlocksserver.domain.vlock.dto.response.VlockResponseDTO;
-import org.umc.travlocksserver.domain.vlock.service.VlockCommandService;
-import org.umc.travlocksserver.domain.vlock.service.VlockQueryService;
+import org.umc.travlocksserver.domain.vlock.service.command.VlockCommandService;
+import org.umc.travlocksserver.domain.vlock.service.query.VlockQueryService;
 import org.umc.travlocksserver.global.response.SuccessResponse;
 
 import jakarta.validation.Valid;

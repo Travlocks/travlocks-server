@@ -20,6 +20,9 @@ public class Vlock extends SoftDeleteBaseEntity {
     @Column(name = "vlock_id")
     private Long id;
 
+    // 외부 장소 ID(Kakao place_id 등)
+    private String externalPlaceId;
+
     /** 블록 카테고리 */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "vlock_category_id", nullable = false)
@@ -38,7 +41,6 @@ public class Vlock extends SoftDeleteBaseEntity {
     @Column(nullable = false, length = 20)
     private String name;
 
-    @Column(nullable = false)
     private String coverImgUrl;
 
     @Column(nullable = false)
@@ -76,19 +78,44 @@ public class Vlock extends SoftDeleteBaseEntity {
 		String memo
 	) {
 		return Vlock.builder()
-			.vlockCategory(category)
-			.city(city)
-			.owner(owner)
-			.name(name)
-			.latitude(latitude)
-			.longitude(longitude)
-			.address(address)
-			.memo(memo)
-			.coverImgUrl("")
-			.linkUrl("")
-			.usageCount(0)
-			.isPublic(false)
-			.build();
+				.vlockCategory(category)
+				.city(city)
+				.owner(owner)
+				.name(name)
+                .latitude(latitude)
+                .longitude(longitude)
+				.address(address)
+				.memo(memo)
+                .coverImgUrl("")
+                .linkUrl("")
+				.usageCount(0)
+				.isPublic(false)
+				.build();
+	}
+
+	public static Vlock createByExternal(
+			String externalPlaceId,
+			VlockCategory vlockCategory,
+			City city,
+			String name,
+			Double latitude,
+			Double longitude,
+			String address,
+			String linkUrl
+	) {
+		return Vlock.builder()
+				.externalPlaceId(externalPlaceId)
+				.vlockCategory(vlockCategory)
+				.city(city)
+				.name(name)
+				.coverImgUrl("")
+				.latitude(latitude)
+				.longitude(longitude)
+				.address(address)
+				.linkUrl(linkUrl)
+				.usageCount(0)
+				.isPublic(true)
+				.build();
 	}
 
 	public void update(

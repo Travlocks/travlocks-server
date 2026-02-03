@@ -7,7 +7,7 @@ public record VlockCategoryDTO(
 
 	String name,
 
-	Float stayHours
+	Double stayHours
 ) {
 	public static VlockCategoryDTO from(VlockCategory vlockCategory) {
 		return new VlockCategoryDTO(
