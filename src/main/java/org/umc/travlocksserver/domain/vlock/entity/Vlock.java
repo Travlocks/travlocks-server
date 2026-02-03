@@ -61,6 +61,10 @@ public class Vlock extends SoftDeleteBaseEntity {
     @Column(nullable = false)
     private Boolean isPublic;
 
+	public boolean isOwnedBy(Long memberId) {
+		return this.owner.getId().equals(memberId);
+	}
+
 	public static Vlock create(
 		VlockCategory category,
 		City city,
@@ -85,5 +89,39 @@ public class Vlock extends SoftDeleteBaseEntity {
 			.usageCount(0)
 			.isPublic(false)
 			.build();
+	}
+
+	public void update(
+		VlockCategory category,
+		City city,
+		String name,
+		Double latitude,
+		Double longitude,
+		String address,
+		String memo,
+		String coverImgUrl,
+		String linkUrl,
+		Boolean isPublic
+	) {
+		this.vlockCategory = category;
+		this.city = city;
+		this.name = name;
+		this.latitude = latitude;
+		this.longitude = longitude;
+		this.address = address;
+		if (memo != null) {
+			this.memo = memo;
+		}
+		// 추후 prefix: https 검증 필요
+		if (coverImgUrl != null) {
+			this.coverImgUrl = coverImgUrl;
+		}
+		// 추후 prefix: https 검증 필요
+		if (linkUrl != null) {
+			this.linkUrl = linkUrl;
+		}
+		if (isPublic != null) {
+			this.isPublic = isPublic;
+		}
 	}
 }

@@ -12,6 +12,8 @@ public enum VlockSuccessCode implements BaseCode {
 
 	VLOCK_CREATE_SUCCESS(HttpStatus.CREATED, "블록 생성이 완료되었습니다."),
 
+	VLOCK_UPDATE_SUCCESS(HttpStatus.OK, "블록 수정이 완료되었습니다."),
+
 	VLOCK_GET_SUCCESS(HttpStatus.OK, "블록을 성공적으로 조회했습니다.")
 	;
 

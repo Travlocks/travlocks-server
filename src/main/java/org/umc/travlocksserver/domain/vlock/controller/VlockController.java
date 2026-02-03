@@ -8,11 +8,13 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.umc.travlocksserver.domain.vlock.code.VlockSuccessCode;
 import org.umc.travlocksserver.domain.vlock.dto.request.VlockRequestDTO;
+import org.umc.travlocksserver.domain.vlock.dto.request.VlockUpdateRequestDTO;
 import org.umc.travlocksserver.domain.vlock.dto.response.VlockResponseDTO;
 import org.umc.travlocksserver.domain.vlock.service.VlockCommandService;
 import org.umc.travlocksserver.domain.vlock.service.VlockQueryService;
@@ -77,5 +79,19 @@ public class VlockController implements VlockControllerDocs {
 		return ResponseEntity
 			.status(HttpStatus.OK)
 			.body(SuccessResponse.ok(VlockSuccessCode.VLOCK_GET_SUCCESS, responses));
+	}
+
+	/** 블록 수정 */
+	@PutMapping("/{vlockId}")
+	public ResponseEntity<SuccessResponse<VlockResponseDTO>> updateVlock(
+		@AuthenticationPrincipal Long memberId,
+		@PathVariable Long vlockId,
+		@Valid @RequestBody VlockUpdateRequestDTO request
+	) {
+		VlockResponseDTO response = vlockCommandService.updateVlock(memberId, vlockId, request);
+
+		return ResponseEntity
+			.status(HttpStatus.OK)
+			.body(SuccessResponse.ok(VlockSuccessCode.VLOCK_UPDATE_SUCCESS, response));
 	}
 }

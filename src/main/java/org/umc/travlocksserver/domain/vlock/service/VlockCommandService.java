@@ -11,6 +11,7 @@ import org.umc.travlocksserver.domain.member.exception.MemberException;
 import org.umc.travlocksserver.domain.member.exception.code.MemberErrorCode;
 import org.umc.travlocksserver.domain.member.repository.MemberRepository;
 import org.umc.travlocksserver.domain.vlock.dto.request.VlockRequestDTO;
+import org.umc.travlocksserver.domain.vlock.dto.request.VlockUpdateRequestDTO;
 import org.umc.travlocksserver.domain.vlock.dto.response.VlockResponseDTO;
 import org.umc.travlocksserver.domain.vlock.entity.Vlock;
 import org.umc.travlocksserver.domain.vlock.entity.VlockCategory;
@@ -32,14 +33,9 @@ public class VlockCommandService {
 	private final VlockRepository vlockRepository;
 
 	public VlockResponseDTO createVlock(Long memberId, VlockRequestDTO request) {
-		Member member = memberRepository.findById(memberId)
-			.orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
-
-		VlockCategory category = vlockCategoryRepository.findById(request.categoryId())
-			.orElseThrow(() -> new VlockException(VlockErrorCode.CATEGORY_NOT_FOUND));
-
-		City city = cityRepository.findWithRegionById(request.cityId())
-			.orElseThrow(() -> new CityException(CityErrorCode.CITY_NOT_FOUND));
+		Member member = getMember(memberId);
+		VlockCategory category = getCategory(request.categoryId());
+		City city = getCity(request.cityId());
 
 		Vlock newVlock = Vlock.create(
 			category,
@@ -56,5 +52,59 @@ public class VlockCommandService {
 
 		return VlockResponseDTO.from(savedVlock);
 	}
-}
 
+	public VlockResponseDTO updateVlock(Long memberId, Long vlockId, VlockUpdateRequestDTO request) {
+		validateMemberExists(memberId);
+
+		Vlock vlock = getOwnedVlock(memberId, vlockId);
+
+		VlockCategory category = getCategory(request.categoryId());
+		City city = getCity(request.cityId());
+
+		vlock.update(
+			category,
+			city,
+			request.name(),
+			request.latitude(),
+			request.longitude(),
+			request.address(),
+			request.memo(),
+			request.coverImgUrl(),
+			request.linkUrl(),
+			request.isPublic()
+		);
+
+		return VlockResponseDTO.from(vlock);
+	}
+
+	private void validateMemberExists(Long memberId) {
+		if (!memberRepository.existsById(memberId)) {
+			throw new MemberException(MemberErrorCode.MEMBER_NOT_FOUND);
+		}
+	}
+
+	private Member getMember(Long memberId) {
+		return memberRepository.findById(memberId)
+			.orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+	}
+
+	private VlockCategory getCategory(Long categoryId) {
+		return vlockCategoryRepository.findById(categoryId)
+			.orElseThrow(() -> new VlockException(VlockErrorCode.CATEGORY_NOT_FOUND));
+	}
+
+	private City getCity(Long cityId) {
+		return cityRepository.findWithRegionById(cityId)
+			.orElseThrow(() -> new CityException(CityErrorCode.CITY_NOT_FOUND));
+	}
+
+	private Vlock getOwnedVlock(Long memberId, Long vlockId) {
+		Vlock vlock = vlockRepository.findByIdAndDeletedAtIsNull(vlockId)
+			.orElseThrow(() -> new VlockException(VlockErrorCode.VLOCK_NOT_FOUND));
+
+		if (!vlock.isOwnedBy(memberId)) {
+			throw new VlockException(VlockErrorCode.VLOCK_FORBIDDEN);
+		}
+		return vlock;
+	}
+}
