@@ -2,6 +2,7 @@ package org.umc.travlocksserver.domain.member.controller;
 
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,9 +18,11 @@ import org.umc.travlocksserver.domain.member.dto.response.MemberProfileResponseD
 import org.umc.travlocksserver.domain.member.dto.response.MemberSignupResponseDTO;
 import org.umc.travlocksserver.domain.member.exception.code.MemberSuccessCode;
 import org.umc.travlocksserver.domain.member.service.command.MemberSignupService;
+import org.umc.travlocksserver.domain.member.service.query.FavoriteTemplateQueryService;
 import org.umc.travlocksserver.domain.member.service.query.MemberEmailCheckService;
 import org.umc.travlocksserver.domain.member.service.query.MemberNicknameCheckService;
 import org.umc.travlocksserver.domain.member.service.query.MemberProfileQueryService;
+import org.umc.travlocksserver.domain.template.dto.response.TemplateCursorResponseDTO;
 import org.umc.travlocksserver.global.response.SuccessResponse;
 
 import jakarta.validation.Valid;
@@ -37,6 +40,7 @@ public class MemberController implements MemberControllerDocs {
     private final MemberNicknameCheckService memberNicknameCheckService;
     private final MemberSignupService memberSignupService;
     private final MemberProfileQueryService memberProfileQueryService;
+	private final FavoriteTemplateQueryService favoriteTemplateQueryService;
 
     @GetMapping("/email/exists")
     public ResponseEntity<SuccessResponse<MemberEmailExistsResponseDTO>> checkEmailExists(
@@ -91,4 +95,19 @@ public class MemberController implements MemberControllerDocs {
                 .status(successCode.getStatus())
                 .body(SuccessResponse.ok(successCode, data));
     }
+
+	@GetMapping("/me/favorites")
+	public ResponseEntity<SuccessResponse<TemplateCursorResponseDTO>> getMyFavoriteTemplates(
+		@AuthenticationPrincipal Long memberId,
+		@RequestParam(name = "cursor", required = false) Long cursor,
+		@RequestParam(name = "limit", defaultValue = "9") int limit
+	) {
+		MemberSuccessCode successCode = MemberSuccessCode.FAVORITE_TEMPLATE_LIST_GET_SUCCESS;
+
+		TemplateCursorResponseDTO data = favoriteTemplateQueryService.getMyFavoriteTemplates(memberId, cursor, limit);
+
+		return ResponseEntity
+				.status(successCode.getStatus())
+				.body(SuccessResponse.ok(successCode, data));
+	}
 }
