@@ -11,12 +11,12 @@ import org.umc.travlocksserver.domain.template.dto.response.TemplateCanvasVlockD
 import org.umc.travlocksserver.domain.template.entity.Template;
 import org.umc.travlocksserver.domain.template.entity.TemplateDay;
 import org.umc.travlocksserver.domain.template.entity.TemplateVlock;
+import org.umc.travlocksserver.domain.template.enums.TransportType;
 import org.umc.travlocksserver.domain.template.exception.TemplateException;
 import org.umc.travlocksserver.domain.template.repository.TemplateDayRepository;
 import org.umc.travlocksserver.domain.template.repository.TemplateRepository;
 import org.umc.travlocksserver.domain.template.repository.TemplateVlockRepository;
 import org.umc.travlocksserver.domain.vlock.dto.response.VlockBriefDTO;
-import org.umc.travlocksserver.domain.vlock.entity.Vlock;
 
 import lombok.RequiredArgsConstructor;
 
@@ -28,6 +28,8 @@ public class TemplateCanvasQueryService {
 	private final TemplateRepository templateRepository;
 	private final TemplateDayRepository templateDayRepository;
 	private final TemplateVlockRepository templateVlockRepository;
+
+	private final TemplateRouteQueryService templateRouteQueryService;
 
 	public TemplateCanvasResponseDTO getTemplateCanvas(Long templateId, Integer dayNo) {
 
@@ -48,7 +50,8 @@ public class TemplateCanvasQueryService {
 			TemplateVlock cur = templateVlocks.get(i);
 			TemplateVlock next = (i + 1 < templateVlocks.size()) ? templateVlocks.get(i + 1) : null;
 
-			int nextMoveMinutes = (next == null) ? 0 : calcNextMoveMinutes(cur.getVlock(), next.getVlock());
+			int nextMoveMinutes = (next == null)
+				? 0 : calcNextMoveMinutes(cur.getVlock().getId(), next.getVlock().getId());
 
 			totalStayHours += cur.getStayHours();
 			totalMoveMinutes += nextMoveMinutes;
@@ -82,10 +85,10 @@ public class TemplateCanvasQueryService {
 	}
 
 	/**
-	 * 블록 간 이동 시간 계산
+	 * 블록 간 이동 시간 계산 (MoveTime 재사용, 없으면 생성)
 	 */
-	private int calcNextMoveMinutes(Vlock from, Vlock to) {
-		// TODO: 외부 경로 API 연동 전까지 임시값
-		return 0;
+	private int calcNextMoveMinutes(Long fromVlockId, Long toVlockId) {
+		var route = templateRouteQueryService.getOrCreateRoute(fromVlockId, toVlockId, TransportType.WALK);
+		return route.moveMinutes();
 	}
 }
