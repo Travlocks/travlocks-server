@@ -12,7 +12,9 @@ public enum TemplateErrorCode implements BaseCode {
 
 	TEMPLATE_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 템플릿입니다."),
 	TEMPLATE_CANVAS_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 템플릿 캔버스입니다."),
-    TEMPLATE_NOT_PUBLIC(HttpStatus.BAD_REQUEST, "공개되지 않은 템플릿입니다.");
+    TEMPLATE_NOT_PUBLIC(HttpStatus.BAD_REQUEST, "공개되지 않은 템플릿입니다."),
+	TEMPLATE_DAY_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 템플릿의 일차(dayNo)가 존재하지 않습니다."),
+	UNSUPPORTED_TRANSPORT_TYPE(HttpStatus.BAD_REQUEST, "현재 지원하지 않는 이동 수단입니다.");
 
 	private final HttpStatus status;
 	private final String message;

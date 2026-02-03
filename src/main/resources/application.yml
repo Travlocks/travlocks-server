@@ -87,3 +87,8 @@ cache:
       cache-ttl-minutes: 15
     vlocks:
       cache-ttl-minutes: 60
+
+tmap:
+  api:
+    key: ${TMAP_API_KEY}
+    base-url: ${TMAP_BASE_URL:https://apis.openapi.sk.com}
