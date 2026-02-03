@@ -12,14 +12,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.umc.travlocksserver.domain.member.entity.Member;
 import org.umc.travlocksserver.domain.template.code.TemplateSuccessCode;
-import org.umc.travlocksserver.domain.template.dto.response.TemplateCanvasResponseDTO;
-import org.umc.travlocksserver.domain.template.dto.response.TemplateRemixResponseDTO;
+import org.umc.travlocksserver.domain.template.dto.response.*;
+import org.umc.travlocksserver.domain.template.exception.code.TemplateDaySuccessCode;
+import org.umc.travlocksserver.domain.template.service.command.TemplateDayCommandService;
 import org.umc.travlocksserver.domain.template.service.command.TemplateRemixService;
 import org.umc.travlocksserver.domain.template.service.query.TemplateCanvasQueryService;
-import org.umc.travlocksserver.domain.template.dto.response.TemplateRecommendationsDTO;
 import org.umc.travlocksserver.domain.template.service.query.TemplateQueryService;
-import org.umc.travlocksserver.domain.template.dto.response.PopularTemplateResponse;
-import org.umc.travlocksserver.domain.template.dto.response.TemplateDetailResponseDTO;
 import org.umc.travlocksserver.global.annotation.LoginUser;
 import org.umc.travlocksserver.global.response.SuccessResponse;
 
@@ -32,6 +30,7 @@ import java.util.List;
 public class TemplateController implements TemplateControllerDocs {
 
     private final TemplateQueryService templateQueryService;
+	private final TemplateDayCommandService templateDayCommandService;
 	private final TemplateRemixService templateRemixService;
 	private final TemplateCanvasQueryService templateCanvasQueryService;
 
@@ -99,4 +98,15 @@ public class TemplateController implements TemplateControllerDocs {
                 )
         );
     }
+
+	@GetMapping("/{templateId}/days/{dayNo}/vlocks/suggestions")
+	public ResponseEntity<SuccessResponse<VlockSuggestionsResponseDTO>> suggestions(
+			@AuthenticationPrincipal Long memberId,
+			@PathVariable Long templateId,
+			@PathVariable Integer dayNo
+	){
+		VlockSuggestionsResponseDTO response = templateDayCommandService.suggestVlocks(memberId, templateId, dayNo);
+		return ResponseEntity.ok(
+				SuccessResponse.ok(TemplateDaySuccessCode.VLOCK_SUGGESTION_SUCCESS, response));
+	}
 }

@@ -128,7 +128,7 @@ public class TemplateRemixService {
 				.templateDay(dayMap.get(ov.getTemplateDay().getId()))
 				.vlock(ov.getVlock())
 				.orderNo(ov.getOrderNo())
-				.stayMinutes(ov.getStayMinutes())
+				.stayHours(ov.getStayHours())
 				.build())
 			.toList();
 
