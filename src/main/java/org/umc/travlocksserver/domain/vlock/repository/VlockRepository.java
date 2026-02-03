@@ -1,6 +1,7 @@
 package org.umc.travlocksserver.domain.vlock.repository;
 
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -11,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface VlockRepository extends JpaRepository<Vlock,Long> {
+public interface VlockRepository extends JpaRepository<Vlock,Long>, VlockRepositoryCustom {
 
     @Query("""
         SELECT v
@@ -49,4 +50,7 @@ public interface VlockRepository extends JpaRepository<Vlock,Long> {
     );
 
     Optional<Vlock> findByExternalPlaceIdAndIsPublicTrue(String externalPlaceId);
+
+    @EntityGraph(attributePaths = {"vlockCategory", "city", "city.region"})
+    List<Vlock> findAllByOwnerIdAndCityIdAndDeletedAtIsNullOrderByUsageCountDescIdDesc(Long ownerId, Long cityId);
 }

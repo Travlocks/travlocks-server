@@ -2,6 +2,7 @@ package org.umc.travlocksserver.domain.vlock.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+
 import org.umc.travlocksserver.domain.location.entity.City;
 import org.umc.travlocksserver.domain.member.entity.Member;
 import org.umc.travlocksserver.global.entity.SoftDeleteBaseEntity;
@@ -9,6 +10,7 @@ import org.umc.travlocksserver.global.entity.SoftDeleteBaseEntity;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Builder(access = AccessLevel.PRIVATE)
 @Entity
 @Table(name = "vlocks")
 public class Vlock extends SoftDeleteBaseEntity {
@@ -61,37 +63,6 @@ public class Vlock extends SoftDeleteBaseEntity {
     @Column(nullable = false)
     private Boolean isPublic;
 
-	@Builder(access = AccessLevel.PRIVATE)
-	private Vlock(
-		String externalPlaceId,
-		VlockCategory vlockCategory,
-		City city,
-		Member owner,
-		String name,
-		String coverImgUrl,
-		Double latitude,
-		Double longitude,
-		String address,
-		String linkUrl,
-		String memo,
-		int usageCount,
-		boolean isPublic
-	) {
-		this.externalPlaceId = externalPlaceId;
-		this.vlockCategory = vlockCategory;
-		this.city = city;
-		this.owner = owner;
-		this.name = name;
-		this.latitude = latitude;
-		this.longitude = longitude;
-		this.address = address;
-		this.memo = memo;
-		this.coverImgUrl = coverImgUrl;
-		this.linkUrl = linkUrl;
-		this.usageCount = usageCount;
-		this.isPublic = isPublic;
-	}
-
 	public static Vlock create(
 		VlockCategory category,
 		City city,
@@ -107,11 +78,12 @@ public class Vlock extends SoftDeleteBaseEntity {
 				.city(city)
 				.owner(owner)
 				.name(name)
-				.coverImgUrl("")
-				.latitude(latitude)
-				.longitude(longitude)
+                .latitude(latitude)
+                .longitude(longitude)
 				.address(address)
 				.memo(memo)
+                .coverImgUrl("")
+                .linkUrl("")
 				.usageCount(0)
 				.isPublic(false)
 				.build();
