@@ -48,9 +48,3 @@ public class CustomAuthEntryPoint implements AuthenticationEntryPoint {
         response.getWriter().write(objectMapper.writeValueAsString(new ErrorResponse(errorCode)));
     }
 }
-
-
-
-
-
-

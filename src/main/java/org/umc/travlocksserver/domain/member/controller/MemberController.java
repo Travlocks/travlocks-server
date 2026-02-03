@@ -18,10 +18,7 @@ import org.umc.travlocksserver.domain.member.service.command.MemberPasswordUpdat
 import org.umc.travlocksserver.domain.member.service.command.MemberProfileUpdateService;
 import org.umc.travlocksserver.domain.member.service.command.MemberSignupService;
 import org.umc.travlocksserver.domain.member.service.command.MemberWithdrawService;
-import org.umc.travlocksserver.domain.member.service.query.FavoriteTemplateQueryService;
-import org.umc.travlocksserver.domain.member.service.query.MemberEmailCheckService;
-import org.umc.travlocksserver.domain.member.service.query.MemberNicknameCheckService;
-import org.umc.travlocksserver.domain.member.service.query.MemberProfileQueryService;
+import org.umc.travlocksserver.domain.member.service.query.*;
 import org.umc.travlocksserver.domain.template.dto.response.TemplateCursorResponseDTO;
 import org.umc.travlocksserver.global.annotation.LoginUser;
 import org.umc.travlocksserver.global.response.SuccessResponse;
@@ -46,6 +43,7 @@ public class MemberController implements MemberControllerDocs {
     private final MemberPasswordUpdateService memberPasswordUpdateService;
     private final MemberProfileUpdateService memberProfileUpdateService;
     private final MemberWithdrawService memberWithdrawService;
+    private final MemberMyPageQueryService memberMyPageQueryService;
 
     @GetMapping("/email/exists")
     public ResponseEntity<SuccessResponse<MemberEmailExistsResponseDTO>> checkEmailExists(
@@ -109,6 +107,18 @@ public class MemberController implements MemberControllerDocs {
         MemberSuccessCode successCode = MemberSuccessCode.FAVORITE_TEMPLATE_LIST_GET_SUCCESS;
 
         TemplateCursorResponseDTO data = favoriteTemplateQueryService.getMyFavoriteTemplates(memberId, cursor, limit);
+
+        return ResponseEntity
+                .status(successCode.getStatus())
+                .body(SuccessResponse.ok(successCode, data));
+    }
+
+    @GetMapping("/me/mypage")
+    public ResponseEntity<SuccessResponse<MemberMyPageResponseDTO>> getMyPage(
+            @LoginUser Member member) {
+        MemberSuccessCode successCode = MemberSuccessCode.MEMBER_MY_PAGE_RETRIEVED;
+
+        MemberMyPageResponseDTO data = memberMyPageQueryService.getMyPage(member);
 
         return ResponseEntity
                 .status(successCode.getStatus())
