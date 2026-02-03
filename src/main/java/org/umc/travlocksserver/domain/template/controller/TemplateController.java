@@ -12,14 +12,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.umc.travlocksserver.domain.member.entity.Member;
 import org.umc.travlocksserver.domain.template.code.TemplateSuccessCode;
-import org.umc.travlocksserver.domain.template.dto.response.TemplateCanvasResponseDTO;
-import org.umc.travlocksserver.domain.template.dto.response.TemplateRemixResponseDTO;
+import org.umc.travlocksserver.domain.template.dto.response.*;
 import org.umc.travlocksserver.domain.template.service.command.TemplateRemixService;
 import org.umc.travlocksserver.domain.template.service.query.TemplateCanvasQueryService;
-import org.umc.travlocksserver.domain.template.dto.response.TemplateRecommendationsDTO;
 import org.umc.travlocksserver.domain.template.service.query.TemplateQueryService;
-import org.umc.travlocksserver.domain.template.dto.response.PopularTemplateResponse;
-import org.umc.travlocksserver.domain.template.dto.response.TemplateDetailResponseDTO;
 import org.umc.travlocksserver.global.annotation.LoginUser;
 import org.umc.travlocksserver.global.response.SuccessResponse;
 
@@ -99,4 +95,18 @@ public class TemplateController implements TemplateControllerDocs {
                 )
         );
     }
+
+	@GetMapping("/recent")
+	public ResponseEntity<SuccessResponse<List<TemplateLatestDTO>>> getRecentTemplates(
+			@AuthenticationPrincipal Long memberId
+	) {
+		List<TemplateLatestDTO> templates = templateQueryService.getRecentTemplates(memberId);
+
+		return ResponseEntity.ok(
+				SuccessResponse.ok(
+						TemplateSuccessCode.TEMPLATE_RECENT_GET_SUCCESS,
+						templates
+				)
+		);
+	}
 }

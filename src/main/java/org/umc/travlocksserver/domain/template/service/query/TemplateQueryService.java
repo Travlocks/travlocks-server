@@ -7,10 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.umc.travlocksserver.domain.favorite.repository.FavoriteRepository;
 import org.umc.travlocksserver.domain.template.code.TemplateErrorCode;
-import org.umc.travlocksserver.domain.template.dto.response.PopularTemplateResponse;
-import org.umc.travlocksserver.domain.template.dto.response.TemplateDetailResponseDTO;
-import org.umc.travlocksserver.domain.template.dto.response.TemplateRecommendationCardDTO;
-import org.umc.travlocksserver.domain.template.dto.response.TemplateRecommendationsDTO;
+import org.umc.travlocksserver.domain.template.dto.response.*;
 import org.umc.travlocksserver.domain.template.entity.Template;
 import org.umc.travlocksserver.domain.template.exception.TemplateException;
 import org.umc.travlocksserver.domain.template.repository.TemplateRepository;
@@ -142,5 +139,33 @@ public class TemplateQueryService {
                 blocks,
                 isFavorited
         );
+    }
+
+    public List<TemplateLatestDTO> getRecentTemplates(Long memberId) {
+        List<Template> templates = templateRepository.findRecentTemplatesByOwner(memberId);
+
+        List<TemplateLatestDTO> dtos = templates.stream()
+                .limit(2) // 최신 2개만
+                .map(t -> {
+                    String regionName = t.getTemplateCities().stream()
+                            .findFirst()
+                            .map(tc -> tc.getCity().getRegion().getName())
+                            .orElse(null);
+
+                    return new TemplateLatestDTO(
+                            t.getId(),
+                            t.getTitle(),
+                            t.getUpdatedAt(),
+                            t.getProgressRate(),
+                            regionName
+                    );
+                })
+                .toList();
+
+        if (dtos.isEmpty()) {
+            throw new TemplateException(TemplateErrorCode.TEMPLATE_RECENT_NOT_FOUND);
+        }
+
+        return dtos;
     }
 }

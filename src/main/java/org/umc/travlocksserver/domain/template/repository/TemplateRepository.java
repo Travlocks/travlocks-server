@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.umc.travlocksserver.domain.template.dto.response.TemplateLatestDTO;
 import org.umc.travlocksserver.domain.template.entity.Template;
 
 @Repository
@@ -70,4 +71,15 @@ public interface TemplateRepository extends JpaRepository<Template, Long>, Templ
 	default List<Template> findPublicTemplatesAfterCursor(Long memberId, Long cursor, int limit) {
 		return findPublicTemplatesAfterCursor(memberId, cursor, PageRequest.of(0, limit));
 	}
+
+	@Query("""
+        SELECT t
+        FROM Template t
+            LEFT JOIN FETCH t.templateCities tc
+            LEFT JOIN FETCH tc.city c
+            LEFT JOIN FETCH c.region r
+        WHERE t.owner.id = :ownerId
+        ORDER BY t.updatedAt DESC
+    """)
+	List<Template> findRecentTemplatesByOwner(Long ownerId);
 }

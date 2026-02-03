@@ -5,9 +5,7 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.umc.travlocksserver.domain.template.dto.response.PopularTemplateResponse;
-import org.umc.travlocksserver.domain.template.dto.response.TemplateCanvasResponseDTO;
-import org.umc.travlocksserver.domain.template.dto.response.TemplateRemixResponseDTO;
+import org.umc.travlocksserver.domain.template.dto.response.*;
 import org.umc.travlocksserver.global.response.ErrorResponse;
 import org.umc.travlocksserver.global.response.SuccessResponse;
 
@@ -18,9 +16,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.umc.travlocksserver.domain.template.dto.response.TemplateRecommendationsDTO;
 import org.umc.travlocksserver.domain.member.entity.Member;
-import org.umc.travlocksserver.domain.template.dto.response.TemplateDetailResponseDTO;
 
 import java.util.List;
 
@@ -127,4 +123,26 @@ public interface TemplateControllerDocs {
             )
     )
     ResponseEntity<SuccessResponse<TemplateDetailResponseDTO>> getTemplateDetail(@PathVariable Long templateId, @Parameter(hidden = true) Member member);
+
+	@Operation(
+			summary = "최근 편집한 템플릿 조회",
+			description = "로그인한 사용자가 최근에 편집한 템플릿 최신 2개를 조회합니다.",
+			responses = {
+					@ApiResponse(
+							responseCode = "200",
+							description = "최근 편집한 템플릿 조회 성공",
+							content = @Content(
+									mediaType = "application/json",
+									schema = @Schema(implementation = TemplateLatestDTO.class)
+							)
+					),
+					@ApiResponse(
+							responseCode = "401",
+							description = "로그인 필요"
+					)
+			}
+	)
+	ResponseEntity<SuccessResponse<List<TemplateLatestDTO>>> getRecentTemplates(
+			@AuthenticationPrincipal Long memberId
+	);
 }
