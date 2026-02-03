@@ -32,7 +32,7 @@ public class TemplateVlock extends BaseEntity {
     @Column(name = "order_no", nullable = false)
     private Integer orderNo;
 
-    /** 체류 시간 (분) */
-    @Column(name = "stay_minutes", nullable = false)
-    private Integer stayMinutes;
+    /** 체류 시간 (시간) */
+    @Column(name = "stay_hours", nullable = false)
+    private Double stayHours;
 }
