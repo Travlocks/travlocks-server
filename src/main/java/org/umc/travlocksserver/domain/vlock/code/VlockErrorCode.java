@@ -1,4 +1,4 @@
-package org.umc.travlocksserver.domain.vlock.constant;
+package org.umc.travlocksserver.domain.vlock.code;
 
 import org.springframework.http.HttpStatus;
 import org.umc.travlocksserver.global.code.BaseCode;

@@ -1,4 +1,4 @@
-package org.umc.travlocksserver.domain.vlock.dto.vlock;
+package org.umc.travlocksserver.domain.vlock.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
