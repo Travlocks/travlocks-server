@@ -2,6 +2,7 @@ package org.umc.travlocksserver.domain.vlock.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+
 import org.umc.travlocksserver.domain.location.entity.City;
 import org.umc.travlocksserver.domain.member.entity.Member;
 import org.umc.travlocksserver.global.entity.SoftDeleteBaseEntity;
@@ -9,6 +10,7 @@ import org.umc.travlocksserver.global.entity.SoftDeleteBaseEntity;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Builder(access = AccessLevel.PRIVATE)
 @Entity
 @Table(name = "vlocks")
 public class Vlock extends SoftDeleteBaseEntity {
@@ -17,6 +19,9 @@ public class Vlock extends SoftDeleteBaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "vlock_id")
     private Long id;
+
+    // 외부 장소 ID(Kakao place_id 등)
+    private String externalPlaceId;
 
     /** 블록 카테고리 */
     @ManyToOne(fetch = FetchType.LAZY)
@@ -36,7 +41,6 @@ public class Vlock extends SoftDeleteBaseEntity {
     @Column(nullable = false, length = 20)
     private String name;
 
-    @Column(nullable = false)
     private String coverImgUrl;
 
     @Column(nullable = false)
@@ -59,31 +63,6 @@ public class Vlock extends SoftDeleteBaseEntity {
     @Column(nullable = false)
     private Boolean isPublic;
 
-	@Builder(access = AccessLevel.PRIVATE)
-	private Vlock(
-		VlockCategory vlockCategory,
-		City city,
-		Member owner,
-		String name,
-		Double latitude,
-		Double longitude,
-		String address,
-		String memo
-	) {
-		this.vlockCategory = vlockCategory;
-		this.city = city;
-		this.owner = owner;
-		this.name = name;
-		this.latitude = latitude;
-		this.longitude = longitude;
-		this.address = address;
-		this.memo = memo;
-		this.coverImgUrl = "";
-		this.linkUrl = "";
-		this.usageCount = 0;
-		this.isPublic = false;
-	}
-
 	public static Vlock create(
 		VlockCategory category,
 		City city,
@@ -95,14 +74,43 @@ public class Vlock extends SoftDeleteBaseEntity {
 		String memo
 	) {
 		return Vlock.builder()
-			.vlockCategory(category)
-			.city(city)
-			.owner(owner)
-			.name(name)
-			.latitude(latitude)
-			.longitude(longitude)
-			.address(address)
-			.memo(memo)
-			.build();
+				.vlockCategory(category)
+				.city(city)
+				.owner(owner)
+				.name(name)
+                .latitude(latitude)
+                .longitude(longitude)
+				.address(address)
+				.memo(memo)
+                .coverImgUrl("")
+                .linkUrl("")
+				.usageCount(0)
+				.isPublic(false)
+				.build();
+	}
+
+	public static Vlock createByExternal(
+			String externalPlaceId,
+			VlockCategory vlockCategory,
+			City city,
+			String name,
+			Double latitude,
+			Double longitude,
+			String address,
+			String linkUrl
+	) {
+		return Vlock.builder()
+				.externalPlaceId(externalPlaceId)
+				.vlockCategory(vlockCategory)
+				.city(city)
+				.name(name)
+				.coverImgUrl("")
+				.latitude(latitude)
+				.longitude(longitude)
+				.address(address)
+				.linkUrl(linkUrl)
+				.usageCount(0)
+				.isPublic(true)
+				.build();
 	}
 }

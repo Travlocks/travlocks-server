@@ -21,5 +21,5 @@ public class VlockCategory extends CreatedSoftDeleteBaseEntity {
     private String name;
 
     @Column(nullable = false)
-    private Float stayHours;
+    private Double stayHours;
 }

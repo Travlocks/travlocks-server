@@ -1,7 +1,8 @@
-package org.umc.travlocksserver.domain.vlock.dto.vlock;
+package org.umc.travlocksserver.domain.vlock.dto.response;
+
+import java.time.LocalDateTime;
 
 import org.umc.travlocksserver.domain.location.dto.CityDTO;
-import org.umc.travlocksserver.domain.vlock.dto.vlockCategory.VlockCategoryDTO;
 import org.umc.travlocksserver.domain.vlock.entity.Vlock;
 
 public record VlockResponseDTO(
@@ -23,7 +24,10 @@ public record VlockResponseDTO(
 
 	Integer usageCount,
 
-	Boolean isPublic
+	Boolean isPublic,
+
+	LocalDateTime createdAt,
+	LocalDateTime updatedAt
 ) {
 	public static VlockResponseDTO from(Vlock vlock) {
 		return new VlockResponseDTO(
@@ -45,7 +49,10 @@ public record VlockResponseDTO(
 
 			vlock.getUsageCount(),
 
-			vlock.getIsPublic()
+			vlock.getIsPublic(),
+
+			vlock.getCreatedAt(),
+			vlock.getUpdatedAt()
 		);
 	}
 }
