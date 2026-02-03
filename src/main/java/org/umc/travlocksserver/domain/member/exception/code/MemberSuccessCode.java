@@ -25,6 +25,10 @@ public enum MemberSuccessCode implements BaseCode {
 	MEMBER_PROFILE_GET_SUCCESS(
 		HttpStatus.OK,
 		"유저 프로필 조회에 성공했습니다."
+	),
+	FAVORITE_TEMPLATE_LIST_GET_SUCCESS(
+		HttpStatus.OK,
+		"내 즐겨찾기 목록 조회에 성공했습니다."
 	);
 
 	private final HttpStatus status;

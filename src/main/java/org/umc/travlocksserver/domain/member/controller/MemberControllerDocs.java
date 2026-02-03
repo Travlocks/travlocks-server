@@ -1,7 +1,9 @@
 package org.umc.travlocksserver.domain.member.controller;
 
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.umc.travlocksserver.domain.member.dto.request.MemberSignupRequestDTO;
@@ -9,6 +11,7 @@ import org.umc.travlocksserver.domain.member.dto.response.MemberEmailExistsRespo
 import org.umc.travlocksserver.domain.member.dto.response.MemberNicknameExistsResponseDTO;
 import org.umc.travlocksserver.domain.member.dto.response.MemberProfileResponseDTO;
 import org.umc.travlocksserver.domain.member.dto.response.MemberSignupResponseDTO;
+import org.umc.travlocksserver.domain.template.dto.response.TemplateCursorResponseDTO;
 import org.umc.travlocksserver.global.response.ErrorResponse;
 import org.umc.travlocksserver.global.response.SuccessResponse;
 
@@ -101,7 +104,31 @@ public interface MemberControllerDocs {
 	})
 	ResponseEntity<SuccessResponse<MemberProfileResponseDTO>> getMemberProfile(
 		@PathVariable Long memberId,
-		@RequestParam(name = "cursor", defaultValue = "0") Long cursor,
+		@RequestParam(name = "cursor", required = false) Long cursor,
+		@RequestParam(name = "limit", defaultValue = "9") int limit
+	);
+
+	@Operation(
+		summary = "내 즐겨찾기 목록 조회 API",
+		description = """
+			로그인한 유저의 즐겨찾기(찜) 템플릿 목록을 조회합니다.
+				
+			[Query Params]
+			- cursor: 다음 목록 조회를 위한 커서(마지막으로 받은 templateId). 첫 조회는 null
+			- limit: 한 번에 가져올 템플릿 개수(기본 9)
+				
+			[Cursor Pagination]
+			- hasNext=true 인 경우, 응답의 nextCursor 값을 다음 요청의 cursor로 전달하세요.
+			"""
+	)
+	@ApiResponses({
+		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "내 즐겨찾기 목록 조회 성공"),
+		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "요청 값 검증 실패 (cursor/limit 범위 오류 등)", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "존재하지 않는 유저", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+	})
+	ResponseEntity<SuccessResponse<TemplateCursorResponseDTO>> getMyFavoriteTemplates(
+		@Parameter(hidden = true) @AuthenticationPrincipal Long memberId,
+		@RequestParam(name = "cursor", required = false) Long cursor,
 		@RequestParam(name = "limit", defaultValue = "9") int limit
 	);
 }
