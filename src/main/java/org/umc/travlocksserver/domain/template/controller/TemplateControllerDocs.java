@@ -12,6 +12,7 @@ import org.umc.travlocksserver.domain.template.dto.response.TemplateCanvasRespon
 import org.umc.travlocksserver.domain.template.dto.response.TemplateRemixResponseDTO;
 import org.umc.travlocksserver.domain.template.enums.TransportType;
 import org.umc.travlocksserver.domain.template.dto.response.*;
+import org.umc.travlocksserver.domain.template.dto.response.*;
 import org.umc.travlocksserver.global.response.ErrorResponse;
 import org.umc.travlocksserver.global.response.SuccessResponse;
 
@@ -187,5 +188,48 @@ public interface TemplateControllerDocs {
 		@PathVariable Long templateId,
 		@PathVariable Integer dayNo,
 		@RequestParam TransportType transportType
+	);
+
+	@Operation(
+			summary = "템플릿 탐색",
+			description = """
+                검색, 필터, 정렬 조건을 기준으로 템플릿을 조회합니다.
+                - 검색(keyword)
+                - 도시(cityNames) : 선택한 도시 필터링
+                - 여행 테마(travelThemes) : 선택한 여행 테마 필터링
+                - 여행 기간(tripDays) : 당일치기, 1박 2일, 2박 3일, 3박 4일, 4일 이상
+                - 이동 수단(transportTypes) : 도보, 차량, 대중교통
+                - 정렬(sort) : 최신순, 인기순, 별점순
+                - 페이지(offset) : 0부터 시작하는 오프셋 기반 페이지
+                """
+	)
+	@ApiResponse(
+			responseCode = "200",
+			description = "템플릿 탐색 성공",
+			content = @Content(
+					mediaType = "application/json",
+					schema = @Schema(
+							implementation = SuccessResponse.class
+					)
+			)
+	)
+	@ApiResponse(
+			responseCode = "400",
+			description = "템플릿 탐색 실패 (잘못된 요청)",
+			content = @Content(
+					mediaType = "application/json",
+					schema = @Schema(
+							implementation = ErrorResponse.class
+					)
+			)
+	)
+	ResponseEntity<SuccessResponse<List<TemplateExploreResponseDTO>>> exploreTemplates(
+			@RequestParam(required = false) String keyword,
+			@RequestParam(required = false) List<String> cities,
+			@RequestParam(required = false) List<String> themes,
+			@RequestParam(required = false) List<String> tripDays,
+			@RequestParam(required = false) List<String> transportTypes,
+			@RequestParam(defaultValue = "별점순") String sort,
+			@RequestParam(defaultValue = "0") int page
 	);
 }

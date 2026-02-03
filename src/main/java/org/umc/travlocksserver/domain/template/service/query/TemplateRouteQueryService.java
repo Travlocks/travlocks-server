@@ -15,7 +15,7 @@ import org.umc.travlocksserver.domain.template.exception.TemplateException;
 import org.umc.travlocksserver.domain.template.repository.MoveTimeRepository;
 import org.umc.travlocksserver.domain.template.repository.TemplateDayRepository;
 import org.umc.travlocksserver.domain.template.repository.TemplateVlockRepository;
-import org.umc.travlocksserver.domain.vlock.constant.VlockErrorCode;
+import org.umc.travlocksserver.domain.vlock.code.VlockErrorCode;
 import org.umc.travlocksserver.domain.vlock.entity.Vlock;
 import org.umc.travlocksserver.domain.vlock.exception.VlockException;
 import org.umc.travlocksserver.domain.vlock.repository.VlockRepository;
