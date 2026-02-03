@@ -5,18 +5,16 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.umc.travlocksserver.domain.member.entity.Member;
 import org.umc.travlocksserver.domain.template.code.TemplateSuccessCode;
+import org.umc.travlocksserver.domain.template.dto.response.OptimizeResponseDTO;
 import org.umc.travlocksserver.domain.template.dto.response.*;
 import org.umc.travlocksserver.domain.template.exception.code.TemplateDaySuccessCode;
 import org.umc.travlocksserver.domain.template.service.command.TemplateDayCommandService;
 import org.umc.travlocksserver.domain.template.service.command.TemplateRemixService;
 import org.umc.travlocksserver.domain.template.service.query.TemplateCanvasQueryService;
+import org.umc.travlocksserver.domain.template.service.command.TemplateDayOptimizeCommandService;
 import org.umc.travlocksserver.domain.template.service.query.TemplateQueryService;
 import org.umc.travlocksserver.global.annotation.LoginUser;
 import org.umc.travlocksserver.global.response.SuccessResponse;
@@ -33,6 +31,7 @@ public class TemplateController implements TemplateControllerDocs {
 	private final TemplateDayCommandService templateDayCommandService;
 	private final TemplateRemixService templateRemixService;
 	private final TemplateCanvasQueryService templateCanvasQueryService;
+	private final TemplateDayOptimizeCommandService templateDayOptimizeCommandService;
 
     @GetMapping("/recommendations")
     public ResponseEntity<SuccessResponse<TemplateRecommendationsDTO>> getRecommendedTemplates(
@@ -108,5 +107,16 @@ public class TemplateController implements TemplateControllerDocs {
 		VlockSuggestionsResponseDTO response = templateDayCommandService.suggestVlocks(memberId, templateId, dayNo);
 		return ResponseEntity.ok(
 				SuccessResponse.ok(TemplateDaySuccessCode.VLOCK_SUGGESTION_SUCCESS, response));
+	}
+
+	@GetMapping("/{templateId}/days/{dayNo}/optimize")
+	public ResponseEntity<SuccessResponse<OptimizeResponseDTO>> optimize(
+			@AuthenticationPrincipal Long memberId,
+			@PathVariable Long templateId,
+			@PathVariable Integer dayNo
+	) {
+		OptimizeResponseDTO response = templateDayOptimizeCommandService.optimizeVlocks(memberId, templateId, dayNo);
+		return ResponseEntity.ok(
+				SuccessResponse.ok(TemplateDaySuccessCode.TEMPLATE_DAY_OPTIMIZE_SUCCESS, response));
 	}
 }
