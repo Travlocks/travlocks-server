@@ -140,6 +140,28 @@ public interface MemberControllerDocs {
 	);
 
     @Operation(
+            summary = "마이페이지 조회 API",
+            description = """
+        로그인한 사용자의 마이페이지 정보를 조회합니다.
+
+        - 닉네임 / 한줄 소개
+        - 선호 여행 스타일 ID 목록
+        - 선호 여행 테마 ID 목록
+        - 내가 생성한 블록 / 템플릿 / 즐겨찾기 수
+        - 최근 생성한 블록 최대 4개
+        - 최근 생성한(=최근 사용) 템플릿 최대 4개
+        """
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "마이페이지 조회 성공"),
+            @ApiResponse(responseCode = "401", description = "인증 실패(토큰 없음/만료/유효하지 않음)", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "존재하지 않는 유저", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    ResponseEntity<SuccessResponse<MemberMyPageResponseDTO>> getMyPage(
+            @Parameter(hidden = true) Member member
+    );
+
+    @Operation(
             summary = "프로필 편집 API",
             description = """
         마이페이지 프로필을 편집합니다.
