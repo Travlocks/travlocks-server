@@ -10,8 +10,8 @@ import java.util.List;
 
 public interface PreferredTravelStyleRepository extends JpaRepository<PreferredTravelStyle, Long> {
     @Modifying(clearAutomatically = true, flushAutomatically = true)
-    @Query("delete from PreferredTravelStyle p where p.member.id = :memberId")
-    void deleteAllByMemberId(@Param("memberId") Long memberId);
+    @Query("delete from PreferredTravelStyle pts where pts.member.id = :memberId")
+    void deleteByMemberId(@Param("memberId") Long memberId);
 
 
     @Query("""

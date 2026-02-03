@@ -16,11 +16,7 @@ public class MemberPasswordUpdateService {
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
-    public void updatePassword(Long memberId, String currentPassword, String newPassword) {
-
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
-
+    public void updatePassword(Member member, String currentPassword, String newPassword) {
         if (!member.matchesPassword(passwordEncoder, currentPassword)) {
             throw new MemberException(MemberErrorCode.PASSWORD_MISMATCH);
         }

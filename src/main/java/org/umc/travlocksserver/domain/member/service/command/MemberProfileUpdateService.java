@@ -42,9 +42,8 @@ public class MemberProfileUpdateService {
     private final TravelThemeRepository travelThemeRepository;
 
     @Transactional
-    public MemberProfileUpdateResponseDTO updateMyProfile(Long memberId, MemberProfileUpdateRequestDTO request) {
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+    public MemberProfileUpdateResponseDTO updateMyProfile(Member member, MemberProfileUpdateRequestDTO request) {
+        Long memberId = member.getId();
 
         if (isPresent(request.nickname())) {
             String nickname = request.nickname().get();
@@ -77,7 +76,7 @@ public class MemberProfileUpdateService {
                 throw new TravelStyleException(TravelStyleErrorCode.TRAVEL_STYLE_MAX_EXCEEDED);
             }
 
-            preferredStyleRepository.deleteAllByMemberId(memberId);
+            preferredStyleRepository.deleteByMemberId(memberId);
 
             if (!uniqueStyleIds.isEmpty()) {
                 List<TravelStyle> styles = travelStyleRepository.findAllById(uniqueStyleIds);
@@ -111,7 +110,7 @@ public class MemberProfileUpdateService {
                 throw new TravelThemeException(TravelThemeErrorCode.TRAVEL_THEME_MAX_EXCEEDED);
             }
 
-            preferredThemeRepository.deleteAllByMemberId(memberId);
+            preferredThemeRepository.deleteByMemberId(memberId);
 
             if (!uniqueThemeIds.isEmpty()) {
                 List<TravelTheme> themes = travelThemeRepository.findAllById(uniqueThemeIds);

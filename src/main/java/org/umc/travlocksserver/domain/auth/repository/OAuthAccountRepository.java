@@ -1,14 +1,14 @@
-package org.umc.travlocksserver.domain.member.repository;
+package org.umc.travlocksserver.domain.auth.repository;
 
 import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import org.umc.travlocksserver.domain.member.entity.MemberConsent;
+import org.umc.travlocksserver.domain.auth.entity.OAuthAccount;
 
-public interface MemberConsentRepository extends JpaRepository<MemberConsent, Long> {
+public interface OAuthAccountRepository extends JpaRepository<OAuthAccount, Long> {
     @Modifying(clearAutomatically = true, flushAutomatically = true)
-    @Query("delete from MemberConsent mc where mc.member.id = :memberId")
+    @Query("delete from OAuthAccount oa where oa.member.id = :memberId")
     void deleteByMemberId(@Param("memberId") Long memberId);
 
 }

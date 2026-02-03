@@ -1,5 +1,6 @@
 package org.umc.travlocksserver.domain.member.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -7,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import org.umc.travlocksserver.domain.member.dto.request.MemberPasswordUpdateRequestDTO;
 import org.umc.travlocksserver.domain.member.dto.request.MemberProfileUpdateRequestDTO;
 import org.umc.travlocksserver.domain.member.dto.request.MemberSignupRequestDTO;
+import org.umc.travlocksserver.domain.member.dto.request.MemberWithdrawRequestDTO;
 import org.umc.travlocksserver.domain.member.dto.response.*;
 import org.umc.travlocksserver.domain.member.entity.Member;
 import org.umc.travlocksserver.domain.member.exception.MemberException;
@@ -14,6 +16,7 @@ import org.umc.travlocksserver.domain.member.exception.code.MemberSuccessCode;
 import org.umc.travlocksserver.domain.member.service.command.MemberPasswordUpdateService;
 import org.umc.travlocksserver.domain.member.service.command.MemberProfileUpdateService;
 import org.umc.travlocksserver.domain.member.service.command.MemberSignupService;
+import org.umc.travlocksserver.domain.member.service.command.MemberWithdrawService;
 import org.umc.travlocksserver.domain.member.service.query.MemberEmailCheckService;
 import org.umc.travlocksserver.domain.member.service.query.MemberNicknameCheckService;
 import org.umc.travlocksserver.domain.member.service.query.MemberProfileQueryService;
@@ -38,6 +41,7 @@ public class MemberController implements MemberControllerDocs {
     private final MemberProfileQueryService memberProfileQueryService;
     private final MemberPasswordUpdateService memberPasswordUpdateService;
     private final MemberProfileUpdateService memberProfileUpdateService;
+    private final MemberWithdrawService memberWithdrawService;
 
     @GetMapping("/email/exists")
     public ResponseEntity<SuccessResponse<MemberEmailExistsResponseDTO>> checkEmailExists(
@@ -99,7 +103,7 @@ public class MemberController implements MemberControllerDocs {
     ) {
         MemberSuccessCode successCode = MemberSuccessCode.MEMBER_PROFILE_UPDATED;
 
-        MemberProfileUpdateResponseDTO data = memberProfileUpdateService.updateMyProfile(member.getId(), request);
+        MemberProfileUpdateResponseDTO data = memberProfileUpdateService.updateMyProfile(member, request);
 
         return ResponseEntity
                 .status(successCode.getStatus())
@@ -113,7 +117,7 @@ public class MemberController implements MemberControllerDocs {
         MemberSuccessCode successCode = MemberSuccessCode.MEMBER_PASSWORD_UPDATED;
 
         memberPasswordUpdateService.updatePassword(
-                member.getId(),
+                member,
                 request.currentPassword(),
                 request.newPassword()
         );
@@ -122,4 +126,23 @@ public class MemberController implements MemberControllerDocs {
                 .status(successCode.getStatus())
                 .body(SuccessResponse.ok(successCode, null));
     }
+
+    @DeleteMapping("/me")
+    public ResponseEntity<SuccessResponse<Void>> withdraw(
+            @LoginUser Member member,
+            @RequestBody(required = false) MemberWithdrawRequestDTO request,
+            HttpServletRequest httpRequest,
+            HttpServletResponse httpResponse
+    ) {
+
+        MemberSuccessCode successCode = MemberSuccessCode.MEMBER_WITHDRAW_SUCCESS;
+
+        String reason = (request == null) ? null : request.reason();
+        memberWithdrawService.withdraw(member, reason, httpRequest, httpResponse);
+
+        return ResponseEntity
+                .status(successCode.getStatus())
+                .body(SuccessResponse.ok(successCode, null));
+    }
+
 }

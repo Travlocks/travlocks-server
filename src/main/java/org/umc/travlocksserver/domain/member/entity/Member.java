@@ -6,6 +6,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.umc.travlocksserver.domain.member.enums.MemberStatus;
 import org.umc.travlocksserver.global.entity.SoftDeleteBaseEntity;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -79,5 +81,16 @@ public class Member extends SoftDeleteBaseEntity {
         this.introduction = introduction;
     }
 
+    public void withdrawAndAnonymize(String anonymizedEmail, String anonymizedNickname) {
+        this.status = MemberStatus.DELETED;
+        this.softDelete();
+        this.email = anonymizedEmail;
+        this.nickname = anonymizedNickname;
+        this.introduction = null;
+        this.passwordHash = null;
+        this.vlockCount = 0;
+        this.templateCount = 0;
+        this.starCount = 0;
+    }
 
 }

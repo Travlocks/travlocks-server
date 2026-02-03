@@ -9,6 +9,9 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.umc.travlocksserver.domain.member.entity.Member;
+import org.umc.travlocksserver.domain.member.enums.MemberStatus;
+import org.umc.travlocksserver.domain.member.exception.MemberException;
+import org.umc.travlocksserver.domain.member.exception.code.MemberErrorCode;
 import org.umc.travlocksserver.domain.member.repository.MemberRepository;
 import org.umc.travlocksserver.global.annotation.LoginUser;
 
@@ -41,6 +44,13 @@ public class LoginUserArgumentResolver implements HandlerMethodArgumentResolver 
 
         Long memberId = (Long) authentication.getPrincipal();
 
-        return memberRepository.findById(memberId).orElse(null);
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+
+        if (member.getStatus() == MemberStatus.DELETED) {
+            throw new MemberException(MemberErrorCode.MEMBER_DELETED);
+        }
+
+        return member;
     }
 }

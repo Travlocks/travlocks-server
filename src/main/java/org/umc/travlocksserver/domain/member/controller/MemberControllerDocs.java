@@ -1,6 +1,7 @@
 package org.umc.travlocksserver.domain.member.controller;
 
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -8,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.umc.travlocksserver.domain.member.dto.request.MemberPasswordUpdateRequestDTO;
 import org.umc.travlocksserver.domain.member.dto.request.MemberProfileUpdateRequestDTO;
 import org.umc.travlocksserver.domain.member.dto.request.MemberSignupRequestDTO;
+import org.umc.travlocksserver.domain.member.dto.request.MemberWithdrawRequestDTO;
 import org.umc.travlocksserver.domain.member.dto.response.*;
 import org.umc.travlocksserver.domain.member.entity.Member;
 import org.umc.travlocksserver.global.response.ErrorResponse;
@@ -149,4 +151,30 @@ public interface MemberControllerDocs {
             Member member,
             @Valid MemberPasswordUpdateRequestDTO request
     );
+
+    @Operation(
+            summary = "회원 탈퇴 API",
+            description = """
+            로그인한 사용자가 계정을 탈퇴합니다.
+
+            - 탈퇴 사유(reason)는 선택값입니다. (요청 Body 생략 가능)
+            - 탈퇴 시 처리 정책:
+              - 개인 데이터(선호스타일/선호테마/약관동의/즐겨찾기/OAuth 계정)는 삭제됩니다.
+              - 사용자가 생성한 콘텐츠(블록/템플릿/템플릿 평점)는 삭제하지 않고 유지되며, 작성자는 '탈퇴한 사용자(더미 계정)'로 변경됩니다.
+              - refreshToken은 서버(Redis)에서 무효화되고, 클라이언트 쿠키도 만료 처리됩니다.
+              - members는 소프트 삭제(status=DELETED) + 개인정보 익명화 처리됩니다.
+            """
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "회원 탈퇴 성공"),
+            @ApiResponse(responseCode = "401", description = "인증 실패(토큰 없음/만료/유효하지 않음)", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "존재하지 않는 유저", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    ResponseEntity<SuccessResponse<Void>> withdraw(
+            Member member,
+            MemberWithdrawRequestDTO request,
+            HttpServletRequest httpRequest,
+            HttpServletResponse httpResponse
+    );
+
 }
