@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.umc.travlocksserver.domain.auth.repository.OAuthAccountRepository;
 import org.umc.travlocksserver.domain.auth.repository.RefreshTokenRedisRepository;
+import org.umc.travlocksserver.domain.auth.service.command.AuthService;
 import org.umc.travlocksserver.domain.favorite.repository.FavoriteRepository;
 import org.umc.travlocksserver.domain.member.entity.Member;
 import org.umc.travlocksserver.domain.member.entity.MemberDeletionLog;
@@ -35,13 +36,10 @@ public class MemberWithdrawService {
     private final MemberConsentRepository memberConsentRepository;
     private final FavoriteRepository starRepository;
     private final OAuthAccountRepository oAuthAccountRepository;
-
     private final VlockRepository vlockRepository;
     private final TemplateRepository templateRepository;
     private final TemplateRatingRepository templateRatingRepository;
-
-    private final RefreshTokenRedisRepository refreshTokenRedisRepository;
-    private final JwtTokenProvider jwtTokenProvider;
+    private final AuthService authService;
 
     @Transactional
     public void withdraw(Member loginMember, String reason, HttpServletRequest request, HttpServletResponse response) {
@@ -55,7 +53,7 @@ public class MemberWithdrawService {
                 MemberDeletionLog.create(loginMember, reason)
         );
 
-        invalidateRefreshToken(request, response);
+        authService.invalidateRefreshToken(request, response);
 
         preferredTravelStyleRepository.deleteByMemberId(memberId);
         preferredTravelThemeRepository.deleteByMemberId(memberId);
@@ -75,46 +73,6 @@ public class MemberWithdrawService {
                 anonymizedEmail(memberId),
                 anonymizedNickname(memberId)
         );
-    }
-
-    /**
-     * RefreshToken 무효화
-     */
-    private void invalidateRefreshToken(HttpServletRequest request, HttpServletResponse response) {
-        String refreshToken = extractCookie(request, "refreshToken");
-
-        if (refreshToken != null && !refreshToken.isBlank()) {
-            try {
-                if (jwtTokenProvider.validateRefreshToken(refreshToken)) {
-                    String jti = jwtTokenProvider.extractJti(refreshToken);
-                    if (jti != null && !jti.isBlank()) {
-                        refreshTokenRedisRepository.delete(jti);
-                    }
-                }
-            } catch (Exception ignored) {
-            }
-        }
-
-        // 쿠키 삭제
-        ResponseCookie deleteCookie = ResponseCookie.from("refreshToken", "")
-                .httpOnly(true)
-                .secure(false) // 운영환경 true
-                .path("/")
-                .maxAge(0)
-                .sameSite("Lax") // 운영환경 None
-                .build();
-
-        response.addHeader(HttpHeaders.SET_COOKIE, deleteCookie.toString());
-    }
-
-    // 쿠키 추출
-    private String extractCookie(HttpServletRequest request, String name) {
-        Cookie[] cookies = request.getCookies();
-        if (cookies == null) return null;
-        for (Cookie cookie : cookies) {
-            if (name.equals(cookie.getName())) return cookie.getValue();
-        }
-        return null;
     }
 
     private String anonymizedEmail(Long memberId) {
