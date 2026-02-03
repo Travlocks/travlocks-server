@@ -111,7 +111,7 @@ public interface TemplateControllerDocs {
 	);
 
 	@Operation(
-		summary = "템플릿 리믹스 캔버스 조회 API",
+		summary = "템플릿 캔버스 조회 API",
 		description = """
 			특정 템플릿의 N일차 캔버스를 조회합니다.
 			캔버스에는 블록 목록이 포함됩니다.
