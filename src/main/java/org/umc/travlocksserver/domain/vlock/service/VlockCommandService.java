@@ -19,17 +19,16 @@ import org.umc.travlocksserver.domain.vlock.repository.VlockCategoryRepository;
 import lombok.RequiredArgsConstructor;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
-public class VlockService {
+public class VlockCommandService {
 
 	private final VlockCategoryRepository vlockCategoryRepository;
 	private final CityRepository cityRepository;
 	private final MemberRepository memberRepository;
 	private final VlockAsyncHandler vlockAsyncHandler;
 
-	@Transactional
 	public void createVlock(Long memberId, VlockRequestDTO request) {
-
 		Member member = memberRepository.findById(memberId)
 			.orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
 
@@ -42,3 +41,4 @@ public class VlockService {
 		vlockAsyncHandler.saveVlockAsync(member, category, city, request);
 	}
 }
+
