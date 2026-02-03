@@ -5,15 +5,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.umc.travlocksserver.domain.member.dto.request.MemberPasswordUpdateRequestDTO;
+import org.umc.travlocksserver.domain.member.dto.request.MemberProfileUpdateRequestDTO;
 import org.umc.travlocksserver.domain.member.dto.request.MemberSignupRequestDTO;
-import org.umc.travlocksserver.domain.member.dto.response.MemberEmailExistsResponseDTO;
-import org.umc.travlocksserver.domain.member.dto.response.MemberNicknameExistsResponseDTO;
-import org.umc.travlocksserver.domain.member.dto.response.MemberProfileResponseDTO;
-import org.umc.travlocksserver.domain.member.dto.response.MemberSignupResponseDTO;
+import org.umc.travlocksserver.domain.member.dto.response.*;
 import org.umc.travlocksserver.domain.member.entity.Member;
 import org.umc.travlocksserver.domain.member.exception.MemberException;
 import org.umc.travlocksserver.domain.member.exception.code.MemberSuccessCode;
 import org.umc.travlocksserver.domain.member.service.command.MemberPasswordUpdateService;
+import org.umc.travlocksserver.domain.member.service.command.MemberProfileUpdateService;
 import org.umc.travlocksserver.domain.member.service.command.MemberSignupService;
 import org.umc.travlocksserver.domain.member.service.query.MemberEmailCheckService;
 import org.umc.travlocksserver.domain.member.service.query.MemberNicknameCheckService;
@@ -38,6 +37,7 @@ public class MemberController implements MemberControllerDocs {
     private final MemberSignupService memberSignupService;
     private final MemberProfileQueryService memberProfileQueryService;
     private final MemberPasswordUpdateService memberPasswordUpdateService;
+    private final MemberProfileUpdateService memberProfileUpdateService;
 
     @GetMapping("/email/exists")
     public ResponseEntity<SuccessResponse<MemberEmailExistsResponseDTO>> checkEmailExists(
@@ -86,6 +86,20 @@ public class MemberController implements MemberControllerDocs {
         MemberSuccessCode successCode = MemberSuccessCode.MEMBER_PROFILE_GET_SUCCESS;
 
         MemberProfileResponseDTO data = memberProfileQueryService.getMemberProfile(memberId, cursor, limit);
+
+        return ResponseEntity
+                .status(successCode.getStatus())
+                .body(SuccessResponse.ok(successCode, data));
+    }
+
+    @PatchMapping("/me/profile")
+    public ResponseEntity<SuccessResponse<MemberProfileUpdateResponseDTO>> updateMyProfile(
+            @LoginUser Member member,
+            @Valid @RequestBody MemberProfileUpdateRequestDTO request
+    ) {
+        MemberSuccessCode successCode = MemberSuccessCode.MEMBER_PROFILE_UPDATED;
+
+        MemberProfileUpdateResponseDTO data = memberProfileUpdateService.updateMyProfile(member.getId(), request);
 
         return ResponseEntity
                 .status(successCode.getStatus())

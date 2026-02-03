@@ -1,15 +1,14 @@
 package org.umc.travlocksserver.domain.member.controller;
 
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.umc.travlocksserver.domain.member.dto.request.MemberPasswordUpdateRequestDTO;
+import org.umc.travlocksserver.domain.member.dto.request.MemberProfileUpdateRequestDTO;
 import org.umc.travlocksserver.domain.member.dto.request.MemberSignupRequestDTO;
-import org.umc.travlocksserver.domain.member.dto.response.MemberEmailExistsResponseDTO;
-import org.umc.travlocksserver.domain.member.dto.response.MemberNicknameExistsResponseDTO;
-import org.umc.travlocksserver.domain.member.dto.response.MemberProfileResponseDTO;
-import org.umc.travlocksserver.domain.member.dto.response.MemberSignupResponseDTO;
+import org.umc.travlocksserver.domain.member.dto.response.*;
 import org.umc.travlocksserver.domain.member.entity.Member;
 import org.umc.travlocksserver.global.response.ErrorResponse;
 import org.umc.travlocksserver.global.response.SuccessResponse;
@@ -36,8 +35,8 @@ public interface MemberControllerDocs {
 			"""
 	)
 	@ApiResponses({
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "이메일 중복 검사 성공"),
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "요청 값 검증 실패(이메일 형식/빈 값 등)", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+		@ApiResponse(responseCode = "200", description = "이메일 중복 검사 성공"),
+		@ApiResponse(responseCode = "400", description = "요청 값 검증 실패(이메일 형식/빈 값 등)", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 	})
     ResponseEntity<SuccessResponse<MemberEmailExistsResponseDTO>> checkEmailExists(
 		@NotBlank(message = "이메일은 필수입니다.") @Email(message = "올바르지 않은 이메일 형식입니다.")
@@ -54,8 +53,8 @@ public interface MemberControllerDocs {
 			"""
 	)
 	@ApiResponses({
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "닉네임 중복 검사 성공"),
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "요청 값 검증 실패(빈 값 등)", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+		@ApiResponse(responseCode = "200", description = "닉네임 중복 검사 성공"),
+		@ApiResponse(responseCode = "400", description = "요청 값 검증 실패(빈 값 등)", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 	})
     ResponseEntity<SuccessResponse<MemberNicknameExistsResponseDTO>> checkNicknameExists(
 		@NotBlank(message = "닉네임은 필수입니다.")
@@ -73,10 +72,10 @@ public interface MemberControllerDocs {
 			"""
 	)
 	@ApiResponses({
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "회원가입 성공"),
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "요청 값 검증 실패 / 약관 오류 / 존재하지 않는 여행 스타일·테마 ID 포함", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "인증 실패(예: signupToken 만료/불일치)",content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "409", description = "충돌(예: 이메일/닉네임 중복)",content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+		@ApiResponse(responseCode = "201", description = "회원가입 성공"),
+		@ApiResponse(responseCode = "400", description = "요청 값 검증 실패 / 약관 오류 / 존재하지 않는 여행 스타일·테마 ID 포함", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+		@ApiResponse(responseCode = "401", description = "인증 실패(예: signupToken 만료/불일치)",content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+		@ApiResponse(responseCode = "409", description = "충돌(예: 이메일/닉네임 중복)",content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 	})
     ResponseEntity<SuccessResponse<MemberSignupResponseDTO>> signup(
 		@Valid MemberSignupRequestDTO request,
@@ -108,6 +107,30 @@ public interface MemberControllerDocs {
 	);
 
     @Operation(
+            summary = "프로필 편집 API",
+            description = """
+        마이페이지 프로필을 편집합니다.
+
+        - 요청에 포함되지 않은 필드는 기존 값을 유지합니다.
+        - introduction: null 전달 시 소개가 삭제됩니다.
+        - preferredTravelStyleIds / preferredTravelThemeIds:
+          - 필드 없음 -> 유지
+          - null -> 400 오류
+          - [] -> 전체 해제
+          - [id...] -> 해당 목록으로 교체 (최대 2개)
+        """
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "프로필 수정 성공"),
+            @ApiResponse(responseCode = "400", description = "검증 실패/중복 닉네임/스타일·테마 개수 초과/존재하지 않는 ID", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "401", description = "인증 실패", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    ResponseEntity<SuccessResponse<MemberProfileUpdateResponseDTO>> updateMyProfile(
+            Member member,
+            @Valid MemberProfileUpdateRequestDTO request
+    );
+
+    @Operation(
             summary = "비밀번호 변경 API",
             description = """
 			로그인한 사용자의 비밀번호를 변경합니다.
@@ -117,10 +140,10 @@ public interface MemberControllerDocs {
 			"""
     )
     @ApiResponses({
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "비밀번호 변경 성공"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "요청 값 검증 실패 / 현재 비밀번호 불일치 / 새 비밀번호가 기존과 동일", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "인증 실패(토큰 없음/만료 등)", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "존재하지 않는 유저", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            @ApiResponse(responseCode = "200", description = "비밀번호 변경 성공"),
+            @ApiResponse(responseCode = "400", description = "요청 값 검증 실패 / 현재 비밀번호 불일치 / 새 비밀번호가 기존과 동일", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "401", description = "인증 실패(토큰 없음/만료 등)", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "존재하지 않는 유저", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     ResponseEntity<SuccessResponse<Void>> updatePassword(
             Member member,

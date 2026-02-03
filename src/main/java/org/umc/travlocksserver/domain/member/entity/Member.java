@@ -71,4 +71,13 @@ public class Member extends SoftDeleteBaseEntity {
         this.passwordHash = encodedPassword;
     }
 
+    public void changeNickname(String nickname) {
+        this.nickname = nickname;
+    }
+
+    public void changeIntroduction(String introduction) {
+        this.introduction = introduction;
+    }
+
+
 }
