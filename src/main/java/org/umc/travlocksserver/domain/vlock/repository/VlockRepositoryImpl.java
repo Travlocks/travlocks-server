@@ -4,8 +4,8 @@ import java.util.List;
 
 import org.umc.travlocksserver.domain.location.dto.CityDTO;
 import org.umc.travlocksserver.domain.location.dto.RegionDTO;
-import org.umc.travlocksserver.domain.vlock.dto.vlock.VlockResponseDTO;
-import org.umc.travlocksserver.domain.vlock.dto.vlockCategory.VlockCategoryDTO;
+import org.umc.travlocksserver.domain.vlock.dto.response.VlockResponseDTO;
+import org.umc.travlocksserver.domain.vlock.dto.response.VlockCategoryDTO;
 
 import com.querydsl.core.types.ConstructorExpression;
 import com.querydsl.core.types.Projections;
