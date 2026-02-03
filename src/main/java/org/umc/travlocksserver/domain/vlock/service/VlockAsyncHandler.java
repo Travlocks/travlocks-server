@@ -11,17 +11,15 @@ import org.umc.travlocksserver.domain.vlock.entity.VlockCategory;
 import org.umc.travlocksserver.domain.vlock.repository.VlockRepository;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @Component
+@Transactional
 @RequiredArgsConstructor
 public class VlockAsyncHandler {
 
 	private final VlockRepository vlockRepository;
 
 	@Async
-	@Transactional
 	public void saveVlockAsync(Member member, VlockCategory category, City city, VlockRequestDTO request) {
 		Vlock newVlock = Vlock.create(
 			category,
