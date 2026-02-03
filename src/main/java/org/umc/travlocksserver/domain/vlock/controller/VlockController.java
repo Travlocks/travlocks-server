@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.umc.travlocksserver.domain.vlock.constant.VlockSuccessCode;
 import org.umc.travlocksserver.domain.vlock.dto.vlock.VlockRequestDTO;
 import org.umc.travlocksserver.domain.vlock.dto.vlock.VlockResponseDTO;
-import org.umc.travlocksserver.domain.vlock.service.VlockCommandService;
-import org.umc.travlocksserver.domain.vlock.service.VlockQueryService;
+import org.umc.travlocksserver.domain.vlock.service.command.VlockCommandService;
+import org.umc.travlocksserver.domain.vlock.service.query.VlockQueryService;
 import org.umc.travlocksserver.global.response.SuccessResponse;
 
 import jakarta.validation.Valid;

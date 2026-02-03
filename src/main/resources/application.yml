@@ -50,10 +50,43 @@ springdoc:
   swagger-ui:
     enabled: true
 
+suggestion:
+  vlock:
+    size: 3
+    min-pool: 50
+    popular-pool: 100  # Day에 있는 Vlock이 0개일 때 DB에서 가져올 Vlock의 최대 추천 후보 수
+    box-pool: 300
+    pool-size: 30
+    ai-candidate-pool: 40
+    max-duplicate-category: 2
+
+kakao:
+  rest-api-key: ${KAKAO_REST_API_KEY}
+  base-url: https://dapi.kakao.com
+  keyword-search:
+    path: /v2/local/search/keyword.json
+    size: 15
+  timeout:
+    connect-ms: 1000
+    response-ms: 3000
+
+hyperclova:
+  base-url: https://clovastudio.stream.ntruss.com/v1/chat-completions/{model}
+  api-key: ${CLOVA_API_KEY}
+  model: HCX-003
+  timeout-ms:
+    connect: 2000
+    response: 6000
+  retry:
+    max: 2
+    backoff-ms: 200
+
 cache:
   recommendation:
     templates:
       cache-ttl-minutes: 15
+    vlocks:
+      cache-ttl-minutes: 60
 
 tmap:
   api:
