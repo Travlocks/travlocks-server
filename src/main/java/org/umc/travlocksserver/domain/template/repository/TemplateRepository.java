@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -70,4 +71,21 @@ public interface TemplateRepository extends JpaRepository<Template, Long>, Templ
 	default List<Template> findPublicTemplatesAfterCursor(Long memberId, Long cursor, int limit) {
 		return findPublicTemplatesAfterCursor(memberId, cursor, PageRequest.of(0, limit));
 	}
+
+	@Query("""
+        SELECT t
+        FROM Template t
+            LEFT JOIN FETCH t.templateCities tc
+            LEFT JOIN FETCH tc.city c
+            LEFT JOIN FETCH c.region r
+        WHERE t.owner.id = :ownerId
+        ORDER BY t.updatedAt DESC
+    """)
+	List<Template> findRecentTemplatesByOwner(Long ownerId);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("update Template t set t.owner.id = :deletedMemberId where t.owner.id = :memberId")
+    void transferOwner(@Param("memberId") Long memberId,
+                       @Param("deletedMemberId") Long deletedMemberId);
+
 }

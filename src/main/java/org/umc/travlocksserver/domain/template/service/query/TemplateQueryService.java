@@ -11,8 +11,11 @@ import org.umc.travlocksserver.domain.template.dto.response.PopularTemplateRespo
 import org.umc.travlocksserver.domain.template.dto.response.TemplateDetailResponseDTO;
 import org.umc.travlocksserver.domain.template.dto.response.TemplateRecommendationCardDTO;
 import org.umc.travlocksserver.domain.template.dto.response.TemplateRecommendationsDTO;
+import org.umc.travlocksserver.domain.template.dto.response.TemplateExploreResponseDTO;
+import org.umc.travlocksserver.domain.template.dto.response.*;
 import org.umc.travlocksserver.domain.template.entity.Template;
 import org.umc.travlocksserver.domain.template.exception.TemplateException;
+import org.umc.travlocksserver.domain.template.repository.TemplateExploreRepositoryCustom;
 import org.umc.travlocksserver.domain.template.repository.TemplateRepository;
 import org.umc.travlocksserver.domain.traveltheme.repository.PreferredTravelThemeRepository;
 import org.umc.travlocksserver.infra.redis.template.CachedTemplateRecommendations;
@@ -33,6 +36,7 @@ public class TemplateQueryService {
     private final PreferredTravelThemeRepository preferredTravelThemeRepository;
     private final TemplateRepository templateRepository;
     private final FavoriteRepository favoriteRepository;
+    private final TemplateExploreRepositoryCustom templateExploreRepositoryCustom;
 
     public TemplateRecommendationsDTO getRecommendedTemplates(Long memberId) {
         CachedTemplateRecommendations cached = cache.get(memberId);
@@ -52,7 +56,7 @@ public class TemplateQueryService {
     }
 
     private List<TemplateRecommendationCardDTO> recommendTemplates(Long memberId) {
-       // 회원 선호 테마 ID들 조회
+        // 회원 선호 테마 ID들 조회
         List<Long> preferredThemeIds = preferredTravelThemeRepository.findPreferredThemeIdsByMemberId(memberId);
 
         // 최근 5개 템플릿의 TravleThemeID 뽑고 Distinct
@@ -62,7 +66,7 @@ public class TemplateQueryService {
         List<Long> excludedTemplateIds = templateRepository.findRemixedTemplateIdsByMemberId(memberId);
 
         // 개인화 추천
-        List<TemplateRecommendationCardDTO> result = templateRepository.recommendPersonalized(preferredThemeIds, recentThemeIds,excludedTemplateIds, RECOMMEND_TEMPLATE_LIMIT);
+        List<TemplateRecommendationCardDTO> result = templateRepository.recommendPersonalized(preferredThemeIds, recentThemeIds, excludedTemplateIds, RECOMMEND_TEMPLATE_LIMIT);
 
         return result;
     }
@@ -142,5 +146,62 @@ public class TemplateQueryService {
                 blocks,
                 isFavorited
         );
+    }
+
+    public List<TemplateExploreResponseDTO> exploreTemplates(
+            String keyword,
+            List<String> cities,
+            List<String> themes,
+            List<String> tripDays,
+            List<String> transportTypes,
+            String sort,
+            int page
+    ) {
+
+        List<TemplateExploreResponseDTO> result =
+                templateExploreRepositoryCustom.findExploreTemplates(
+                        keyword,
+                        cities,
+                        themes,
+                        tripDays,
+                        transportTypes,
+                        sort,
+                        page * 9
+                );
+
+        if (result.isEmpty()) {
+            throw new TemplateException(TemplateErrorCode.TEMPLATE_NO_MATCH);
+        }
+
+        return result;
+    }
+
+
+    public List<TemplateLatestDTO> getRecentTemplates(Long memberId) {
+        List<Template> templates = templateRepository.findRecentTemplatesByOwner(memberId);
+
+        List<TemplateLatestDTO> dtos = templates.stream()
+                .limit(2) // 최신 2개만
+                .map(t -> {
+                    String regionName = t.getTemplateCities().stream()
+                            .findFirst()
+                            .map(tc -> tc.getCity().getRegion().getName())
+                            .orElse(null);
+
+                    return new TemplateLatestDTO(
+                            t.getId(),
+                            t.getTitle(),
+                            t.getUpdatedAt(),
+                            t.getProgressRate(),
+                            regionName
+                    );
+                })
+                .toList();
+
+        if (dtos.isEmpty()) {
+            throw new TemplateException(TemplateErrorCode.TEMPLATE_RECENT_NOT_FOUND);
+        }
+
+        return dtos;
     }
 }

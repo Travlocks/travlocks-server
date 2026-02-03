@@ -1,9 +1,9 @@
-package org.umc.travlocksserver.domain.vlock.dto.vlock;
+package org.umc.travlocksserver.domain.vlock.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
-public record VlockRequestDTO(
+public record VlockUpdateRequestDTO(
 	@NotBlank(message = "이름은 필수입니다.")
 	String name,
 
@@ -19,6 +19,11 @@ public record VlockRequestDTO(
 	String memo,
 
 	Double latitude,
-	Double longitude
+	Double longitude,
+
+	String coverImgUrl,
+	String linkUrl,
+
+	Boolean isPublic
 ) {
 }

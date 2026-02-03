@@ -1,4 +1,4 @@
-package org.umc.travlocksserver.domain.vlock.constant;
+package org.umc.travlocksserver.domain.vlock.code;
 
 import org.springframework.http.HttpStatus;
 import org.umc.travlocksserver.global.code.BaseCode;
@@ -10,7 +10,9 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum VlockSuccessCode implements BaseCode {
 
-	VLOCK_CREATE_ACCEPTED_SUCCESS(HttpStatus.ACCEPTED, "블록 생성 요청이 완료되었습니다."),
+	VLOCK_CREATE_SUCCESS(HttpStatus.CREATED, "블록 생성이 완료되었습니다."),
+
+	VLOCK_UPDATE_SUCCESS(HttpStatus.OK, "블록 수정이 완료되었습니다."),
 
 	VLOCK_GET_SUCCESS(HttpStatus.OK, "블록을 성공적으로 조회했습니다.")
 	;

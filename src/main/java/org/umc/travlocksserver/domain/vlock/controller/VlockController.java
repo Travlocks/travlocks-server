@@ -8,12 +8,14 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.umc.travlocksserver.domain.vlock.constant.VlockSuccessCode;
-import org.umc.travlocksserver.domain.vlock.dto.vlock.VlockRequestDTO;
-import org.umc.travlocksserver.domain.vlock.dto.vlock.VlockResponseDTO;
+import org.umc.travlocksserver.domain.vlock.code.VlockSuccessCode;
+import org.umc.travlocksserver.domain.vlock.dto.request.VlockRequestDTO;
+import org.umc.travlocksserver.domain.vlock.dto.request.VlockUpdateRequestDTO;
+import org.umc.travlocksserver.domain.vlock.dto.response.VlockResponseDTO;
 import org.umc.travlocksserver.domain.vlock.service.command.VlockCommandService;
 import org.umc.travlocksserver.domain.vlock.service.query.VlockQueryService;
 import org.umc.travlocksserver.global.response.SuccessResponse;
@@ -31,14 +33,14 @@ public class VlockController implements VlockControllerDocs {
 
 	/** 블록 생성 */
 	@PostMapping
-	public ResponseEntity<SuccessResponse<Void>> createVlock(
+	public ResponseEntity<SuccessResponse<VlockResponseDTO>> createVlock(
 		@AuthenticationPrincipal Long memberId,
 		@Valid @RequestBody VlockRequestDTO request) {
-		vlockCommandService.createVlock(memberId, request);
+		VlockResponseDTO response = vlockCommandService.createVlock(memberId, request);
 
 		return ResponseEntity
-			.status(HttpStatus.ACCEPTED)
-			.body(SuccessResponse.ok(VlockSuccessCode.VLOCK_CREATE_ACCEPTED_SUCCESS));
+			.status(HttpStatus.CREATED)
+			.body(SuccessResponse.ok(VlockSuccessCode.VLOCK_CREATE_SUCCESS, response));
 	}
 
 	/** 인기 블록 조회 */
@@ -77,5 +79,19 @@ public class VlockController implements VlockControllerDocs {
 		return ResponseEntity
 			.status(HttpStatus.OK)
 			.body(SuccessResponse.ok(VlockSuccessCode.VLOCK_GET_SUCCESS, responses));
+	}
+
+	/** 블록 수정 */
+	@PutMapping("/{vlockId}")
+	public ResponseEntity<SuccessResponse<VlockResponseDTO>> updateVlock(
+		@AuthenticationPrincipal Long memberId,
+		@PathVariable Long vlockId,
+		@Valid @RequestBody VlockUpdateRequestDTO request
+	) {
+		VlockResponseDTO response = vlockCommandService.updateVlock(memberId, vlockId, request);
+
+		return ResponseEntity
+			.status(HttpStatus.OK)
+			.body(SuccessResponse.ok(VlockSuccessCode.VLOCK_UPDATE_SUCCESS, response));
 	}
 }

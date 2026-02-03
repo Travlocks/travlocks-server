@@ -6,5 +6,4 @@ import org.umc.travlocksserver.domain.travelstyle.entity.TravelStyle;
 import java.util.List;
 
 public interface TravelStyleRepository extends JpaRepository<TravelStyle, Long> {
-    List<TravelStyle> findAllByIdIn(List<Long> ids);
 }

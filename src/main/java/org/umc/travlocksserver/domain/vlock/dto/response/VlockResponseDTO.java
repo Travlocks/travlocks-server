@@ -1,9 +1,8 @@
-package org.umc.travlocksserver.domain.vlock.dto.vlock;
+package org.umc.travlocksserver.domain.vlock.dto.response;
 
 import java.time.LocalDateTime;
 
 import org.umc.travlocksserver.domain.location.dto.CityDTO;
-import org.umc.travlocksserver.domain.vlock.dto.vlockCategory.VlockCategoryDTO;
 import org.umc.travlocksserver.domain.vlock.entity.Vlock;
 
 public record VlockResponseDTO(

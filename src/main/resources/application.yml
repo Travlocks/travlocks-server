@@ -18,6 +18,11 @@ spring:
       hibernate:
         format_sql: true
 
+logging:
+  level:
+    org.hibernate.SQL: debug
+    org.hibernate.orm.jdbc.bind: trace
+
   data:
     redis:
       host: ${SPRING_DATA_REDIS_HOST:localhost}
@@ -87,3 +92,8 @@ cache:
       cache-ttl-minutes: 15
     vlocks:
       cache-ttl-minutes: 60
+
+tmap:
+  api:
+    key: ${TMAP_API_KEY}
+    base-url: ${TMAP_BASE_URL:https://apis.openapi.sk.com}
