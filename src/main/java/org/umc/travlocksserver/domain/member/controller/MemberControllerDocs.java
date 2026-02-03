@@ -21,7 +21,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
-@Tag(name = "템플릿 API", description = "템플릿 관련 API입니다.")
+@Tag(name = "회원 API", description = "회원 관련 API입니다.")
 public interface MemberControllerDocs {
 
 	@Operation(
