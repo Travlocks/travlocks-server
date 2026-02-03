@@ -24,6 +24,7 @@ import org.umc.travlocksserver.domain.template.exception.code.TemplateDaySuccess
 import org.umc.travlocksserver.domain.template.service.command.TemplateDayCommandService;
 import org.umc.travlocksserver.domain.template.dto.response.VlockSuggestionsResponseDTO;
 import org.umc.travlocksserver.domain.template.dto.response.*;
+import org.umc.travlocksserver.domain.template.dto.response.*;
 import org.umc.travlocksserver.domain.template.service.command.TemplateRemixService;
 import org.umc.travlocksserver.domain.template.service.query.TemplateCanvasQueryService;
 import org.umc.travlocksserver.domain.template.service.query.TemplateQueryService;
@@ -156,6 +157,20 @@ public class TemplateController implements TemplateControllerDocs {
 						templateQueryService.exploreTemplates(
 								keyword, cities, themes, tripDays, transportTypes, sort, page
 						)
+				)
+		);
+	}
+
+	@GetMapping("/recent")
+	public ResponseEntity<SuccessResponse<List<TemplateLatestDTO>>> getRecentTemplates(
+			@AuthenticationPrincipal Long memberId
+	) {
+		List<TemplateLatestDTO> templates = templateQueryService.getRecentTemplates(memberId);
+
+		return ResponseEntity.ok(
+				SuccessResponse.ok(
+						TemplateSuccessCode.TEMPLATE_RECENT_GET_SUCCESS,
+						templates
 				)
 		);
 	}
