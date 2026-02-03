@@ -72,6 +72,17 @@ public interface TemplateRepository extends JpaRepository<Template, Long>, Templ
 		return findPublicTemplatesAfterCursor(memberId, cursor, PageRequest.of(0, limit));
 	}
 
+	@Query("""
+        SELECT t
+        FROM Template t
+            LEFT JOIN FETCH t.templateCities tc
+            LEFT JOIN FETCH tc.city c
+            LEFT JOIN FETCH c.region r
+        WHERE t.owner.id = :ownerId
+        ORDER BY t.updatedAt DESC
+    """)
+	List<Template> findRecentTemplatesByOwner(Long ownerId);
+
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("update Template t set t.owner.id = :deletedMemberId where t.owner.id = :memberId")
     void transferOwner(@Param("memberId") Long memberId,

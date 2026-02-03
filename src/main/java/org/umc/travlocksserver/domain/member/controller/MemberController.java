@@ -3,6 +3,7 @@ package org.umc.travlocksserver.domain.member.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.umc.travlocksserver.domain.member.dto.request.MemberPasswordUpdateRequestDTO;
@@ -17,9 +18,11 @@ import org.umc.travlocksserver.domain.member.service.command.MemberPasswordUpdat
 import org.umc.travlocksserver.domain.member.service.command.MemberProfileUpdateService;
 import org.umc.travlocksserver.domain.member.service.command.MemberSignupService;
 import org.umc.travlocksserver.domain.member.service.command.MemberWithdrawService;
+import org.umc.travlocksserver.domain.member.service.query.FavoriteTemplateQueryService;
 import org.umc.travlocksserver.domain.member.service.query.MemberEmailCheckService;
 import org.umc.travlocksserver.domain.member.service.query.MemberNicknameCheckService;
 import org.umc.travlocksserver.domain.member.service.query.MemberProfileQueryService;
+import org.umc.travlocksserver.domain.template.dto.response.TemplateCursorResponseDTO;
 import org.umc.travlocksserver.global.annotation.LoginUser;
 import org.umc.travlocksserver.global.response.SuccessResponse;
 
@@ -39,6 +42,7 @@ public class MemberController implements MemberControllerDocs {
     private final MemberNicknameCheckService memberNicknameCheckService;
     private final MemberSignupService memberSignupService;
     private final MemberProfileQueryService memberProfileQueryService;
+    private final FavoriteTemplateQueryService favoriteTemplateQueryService;
     private final MemberPasswordUpdateService memberPasswordUpdateService;
     private final MemberProfileUpdateService memberProfileUpdateService;
     private final MemberWithdrawService memberWithdrawService;
@@ -90,6 +94,21 @@ public class MemberController implements MemberControllerDocs {
         MemberSuccessCode successCode = MemberSuccessCode.MEMBER_PROFILE_GET_SUCCESS;
 
         MemberProfileResponseDTO data = memberProfileQueryService.getMemberProfile(memberId, cursor, limit);
+
+        return ResponseEntity
+                .status(successCode.getStatus())
+                .body(SuccessResponse.ok(successCode, data));
+    }
+
+    @GetMapping("/me/favorites")
+    public ResponseEntity<SuccessResponse<TemplateCursorResponseDTO>> getMyFavoriteTemplates(
+            @AuthenticationPrincipal Long memberId,
+            @RequestParam(name = "cursor", required = false) Long cursor,
+            @RequestParam(name = "limit", defaultValue = "9") int limit
+    ) {
+        MemberSuccessCode successCode = MemberSuccessCode.FAVORITE_TEMPLATE_LIST_GET_SUCCESS;
+
+        TemplateCursorResponseDTO data = favoriteTemplateQueryService.getMyFavoriteTemplates(memberId, cursor, limit);
 
         return ResponseEntity
                 .status(successCode.getStatus())

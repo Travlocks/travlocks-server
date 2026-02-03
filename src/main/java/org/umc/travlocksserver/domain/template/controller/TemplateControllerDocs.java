@@ -12,7 +12,6 @@ import org.umc.travlocksserver.domain.template.dto.response.TemplateCanvasRespon
 import org.umc.travlocksserver.domain.template.dto.response.TemplateRemixResponseDTO;
 import org.umc.travlocksserver.domain.template.enums.TransportType;
 import org.umc.travlocksserver.domain.template.dto.response.*;
-import org.umc.travlocksserver.domain.template.dto.response.*;
 import org.umc.travlocksserver.global.response.ErrorResponse;
 import org.umc.travlocksserver.global.response.SuccessResponse;
 
@@ -231,5 +230,27 @@ public interface TemplateControllerDocs {
 			@RequestParam(required = false) List<String> transportTypes,
 			@RequestParam(defaultValue = "별점순") String sort,
 			@RequestParam(defaultValue = "0") int page
+	);
+
+	@Operation(
+			summary = "최근 편집한 템플릿 조회",
+			description = "로그인한 사용자가 최근에 편집한 템플릿 최신 2개를 조회합니다.",
+			responses = {
+					@ApiResponse(
+							responseCode = "200",
+							description = "최근 편집한 템플릿 조회 성공",
+							content = @Content(
+									mediaType = "application/json",
+									schema = @Schema(implementation = TemplateLatestDTO.class)
+							)
+					),
+					@ApiResponse(
+							responseCode = "401",
+							description = "로그인 필요"
+					)
+			}
+	)
+	ResponseEntity<SuccessResponse<List<TemplateLatestDTO>>> getRecentTemplates(
+			@AuthenticationPrincipal Long memberId
 	);
 }

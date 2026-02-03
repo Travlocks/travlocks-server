@@ -7,6 +7,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.umc.travlocksserver.domain.vlock.dto.request.VlockRequestDTO;
+import org.umc.travlocksserver.domain.vlock.dto.request.VlockUpdateRequestDTO;
 import org.umc.travlocksserver.domain.vlock.dto.response.VlockResponseDTO;
 import org.umc.travlocksserver.global.response.SuccessResponse;
 
@@ -86,4 +87,16 @@ public interface VlockControllerDocs {
 	ResponseEntity<SuccessResponse<List<VlockResponseDTO>>> getMyVlocks(
 		@AuthenticationPrincipal Long memberId,
 		@PathVariable Long cityId);
+
+	@ApiResponses({
+		@ApiResponse(responseCode = "200", description = "Vlock updated successfully"),
+		@ApiResponse(responseCode = "400", description = "Name, Address, Category ID, City ID is required"),
+		@ApiResponse(responseCode = "403", description = "Access to the specified vlock is forbidden"),
+		@ApiResponse(responseCode = "404", description = "Vlock ID, Category ID, City ID is invalid")
+	})
+	ResponseEntity<SuccessResponse<VlockResponseDTO>> updateVlock(
+		@AuthenticationPrincipal Long memberId,
+		@PathVariable Long vlockId,
+		@Valid @RequestBody VlockUpdateRequestDTO request
+	);
 }

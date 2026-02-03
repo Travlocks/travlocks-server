@@ -55,8 +55,10 @@ public interface VlockRepository extends JpaRepository<Vlock,Long>, VlockReposit
     @EntityGraph(attributePaths = {"vlockCategory", "city", "city.region"})
     List<Vlock> findAllByOwnerIdAndCityIdAndDeletedAtIsNullOrderByUsageCountDescIdDesc(Long ownerId, Long cityId);
 
+	Optional<Vlock> findByIdAndDeletedAtIsNull(Long id);
+
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("update Vlock v set v.owner.id = :deletedMemberId where v.owner.id = :memberId")
-    void transferOwner(@io.lettuce.core.dynamic.annotation.Param("memberId") Long memberId,
-                       @io.lettuce.core.dynamic.annotation.Param("deletedMemberId") Long deletedMemberId);
+    void transferOwner(@Param("memberId") Long memberId,
+                       @Param("deletedMemberId") Long deletedMemberId);
 }

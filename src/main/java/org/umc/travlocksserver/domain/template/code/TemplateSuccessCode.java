@@ -16,7 +16,8 @@ public enum TemplateSuccessCode implements BaseCode {
 	TEMPLATE_GET_CANVAS_SUCCESS(HttpStatus.OK, "템플릿 캔버스 조회에 성공했습니다."),
     TEMPLATE_DETAIL_GET_SUCCESS(HttpStatus.OK, "템플릿 상세 조회에 성공했습니다."),
 	TEMPLATE_GET_ROUTES_SUCCESS(HttpStatus.OK, "이동 루트 조회에 성공했습니다."),
-	TEMPLATE_EXPLORE_SUCCESS(HttpStatus.OK,"템플릿 탐색 조회에 성공했습니다.");
+	TEMPLATE_EXPLORE_SUCCESS(HttpStatus.OK,"템플릿 탐색 조회에 성공했습니다."),
+	TEMPLATE_RECENT_GET_SUCCESS(HttpStatus.OK, "최근 편집 템플릿 조회에 성공했습니다.");
 
 	private final HttpStatus status;
 	private final String message;
