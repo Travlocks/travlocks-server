@@ -40,7 +40,7 @@ public class TemplateCanvasQueryService {
 		List<TemplateVlock> templateVlocks = templateVlockRepository.findAllByTemplateDayIdFetchVlock(day.getId());
 
 		double totalStayHours = 0;
-		double totalMoveHours = 0;
+		int totalMoveMinutes = 0;
 
 		List<TemplateCanvasVlockDTO> vlocks = new ArrayList<>(templateVlocks.size());
 
@@ -48,16 +48,16 @@ public class TemplateCanvasQueryService {
 			TemplateVlock cur = templateVlocks.get(i);
 			TemplateVlock next = (i + 1 < templateVlocks.size()) ? templateVlocks.get(i + 1) : null;
 
-			double nextMoveHours = (next == null) ? 0 : calcNextMoveMinutes(cur.getVlock(), next.getVlock());
+			int nextMoveMinutes = (next == null) ? 0 : calcNextMoveMinutes(cur.getVlock(), next.getVlock());
 
 			totalStayHours += cur.getStayHours();
-			totalMoveHours += nextMoveHours;
+			totalMoveMinutes += nextMoveMinutes;
 
 			vlocks.add(new TemplateCanvasVlockDTO(
 				cur.getId(),
 				cur.getOrderNo(),
 				cur.getStayHours(),
-				nextMoveHours,
+				nextMoveMinutes,
 				new VlockBriefDTO(
 					cur.getVlock().getId(),
 					cur.getVlock().getName(),
@@ -66,7 +66,7 @@ public class TemplateCanvasQueryService {
 			));
 		}
 
-		double totalHours = totalStayHours + totalMoveHours;
+		double totalHours = totalStayHours + (double) totalMoveMinutes / 60;
 
 		return new TemplateCanvasResponseDTO(
 			template.getId(),
@@ -74,7 +74,7 @@ public class TemplateCanvasQueryService {
 			dayNo,
 			day.getVlockCount(),
 			totalHours,
-			totalMoveHours,
+			totalMoveMinutes,
 			totalStayHours,
 			vlocks,
 			template.getCreatedAt()

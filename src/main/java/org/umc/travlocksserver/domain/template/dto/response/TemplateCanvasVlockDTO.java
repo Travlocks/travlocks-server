@@ -6,7 +6,7 @@ public record TemplateCanvasVlockDTO(
 	Long templateVlockId,
 	Integer orderNo,
 	Double stayHours,
-	Double nextMoveHours,
+	Integer nextMoveMinutes,
 	VlockBriefDTO vlock
 ) {
 }
