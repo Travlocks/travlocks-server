@@ -10,7 +10,7 @@ import org.umc.travlocksserver.domain.template.entity.Template;
 import org.umc.travlocksserver.domain.template.entity.TemplateDay;
 import org.umc.travlocksserver.domain.template.enums.TransportType;
 import org.umc.travlocksserver.domain.template.exception.TemplateDayException;
-import org.umc.travlocksserver.domain.template.exception.code.TemplateDayErrorCode;
+import org.umc.travlocksserver.domain.template.code.TemplateDayErrorCode;
 import org.umc.travlocksserver.domain.template.projection.CityProjectionDTO;
 import org.umc.travlocksserver.domain.template.repository.TemplateDayRepository;
 import org.umc.travlocksserver.domain.template.service.query.TemplateCityQueryService;

@@ -10,7 +10,7 @@ import org.umc.travlocksserver.domain.member.entity.Member;
 import org.umc.travlocksserver.domain.template.code.TemplateSuccessCode;
 import org.umc.travlocksserver.domain.template.dto.response.OptimizeResponseDTO;
 import org.umc.travlocksserver.domain.template.dto.response.*;
-import org.umc.travlocksserver.domain.template.exception.code.TemplateDaySuccessCode;
+import org.umc.travlocksserver.domain.template.code.TemplateDaySuccessCode;
 import org.umc.travlocksserver.domain.template.service.command.TemplateDayCommandService;
 import org.umc.travlocksserver.domain.template.service.command.TemplateRemixService;
 import org.umc.travlocksserver.domain.template.service.query.TemplateCanvasQueryService;

@@ -111,7 +111,6 @@ public class TemplateDayOptimizeCommandService {
                 return bestWithOverTwoFixedPositions(start, remaining, restaurants, lunchIndex, dinnerIndex);
             }
         }
-
     }
 
     /**
