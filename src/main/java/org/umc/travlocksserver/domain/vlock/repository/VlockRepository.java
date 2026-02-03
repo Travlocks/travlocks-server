@@ -53,4 +53,6 @@ public interface VlockRepository extends JpaRepository<Vlock,Long>, VlockReposit
 
     @EntityGraph(attributePaths = {"vlockCategory", "city", "city.region"})
     List<Vlock> findAllByOwnerIdAndCityIdAndDeletedAtIsNullOrderByUsageCountDescIdDesc(Long ownerId, Long cityId);
+
+	Optional<Vlock> findByIdAndDeletedAtIsNull(Long id);
 }
