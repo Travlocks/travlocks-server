@@ -15,7 +15,9 @@ public enum VlockErrorCode implements BaseCode {
 	START_VLOCK_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 출발 블록입니다."),
 	END_VLOCK_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 도착 블록입니다."),
 
-	VLOCK_FORBIDDEN(HttpStatus.FORBIDDEN, "해당 블록에 대한 접근 권한이 없습니다.")
+	VLOCK_FORBIDDEN(HttpStatus.FORBIDDEN, "해당 블록에 대한 접근 권한이 없습니다."),
+
+	VLOCK_ALREADY_DELETED(HttpStatus.BAD_REQUEST, "이미 삭제된 블록입니다.")
 	;
 
 	private final HttpStatus status;
