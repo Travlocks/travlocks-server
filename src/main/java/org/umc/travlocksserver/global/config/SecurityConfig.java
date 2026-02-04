@@ -57,7 +57,8 @@ public class SecurityConfig {
                                 "/api/v1/members/signup",
                                 "/api/v1/auth/login",
                                 "/api/v1/auth/refresh",
-                                "/api/v1/auth/logout"
+                                "/api/v1/auth/logout",
+                                "/api/v1/auth/password-reset/request"
                         ).permitAll()
 
                         // 나머지는 인증 필요
