@@ -4,7 +4,9 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -20,6 +22,7 @@ import org.umc.travlocksserver.domain.auth.dto.response.AuthVerifyEmailResponseD
 import org.umc.travlocksserver.global.response.ErrorResponse;
 import org.umc.travlocksserver.global.response.SuccessResponse;
 
+@Tag(name = "Auth", description = "인증 관련 API")
 public interface AuthControllerDocs {
 
     @Operation(
@@ -32,9 +35,9 @@ public interface AuthControllerDocs {
             """
     )
     @ApiResponses({
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "이메일 인증 코드 발송 성공"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "요청 값 검증 실패 / 이미 가입된 이메일 / 인증 요청 정보 오류",content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "이메일 발송 실패",content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            @ApiResponse(responseCode = "200", description = "이메일 인증 코드 발송 성공"),
+            @ApiResponse(responseCode = "400", description = "요청 값 검증 실패 / 이미 가입된 이메일 / 인증 요청 정보 오류",content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "이메일 발송 실패",content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     ResponseEntity<SuccessResponse<AuthSendEmailResponseDTO>> sendEmailVerificationCode(
             @Valid AuthSendEmailRequestDTO request
@@ -52,8 +55,8 @@ public interface AuthControllerDocs {
             """
     )
     @ApiResponses({
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "이메일 인증 성공"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "요청 값 검증 실패 / verificationId 만료·없음 / 인증 코드 불일치",content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            @ApiResponse(responseCode = "200", description = "이메일 인증 성공"),
+            @ApiResponse(responseCode = "400", description = "요청 값 검증 실패 / verificationId 만료·없음 / 인증 코드 불일치",content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     ResponseEntity<SuccessResponse<AuthVerifyEmailResponseDTO>> confirmEmailVerificationCode(
             @Valid AuthVerifyEmailRequestDTO request
@@ -69,9 +72,9 @@ public interface AuthControllerDocs {
             """
     )
     @ApiResponses({
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "이메일 인증 코드 재발송 성공"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "요청 값 검증 실패 / verificationId 만료·없음",content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "이메일 발송 실패",content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            @ApiResponse(responseCode = "200", description = "이메일 인증 코드 재발송 성공"),
+            @ApiResponse(responseCode = "400", description = "요청 값 검증 실패 / verificationId 만료·없음",content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "이메일 발송 실패",content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     ResponseEntity<SuccessResponse<?>> resendEmailVerificationCode(
             @Valid AuthResendEmailRequestDTO request
@@ -87,9 +90,9 @@ public interface AuthControllerDocs {
             """
     )
     @ApiResponses({
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "로그인 성공"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "요청 값 검증 실패",content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "로그인 실패(이메일 또는 비밀번호 불일치)",content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            @ApiResponse(responseCode = "200", description = "로그인 성공"),
+            @ApiResponse(responseCode = "400", description = "요청 값 검증 실패",content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "401", description = "로그인 실패(이메일 또는 비밀번호 불일치)",content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     ResponseEntity<SuccessResponse<AuthLoginResponseDTO>> login(
             @Valid AuthLoginRequestDTO request,
@@ -106,10 +109,28 @@ public interface AuthControllerDocs {
             """
     )
     @ApiResponses({
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "액세스 토큰 재발급 성공"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "refreshToken 누락 / 유효하지 않음 / 만료됨",content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            @ApiResponse(responseCode = "200", description = "액세스 토큰 재발급 성공"),
+            @ApiResponse(responseCode = "400", description = "refreshToken 누락 / 유효하지 않음 / 만료됨",content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     ResponseEntity<SuccessResponse<AuthRefreshResponseDTO>> refresh(
             @Parameter(hidden = true) HttpServletRequest request
+    );
+
+    @Operation(
+            summary = "로그아웃 API",
+            description = """
+            refreshToken을 무효화하고(refreshToken:{jti} Redis 삭제), 쿠키의 refreshToken을 삭제합니다.
+
+            - refreshToken은 HttpOnly 쿠키로 전달됩니다.
+            - 로그아웃은 멱등하게 동작합니다.
+              (refreshToken이 없거나 유효하지 않아도 쿠키 삭제 응답은 내려갑니다.)
+            """
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "로그아웃 성공")
+    })
+    ResponseEntity<SuccessResponse<?>> logout(
+            @Parameter(hidden = true) HttpServletRequest request,
+            @Parameter(hidden = true) HttpServletResponse response
     );
 }
