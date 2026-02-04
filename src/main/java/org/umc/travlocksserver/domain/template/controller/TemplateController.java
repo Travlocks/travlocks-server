@@ -10,6 +10,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.umc.travlocksserver.domain.template.dto.request.TemplatePreInputRequestDTO;
+import org.umc.travlocksserver.domain.template.dto.response.TemplatePreInputResponseDTO;
+import org.umc.travlocksserver.domain.template.service.command.TemplatePreInputService;
 import org.umc.travlocksserver.domain.member.entity.Member;
 import org.umc.travlocksserver.domain.template.code.TemplateSuccessCode;
 import org.umc.travlocksserver.domain.template.dto.response.TemplateCanvasResponseDTO;
@@ -34,6 +39,7 @@ public class TemplateController implements TemplateControllerDocs {
     private final TemplateQueryService templateQueryService;
 	private final TemplateRemixService templateRemixService;
 	private final TemplateCanvasQueryService templateCanvasQueryService;
+	private final TemplatePreInputService templatePreInputService;
 
     @GetMapping("/recommendations")
     public ResponseEntity<SuccessResponse<TemplateRecommendationsDTO>> getRecommendedTemplates(
@@ -68,6 +74,19 @@ public class TemplateController implements TemplateControllerDocs {
 		return ResponseEntity
 			.status(successCode.getStatus())
 			.body(SuccessResponse.ok(successCode, data));
+	}
+
+	@PostMapping("/pre-inputs")
+	public ResponseEntity<SuccessResponse<TemplatePreInputResponseDTO>> createPreInput(
+			@Valid @RequestBody TemplatePreInputRequestDTO request,
+			@AuthenticationPrincipal Long memberId
+	) {
+		TemplateSuccessCode successCode = TemplateSuccessCode.TEMPLATE_PREINPUT_CREATE_SUCCESS;
+		TemplatePreInputResponseDTO data = templatePreInputService.createPreInput(memberId, request);
+
+		return ResponseEntity
+				.status(successCode.getStatus())
+				.body(SuccessResponse.ok(successCode, data));
 	}
 
 	@GetMapping("/{templateId}/days/{dayNo}/canvas")
