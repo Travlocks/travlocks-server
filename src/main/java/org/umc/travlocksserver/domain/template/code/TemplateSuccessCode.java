@@ -15,7 +15,9 @@ public enum TemplateSuccessCode implements BaseCode {
 	TEMPLATE_REMIX_SUCCESS(HttpStatus.CREATED, "템플릿 리믹스(복제)에 성공했습니다."),
 	TEMPLATE_GET_CANVAS_SUCCESS(HttpStatus.OK, "템플릿 캔버스 조회에 성공했습니다."),
     TEMPLATE_DETAIL_GET_SUCCESS(HttpStatus.OK, "템플릿 상세 조회에 성공했습니다."),
-	TEMPLATE_PREINPUT_CREATE_SUCCESS(HttpStatus.CREATED, "여정 작업물 초안이 생성되었습니다.");
+	TEMPLATE_PREINPUT_CREATE_SUCCESS(HttpStatus.CREATED, "여정 작업물 초안이 생성되었습니다."),
+	REGION_RETRIEVE_SUCCESS(HttpStatus.OK, "지역 목록 조회 성공");
+
 	private final HttpStatus status;
 	private final String message;
 }
