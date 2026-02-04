@@ -3,6 +3,7 @@ package org.umc.travlocksserver.domain.template.service.query;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.umc.travlocksserver.domain.template.entity.TemplateVlock;
 import org.umc.travlocksserver.domain.template.repository.TemplateVlockRepository;
 import org.umc.travlocksserver.domain.vlock.entity.Vlock;
 
@@ -21,5 +22,9 @@ public class TemplateVlockQueryService {
 
     public List<Long> getAllVlockIdsByTemplateDayTemplateId(Long templateId) {
         return templateVlockRepository.findAllVlockIdsByTemplateDayTemplateId(templateId);
+    }
+
+    public List<TemplateVlock> getAllByTemplateDayIdOrderByOrderNo(Long templateDayId) {
+        return templateVlockRepository.findAllByTemplateDayIdOrderByOrderNo(templateDayId);
     }
 }

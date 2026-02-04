@@ -85,6 +85,21 @@ public class VlockCommandService {
 		return VlockResponseDTO.from(vlock);
 	}
 
+	public void deleteVlock(Long memberId, Long vlockId) {
+		Vlock vlock = vlockRepository.findById(vlockId)
+			.orElseThrow(() -> new VlockException(VlockErrorCode.VLOCK_NOT_FOUND));
+
+		if (vlock.isDeleted()) {
+			throw new VlockException(VlockErrorCode.VLOCK_ALREADY_DELETED);
+		}
+
+		if (!vlock.isOwnedBy(memberId)) {
+			throw new VlockException(VlockErrorCode.VLOCK_FORBIDDEN);
+		}
+
+		vlock.softDelete();
+	}
+
     // ⚪ 외부(카카오맵) API를 통해 블록을 삽입하는 메서드 (추천시 블록에 데이터가 너무 적을 경우 사용)
     public void upsertVlocksFromExternal(Long cityId, List<KakaoPlace> places) {
         City city = cityQueryService.getReferenceById(cityId);

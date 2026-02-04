@@ -89,4 +89,16 @@ public class AuthController implements AuthControllerDocs {
                 .status(successCode.getStatus())
                 .body(SuccessResponse.ok(successCode, data));
     }
+
+    @PostMapping("/logout")
+    public ResponseEntity<SuccessResponse<?>> logout(
+            HttpServletRequest request,
+            HttpServletResponse response) {
+        AuthSuccessCode successCode = AuthSuccessCode.AUTH_LOGOUT_SUCCESS;
+        authService.logout(request, response);
+
+        return ResponseEntity
+                .status(successCode.getStatus())
+                .body(SuccessResponse.ok(successCode, null));
+    }
 }

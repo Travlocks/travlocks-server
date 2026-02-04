@@ -2,6 +2,7 @@ package org.umc.travlocksserver.global.resolver;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.MethodParameter;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.support.WebDataBinderFactory;
@@ -39,7 +40,7 @@ public class LoginUserArgumentResolver implements HandlerMethodArgumentResolver 
         if (authentication == null
                 || !authentication.isAuthenticated()
                 || "anonymousUser".equals(authentication.getPrincipal())) {
-            return null;
+            throw new InsufficientAuthenticationException("Authentication required");
         }
 
         Long memberId = (Long) authentication.getPrincipal();

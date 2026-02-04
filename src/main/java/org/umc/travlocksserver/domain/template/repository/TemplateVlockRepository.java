@@ -42,4 +42,6 @@ public interface TemplateVlockRepository extends JpaRepository<TemplateVlock, Lo
 		WHERE tv.templateDay.template.id = :templateId
 	""")
     List<Vlock> findVlocksByTemplateId(Long templateId);
+
+    List<TemplateVlock> findAllByTemplateDayIdOrderByOrderNo(Long templateDayId);
 }
