@@ -171,4 +171,25 @@ public interface AuthControllerDocs {
             @RequestParam("token") String token
     );
 
+    @Operation(
+            summary = "비밀번호 재설정 확정 API",
+            description = """
+        비밀번호 재설정 링크를 통해 전달받은 resetToken을 사용하여
+        새로운 비밀번호로 변경을 확정하는 API입니다.
+
+        - resetToken이 유효한 경우에만 비밀번호 변경이 가능합니다.
+        - 새 비밀번호와 비밀번호 확인 값이 일치해야 합니다.
+        - 비밀번호는 최소 8자 이상이며 영문과 숫자를 포함해야 합니다.
+        - 비밀번호 변경이 완료되면 resetToken은 재사용 방지를 위해 삭제됩니다.
+        """
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "비밀번호 재설정 성공"),
+            @ApiResponse(responseCode = "400", description = "resetToken이 올바르지 않거나 만료됨/비밀번호와 비밀번호 확인 불일치", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    ResponseEntity<SuccessResponse<?>> confirmPasswordReset(
+            @Valid AuthPasswordResetConfirmRequestDTO request
+    );
+
+
 }

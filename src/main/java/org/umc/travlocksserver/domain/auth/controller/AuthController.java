@@ -120,4 +120,15 @@ public class AuthController implements AuthControllerDocs {
                 .body(SuccessResponse.ok(successCode, data));
     }
 
+    @PostMapping("/password-reset/confirm")
+    public ResponseEntity<SuccessResponse<?>> confirmPasswordReset(
+            @Valid @RequestBody AuthPasswordResetConfirmRequestDTO request) {
+        AuthSuccessCode successCode = AuthSuccessCode.PASSWORD_RESET_SUCCESS;
+        passwordResetService.confirmPasswordReset(request);
+
+        return ResponseEntity
+                .status(successCode.getStatus())
+                .body(SuccessResponse.ok(successCode, null));
+    }
+
 }
