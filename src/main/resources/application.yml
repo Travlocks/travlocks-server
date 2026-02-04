@@ -45,7 +45,7 @@ jwt:
   refresh-ttl-seconds: ${JWT_REFRESH_TTL_SECONDS:1209600} # 14일
 
 password-reset:
-  redirect-uri: ${PASSWORD_RESET_REDIRECT_URI:https://travlocks.kro.kr/reset-password}
+  redirect-uri: ${PASSWORD_RESET_REDIRECT_URI:http://localhost:5173/password-reset}
   ttl-minutes: ${PASSWORD_RESET_TTL_MINUTES:5}
 
 app:
