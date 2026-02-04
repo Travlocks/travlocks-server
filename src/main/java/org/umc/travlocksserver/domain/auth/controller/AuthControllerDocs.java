@@ -11,14 +11,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.umc.travlocksserver.domain.auth.dto.request.AuthLoginRequestDTO;
-import org.umc.travlocksserver.domain.auth.dto.request.AuthResendEmailRequestDTO;
-import org.umc.travlocksserver.domain.auth.dto.request.AuthSendEmailRequestDTO;
-import org.umc.travlocksserver.domain.auth.dto.request.AuthVerifyEmailRequestDTO;
-import org.umc.travlocksserver.domain.auth.dto.response.AuthLoginResponseDTO;
-import org.umc.travlocksserver.domain.auth.dto.response.AuthRefreshResponseDTO;
-import org.umc.travlocksserver.domain.auth.dto.response.AuthSendEmailResponseDTO;
-import org.umc.travlocksserver.domain.auth.dto.response.AuthVerifyEmailResponseDTO;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.umc.travlocksserver.domain.auth.dto.request.*;
+import org.umc.travlocksserver.domain.auth.dto.response.*;
 import org.umc.travlocksserver.global.response.ErrorResponse;
 import org.umc.travlocksserver.global.response.SuccessResponse;
 
@@ -133,4 +128,47 @@ public interface AuthControllerDocs {
             @Parameter(hidden = true) HttpServletRequest request,
             @Parameter(hidden = true) HttpServletResponse response
     );
+
+    @Operation(
+            summary = "비밀번호 재설정 링크 전송 API",
+            description = """
+            로그인하지 못한 사용자가 비밀번호를 재설정할 수 있도록, 입력한 이메일로 비밀번호 재설정 링크를 전송합니다.
+
+            - 입력한 이메일이 서비스에 가입된 이메일인 경우에만 resetToken을 발급하고 메일을 전송합니다.
+            - 보안상 계정 존재 여부 노출을 방지하기 위해,
+              입력한 이메일이 서비스에 가입되지 않은 경우에도 동일한 성공 응답을 반환합니다.
+            - 이 경우 실제 비밀번호 재설정 이메일은 발송되지 않습니다.
+            - 메일에는 resetToken이 포함된 재설정 링크가 전달됩니다.
+              (예: https://travlocks.kro.kr/reset-password?token=...)
+            """
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "비밀번호 재설정 링크 전송 요청 처리 성공"),
+            @ApiResponse(responseCode = "400", description = "요청 값 검증 실패(이메일 형식 오류 등)", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "이메일 발송 실패", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    ResponseEntity<SuccessResponse<?>> requestPasswordResetLink(
+            @Valid AuthPasswordResetLinkRequestDTO request
+    );
+
+    @Operation(
+            summary = "비밀번호 재설정 토큰 유효성 검증 API",
+            description = """
+            비밀번호 재설정 링크에 포함된 resetToken의 유효성을 검증합니다.
+
+            - resetToken이 Redis에 존재하고 만료되지 않은 경우 valid=true를 반환합니다.
+            - resetToken이 없거나 만료된 경우 에러를 반환합니다.
+            - 본 API는 비밀번호 재설정 페이지 진입 시 프론트에서 호출하여,
+              유효한 토큰일 때만 비밀번호 입력 폼을 노출하는 용도로 사용합니다.
+            """
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "비밀번호 재설정 토큰 검증 성공"),
+            @ApiResponse(responseCode = "400", description = "resetToken이 올바르지 않거나 만료됨", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    ResponseEntity<SuccessResponse<AuthPasswordResetVerifyResponseDTO>> verifyPasswordResetToken(
+            @Parameter(description = "비밀번호 재설정 토큰", required = true)
+            @RequestParam("token") String token
+    );
+
 }

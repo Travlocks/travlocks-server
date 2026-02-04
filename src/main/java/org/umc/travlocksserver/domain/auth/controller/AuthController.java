@@ -6,10 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.umc.travlocksserver.domain.auth.dto.request.*;
-import org.umc.travlocksserver.domain.auth.dto.response.AuthLoginResponseDTO;
-import org.umc.travlocksserver.domain.auth.dto.response.AuthRefreshResponseDTO;
-import org.umc.travlocksserver.domain.auth.dto.response.AuthSendEmailResponseDTO;
-import org.umc.travlocksserver.domain.auth.dto.response.AuthVerifyEmailResponseDTO;
+import org.umc.travlocksserver.domain.auth.dto.response.*;
 import org.umc.travlocksserver.domain.auth.exception.code.AuthSuccessCode;
 import org.umc.travlocksserver.domain.auth.service.command.AuthService;
 import org.umc.travlocksserver.domain.auth.service.command.EmailVerificationService;
@@ -103,14 +100,24 @@ public class AuthController implements AuthControllerDocs {
 
     @PostMapping("/password-reset/request")
     public ResponseEntity<SuccessResponse<?>> requestPasswordResetLink(
-            @Valid @RequestBody AuthPasswordResetLinkRequestDTO request
-    ) {
+            @Valid @RequestBody AuthPasswordResetLinkRequestDTO request) {
         AuthSuccessCode successCode = AuthSuccessCode.PASSWORD_RESET_LINK_SENT;
         passwordResetService.sendPasswordResetLink(request.email());
 
         return ResponseEntity
                 .status(successCode.getStatus())
                 .body(SuccessResponse.ok(successCode, null));
+    }
+
+    @GetMapping("/password-reset/verify")
+    public ResponseEntity<SuccessResponse<AuthPasswordResetVerifyResponseDTO>> verifyPasswordResetToken(
+            @RequestParam("token") String token) {
+        AuthSuccessCode successCode = AuthSuccessCode.PASSWORD_RESET_TOKEN_VERIFIED;
+        AuthPasswordResetVerifyResponseDTO data = passwordResetService.verifyResetToken(token);
+
+        return ResponseEntity
+                .status(successCode.getStatus())
+                .body(SuccessResponse.ok(successCode, data));
     }
 
 }

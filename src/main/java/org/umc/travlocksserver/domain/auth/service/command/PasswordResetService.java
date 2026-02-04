@@ -3,6 +3,9 @@ package org.umc.travlocksserver.domain.auth.service.command;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.umc.travlocksserver.domain.auth.dto.response.AuthPasswordResetVerifyResponseDTO;
+import org.umc.travlocksserver.domain.auth.exception.AuthException;
+import org.umc.travlocksserver.domain.auth.exception.code.AuthErrorCode;
 import org.umc.travlocksserver.domain.auth.repository.PasswordResetTokenRedisRepository;
 import org.umc.travlocksserver.domain.member.repository.MemberRepository;
 import org.umc.travlocksserver.global.mail.ResendMailSender;
@@ -48,6 +51,14 @@ public class PasswordResetService {
         String resetUrl = buildResetUrl(resetToken);
 
         resendMailSender.sendPasswordResetLink(email, resetUrl, ttlMinutes);
+    }
+
+    public AuthPasswordResetVerifyResponseDTO verifyResetToken(String token) {
+        if (passwordResetTokenRedisRepository.find(token) == null) {
+            throw new AuthException(AuthErrorCode.PASSWORD_RESET_TOKEN_INVALID);
+        }
+
+        return new AuthPasswordResetVerifyResponseDTO(true);
     }
 
     private String buildResetUrl(String token) {
