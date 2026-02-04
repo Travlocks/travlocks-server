@@ -1,7 +1,7 @@
 package org.umc.travlocksserver.infra.ai;
 
 // ✨ 외부 AI인 HyperClova으로 응답받는 DTO
-public record HyperClovaResponseDTO(
+public record AiResponseDTO(
         Result result
 ) {
     public record Result(
