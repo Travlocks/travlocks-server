@@ -25,11 +25,8 @@ public class TemplateTag extends CreatedBaseEntity {
     @JoinColumn(name = "template_id", nullable = false)
     private Template template;
 
-    @Column(name = "ranking", nullable = false)
-    private Integer ranking;
-
-    @Column(name = "confidence", nullable = false)
-    private Double confidence;
+    @Column(nullable = false, length = 16)
+    private TagType type;
 
     @Column(name = "version", nullable = false)
     private Integer version;
