@@ -7,6 +7,8 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.umc.travlocksserver.domain.member.dto.response.CreatedVlockDTO;
+import org.umc.travlocksserver.domain.member.dto.response.MemberMyPageResponseDTO;
 import org.umc.travlocksserver.domain.vlock.entity.Vlock;
 
 import java.util.List;
@@ -61,4 +63,25 @@ public interface VlockRepository extends JpaRepository<Vlock,Long>, VlockReposit
     @Query("update Vlock v set v.owner.id = :deletedMemberId where v.owner.id = :memberId")
     void transferOwner(@Param("memberId") Long memberId,
                        @Param("deletedMemberId") Long deletedMemberId);
+
+    @Query("""
+    select new org.umc.travlocksserver.domain.member.dto.response.CreatedVlockDTO(
+        v.id,
+        v.name,
+        v.city.name,
+        v.createdAt
+    )
+    from Vlock v
+    where v.owner.id = :memberId
+      and v.deletedAt is null
+    order by v.createdAt desc, v.id desc
+    """)
+    List<CreatedVlockDTO> findRecentCreatedVlocksInternal(
+            @Param("memberId") Long memberId
+    );
+    default List<CreatedVlockDTO> findRecentCreatedVlocks(Long memberId, int limit) {
+        List<CreatedVlockDTO> all = findRecentCreatedVlocksInternal(memberId);
+        return all.size() > limit ? all.subList(0, limit) : all;
+    }
+
 }
