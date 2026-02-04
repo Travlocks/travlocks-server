@@ -9,8 +9,9 @@ public record TemplateCanvasResponseDTO(
 	Integer dayNo,
 	Integer vlockCount,
 	Double totalHours,
-	Integer totalMoveMinutes,
+	Double totalMoveHours,
 	Double totalStayHours,
+	List<Long> cities,
 	List<TemplateCanvasVlockDTO> vlocks,
 	LocalDateTime createdAt
 ) {
