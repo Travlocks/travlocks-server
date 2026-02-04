@@ -22,6 +22,6 @@ public interface TemplateDayRepository extends JpaRepository<TemplateDay, Long> 
             AND td.dayNo = :dayNo
             AND m.id = :memberId
     """)
-    Optional<TemplateDay> findTemplateDayAccesible(Long memberId, Long templateDayId, Integer dayNo);
+    Optional<TemplateDay> findTemplateDayAccesible(Long memberId, Long templateId, Integer dayNo);
 	Optional<TemplateDay> findByTemplateIdAndDayNo(Long templateId, Integer dayNo);
 }
