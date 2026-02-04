@@ -11,12 +11,12 @@ import org.umc.travlocksserver.domain.template.dto.response.TemplateCanvasVlockD
 import org.umc.travlocksserver.domain.template.entity.Template;
 import org.umc.travlocksserver.domain.template.entity.TemplateDay;
 import org.umc.travlocksserver.domain.template.entity.TemplateVlock;
+import org.umc.travlocksserver.domain.template.enums.TransportType;
 import org.umc.travlocksserver.domain.template.exception.TemplateException;
 import org.umc.travlocksserver.domain.template.repository.TemplateDayRepository;
 import org.umc.travlocksserver.domain.template.repository.TemplateRepository;
 import org.umc.travlocksserver.domain.template.repository.TemplateVlockRepository;
 import org.umc.travlocksserver.domain.vlock.dto.response.VlockBriefDTO;
-import org.umc.travlocksserver.domain.vlock.entity.Vlock;
 
 import lombok.RequiredArgsConstructor;
 
@@ -29,6 +29,8 @@ public class TemplateCanvasQueryService {
 	private final TemplateDayRepository templateDayRepository;
 	private final TemplateVlockRepository templateVlockRepository;
 
+	private final TemplateRouteQueryService templateRouteQueryService;
+
 	public TemplateCanvasResponseDTO getTemplateCanvas(Long templateId, Integer dayNo) {
 
 		Template template = templateRepository.findById(templateId)
@@ -39,7 +41,7 @@ public class TemplateCanvasQueryService {
 
 		List<TemplateVlock> templateVlocks = templateVlockRepository.findAllByTemplateDayIdFetchVlock(day.getId());
 
-		int totalStayMinutes = 0;
+		double totalStayHours = 0;
 		int totalMoveMinutes = 0;
 
 		List<TemplateCanvasVlockDTO> vlocks = new ArrayList<>(templateVlocks.size());
@@ -48,15 +50,16 @@ public class TemplateCanvasQueryService {
 			TemplateVlock cur = templateVlocks.get(i);
 			TemplateVlock next = (i + 1 < templateVlocks.size()) ? templateVlocks.get(i + 1) : null;
 
-			int nextMoveMinutes = (next == null) ? 0 : calcNextMoveMinutes(cur.getVlock(), next.getVlock());
+			int nextMoveMinutes = (next == null)
+				? 0 : calcNextMoveMinutes(cur.getVlock().getId(), next.getVlock().getId());
 
-			totalStayMinutes += cur.getStayMinutes();
+			totalStayHours += cur.getStayHours();
 			totalMoveMinutes += nextMoveMinutes;
 
 			vlocks.add(new TemplateCanvasVlockDTO(
 				cur.getId(),
 				cur.getOrderNo(),
-				cur.getStayMinutes(),
+				cur.getStayHours(),
 				nextMoveMinutes,
 				new VlockBriefDTO(
 					cur.getVlock().getId(),
@@ -66,26 +69,26 @@ public class TemplateCanvasQueryService {
 			));
 		}
 
-		int totalMinutes = totalStayMinutes + totalMoveMinutes;
+		double totalHours = totalStayHours + (double) totalMoveMinutes / 60;
 
 		return new TemplateCanvasResponseDTO(
 			template.getId(),
 			template.getTitle(),
 			dayNo,
 			day.getVlockCount(),
-			totalMinutes,
+			totalHours,
 			totalMoveMinutes,
-			totalStayMinutes,
+			totalStayHours,
 			vlocks,
 			template.getCreatedAt()
 		);
 	}
 
 	/**
-	 * 블록 간 이동 시간 계산
+	 * 블록 간 이동 시간 계산 (MoveTime 재사용, 없으면 생성)
 	 */
-	private int calcNextMoveMinutes(Vlock from, Vlock to) {
-		// TODO: 외부 경로 API 연동 전까지 임시값
-		return 0;
+	private int calcNextMoveMinutes(Long fromVlockId, Long toVlockId) {
+		var route = templateRouteQueryService.getOrCreateRoute(fromVlockId, toVlockId, TransportType.WALK);
+		return route.moveMinutes();
 	}
 }

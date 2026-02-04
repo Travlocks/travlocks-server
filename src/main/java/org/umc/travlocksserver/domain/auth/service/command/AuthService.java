@@ -38,12 +38,10 @@ public class AuthService {
     }
 
     public AuthLoginResponseDTO login(AuthLoginRequestDTO request, HttpServletResponse response) {
-        // 회원 조회
         Member member = memberRepository.findByEmail(request.email())
                 .orElseThrow(() -> new AuthException(AuthErrorCode.INVALID_CREDENTIALS));
 
-        // 비밀번호 검증
-        if (!passwordEncoder.matches(request.password(), member.getPasswordHash())) {
+        if (!member.matchesPassword(passwordEncoder, request.password())) {
             throw new AuthException(AuthErrorCode.INVALID_CREDENTIALS);
         }
 
@@ -57,37 +55,34 @@ public class AuthService {
     }
 
     public AuthRefreshResponseDTO refreshAccessToken(HttpServletRequest request) {
-
-        // 1) 쿠키에서 refreshToken 꺼내기
         String refreshToken = extractRefreshTokenFromCookie(request);
         if (refreshToken == null) {
             throw new AuthException(AuthErrorCode.REFRESH_TOKEN_REQUIRED);
         }
 
-        // 2) refreshToken 서명/만료 검증
         if (!jwtTokenProvider.validateRefreshToken(refreshToken)) {
             throw new AuthException(AuthErrorCode.INVALID_REFRESH_TOKEN);
         }
 
-        // 3) refreshToken에서 jti 추출
+        // refreshToken에서 jti 추출
         String jti = jwtTokenProvider.extractJti(refreshToken);
         if (jti == null || jti.isBlank()) {
             throw new AuthException(AuthErrorCode.INVALID_REFRESH_TOKEN);
         }
 
-        // 4) Redis에 jti 존재하는지 확인 (존재하면 memberId 얻음)
+        // Redis에 jti 존재하는지 확인 (존재하면 memberId 얻음)
         Long memberIdFromRedis = refreshTokenRedisRepository.findMemberId(jti);
         if (memberIdFromRedis == null) {
             throw new AuthException(AuthErrorCode.INVALID_REFRESH_TOKEN);
         }
 
-        // 5) refreshToken 안의 sub(memberId)와 Redis 값 일치 검증
+        // refreshToken 안의 sub(memberId)와 Redis 값 일치 검증
         Long memberIdFromToken = jwtTokenProvider.extractMemberId(refreshToken);
         if (memberIdFromToken == null || !memberIdFromToken.equals(memberIdFromRedis)) {
             throw new AuthException(AuthErrorCode.INVALID_REFRESH_TOKEN);
         }
 
-        // 6) 새 accessToken 발급
+        // 새 accessToken 발급
         String newAccessToken = jwtTokenProvider.generateAccessToken(memberIdFromRedis);
 
         return new AuthRefreshResponseDTO(
@@ -96,7 +91,13 @@ public class AuthService {
         );
     }
 
-    // AccessToken, RefreshToken 발급
+    public void logout(HttpServletRequest request, HttpServletResponse response) {
+        invalidateRefreshToken(request, response);
+    }
+
+    /**
+     * AccessToken, RefreshToken 발급
+     */
     public IssuedTokens issueTokens(Long memberId, HttpServletResponse response) {
         Duration refreshTtl = Duration.ofSeconds(refreshTtlSeconds);
 
@@ -124,6 +125,41 @@ public class AuthService {
         return new IssuedTokens(accessToken, jwtTokenProvider.getAccessTokenExpiresInSeconds());
     }
 
+    /**
+     * RefreshToken 무효화
+     */
+    public void invalidateRefreshToken(HttpServletRequest request, HttpServletResponse response) {
+        String refreshToken = extractRefreshTokenFromCookie(request);
+
+        if (refreshToken != null && !refreshToken.isBlank()) {
+            try {
+                if (jwtTokenProvider.validateRefreshToken(refreshToken)) {
+                    String jti = jwtTokenProvider.extractJti(refreshToken);
+                    if (jti != null && !jti.isBlank()) {
+                        refreshTokenRedisRepository.delete(jti);
+                    }
+                }
+            } catch (Exception ignored) {
+                // 멱등 처리: 파싱/검증 오류여도 쿠키 삭제는 수행
+            }
+        }
+
+        // 쿠키 삭제
+        ResponseCookie deleteCookie = ResponseCookie.from("refreshToken", "")
+                .httpOnly(true)
+                .secure(false) // 운영환경 true
+                .path("/")
+                .maxAge(0)
+                .sameSite("Lax") // 운영환경 None
+                .build();
+
+        response.addHeader(HttpHeaders.SET_COOKIE, deleteCookie.toString());
+    }
+
+
+    /**
+     * refreshToken 추출
+     */
     private String extractRefreshTokenFromCookie(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
         if (cookies == null) return null;

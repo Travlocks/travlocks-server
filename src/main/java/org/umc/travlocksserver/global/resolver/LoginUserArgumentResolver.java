@@ -2,6 +2,7 @@ package org.umc.travlocksserver.global.resolver;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.MethodParameter;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.support.WebDataBinderFactory;
@@ -9,6 +10,9 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.umc.travlocksserver.domain.member.entity.Member;
+import org.umc.travlocksserver.domain.member.enums.MemberStatus;
+import org.umc.travlocksserver.domain.member.exception.MemberException;
+import org.umc.travlocksserver.domain.member.exception.code.MemberErrorCode;
 import org.umc.travlocksserver.domain.member.repository.MemberRepository;
 import org.umc.travlocksserver.global.annotation.LoginUser;
 
@@ -36,11 +40,18 @@ public class LoginUserArgumentResolver implements HandlerMethodArgumentResolver 
         if (authentication == null
                 || !authentication.isAuthenticated()
                 || "anonymousUser".equals(authentication.getPrincipal())) {
-            return null;
+            throw new InsufficientAuthenticationException("Authentication required");
         }
 
         Long memberId = (Long) authentication.getPrincipal();
 
-        return memberRepository.findById(memberId).orElse(null);
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+
+        if (member.getStatus() == MemberStatus.DELETED) {
+            throw new MemberException(MemberErrorCode.MEMBER_DELETED);
+        }
+
+        return member;
     }
 }

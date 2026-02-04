@@ -56,7 +56,8 @@ public class SecurityConfig {
                                 "/api/v1/members/nickname/exists",
                                 "/api/v1/members/signup",
                                 "/api/v1/auth/login",
-                                "/api/v1/auth/refresh"
+                                "/api/v1/auth/refresh",
+                                "/api/v1/auth/logout"
                         ).permitAll()
 
                         // 나머지는 인증 필요

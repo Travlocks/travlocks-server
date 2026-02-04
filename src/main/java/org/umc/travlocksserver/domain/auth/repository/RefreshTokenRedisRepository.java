@@ -30,4 +30,9 @@ public class RefreshTokenRedisRepository {
         }
     }
 
+    public void delete(String jti) {
+        redisTemplate.delete(key(jti));
+    }
+
+
 }
