@@ -31,7 +31,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
-@Tag(name = "Member", description = "회원 관련 API")
+@Tag(name = "회원 API", description = "회원 관련 API 입니다.")
 public interface MemberControllerDocs {
 
 	@Operation(
@@ -229,5 +229,4 @@ public interface MemberControllerDocs {
             HttpServletRequest httpRequest,
             HttpServletResponse httpResponse
     );
-
 }

@@ -35,4 +35,8 @@ public class TemplateVlock extends BaseEntity {
     /** 체류 시간 (시간) */
     @Column(name = "stay_hours", nullable = false)
     private Double stayHours;
+
+    public void updateOrderNo(int orderNo) {
+        this.orderNo = orderNo;
+    }
 }

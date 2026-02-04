@@ -35,4 +35,6 @@ public interface TemplateVlockRepository extends JpaRepository<TemplateVlock, Lo
 			order by tv.orderNo asc
 		""")
 	List<TemplateVlock> findAllByTemplateDayIdFetchVlock(Long templateDayId);
+
+    List<TemplateVlock> findAllByTemplateDayIdOrderByOrderNo(Long templateDayId);
 }
