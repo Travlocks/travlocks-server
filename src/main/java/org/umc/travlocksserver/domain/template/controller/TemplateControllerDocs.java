@@ -38,7 +38,7 @@ public interface TemplateControllerDocs {
 		description = """
 			여행지, 기간, 교통수단, 테마 정보를 제출하면 캔버스 편집용 여정 작업물(초안)을 최초 생성합니다.
 			
-			- 기본 비공개 (isPublic=false)
+			- 기본 전체공개 (isPublic=true)
 			- 공유 링크용 UUID(shareToken)는 생성 시점에 함께 발급
 			"""
 	)

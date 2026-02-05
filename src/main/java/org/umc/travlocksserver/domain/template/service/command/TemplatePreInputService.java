@@ -88,7 +88,7 @@ public class TemplatePreInputService {
                 .endDate(null)
                 .tripDays(tripDays)
                 .vlockCount(0)
-                .isPublic(false)
+                .isPublic(true)
                 .shareToken(shareToken)
                 .favoriteCount(0)
                 .remixCount(0)
