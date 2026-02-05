@@ -2,6 +2,8 @@ package org.umc.travlocksserver.domain.member.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
@@ -12,22 +14,23 @@ import org.umc.travlocksserver.domain.member.dto.request.MemberSignupRequestDTO;
 import org.umc.travlocksserver.domain.member.dto.request.MemberWithdrawRequestDTO;
 import org.umc.travlocksserver.domain.member.dto.response.*;
 import org.umc.travlocksserver.domain.member.entity.Member;
-import org.umc.travlocksserver.domain.member.exception.MemberException;
 import org.umc.travlocksserver.domain.member.exception.code.MemberSuccessCode;
 import org.umc.travlocksserver.domain.member.service.command.MemberPasswordUpdateService;
 import org.umc.travlocksserver.domain.member.service.command.MemberProfileUpdateService;
 import org.umc.travlocksserver.domain.member.service.command.MemberSignupService;
 import org.umc.travlocksserver.domain.member.service.command.MemberWithdrawService;
 import org.umc.travlocksserver.domain.member.service.query.*;
+import org.umc.travlocksserver.domain.template.code.TemplateSuccessCode;
+import org.umc.travlocksserver.domain.template.dto.response.TemplateCardResponseDTO;
 import org.umc.travlocksserver.domain.template.dto.response.TemplateCursorResponseDTO;
 import org.umc.travlocksserver.global.annotation.LoginUser;
+import org.umc.travlocksserver.global.response.PageResponse;
 import org.umc.travlocksserver.global.response.SuccessResponse;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
-import org.umc.travlocksserver.global.security.code.SecurityErrorCode;
 
 @Validated
 @RestController
@@ -174,4 +177,15 @@ public class MemberController implements MemberControllerDocs {
                 .body(SuccessResponse.ok(successCode, null));
     }
 
+    @GetMapping("/me/templates")
+    public ResponseEntity<SuccessResponse<PageResponse<TemplateCardResponseDTO>>> getMyTemplates(
+            @AuthenticationPrincipal Long memberId,
+            @PageableDefault(size = 9)
+            Pageable pageable
+    ) {
+        PageResponse<TemplateCardResponseDTO> response = memberMyPageQueryService.getMyTemplates(memberId, pageable);
+        return ResponseEntity
+                .status(TemplateSuccessCode.TEMPLATE_LIST_GET_SUCCESS.getStatus())
+                .body(SuccessResponse.ok(TemplateSuccessCode.TEMPLATE_LIST_GET_SUCCESS, response));
+    }
 }
