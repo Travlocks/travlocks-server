@@ -49,15 +49,25 @@ public class SecurityConfig {
                         ).permitAll()
 
                         .requestMatchers(
+                                // 회원가입 & 이메일 인증
                                 "/api/v1/auth/email-verification",
                                 "/api/v1/auth/email-verification/confirm",
                                 "/api/v1/auth/email-verification/resend",
-                                "/api/v1/members/email/exists",
-                                "/api/v1/members/nickname/exists",
                                 "/api/v1/members/signup",
+
+                                // 비밀번호 재설정 (로그인 전)
+                                "/api/v1/auth/password-reset/request",
+                                "/api/v1/auth/password-reset/verify",
+                                "/api/v1/auth/password-reset/confirm",
+
+                                // 로그인/토큰
                                 "/api/v1/auth/login",
                                 "/api/v1/auth/refresh",
-                                "/api/v1/auth/logout"
+                                "/api/v1/auth/logout",
+
+                                // 중복/존재 여부 검사
+                                "/api/v1/members/email/exists",
+                                "/api/v1/members/nickname/exists"
                         ).permitAll()
 
                         // 나머지는 인증 필요

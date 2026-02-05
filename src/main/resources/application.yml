@@ -44,6 +44,10 @@ jwt:
   access-ttl-seconds: ${JWT_ACCESS_TTL_SECONDS:3600} # 1시간
   refresh-ttl-seconds: ${JWT_REFRESH_TTL_SECONDS:1209600} # 14일
 
+password-reset:
+  redirect-uri: ${PASSWORD_RESET_REDIRECT_URI:http://localhost:5173/password-reset}
+  ttl-minutes: ${PASSWORD_RESET_TTL_MINUTES:5}
+
 app:
   profile:
     default-base-url: ${DEFAULT_PROFILE_BASE_URL:https://travlocks-bucket.s3.ap-northeast-2.amazonaws.com/profiles/defaults}
