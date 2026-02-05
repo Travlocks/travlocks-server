@@ -3,6 +3,7 @@ package org.umc.travlocksserver.global.config;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -39,6 +40,7 @@ public class SecurityConfig {
 
                 // 인가 설정
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         // Swagger 관련 URL 허용
                         .requestMatchers(
                                 "/swagger-ui/**",
@@ -49,15 +51,25 @@ public class SecurityConfig {
                         ).permitAll()
 
                         .requestMatchers(
+                                // 회원가입 & 이메일 인증
                                 "/api/v1/auth/email-verification",
                                 "/api/v1/auth/email-verification/confirm",
                                 "/api/v1/auth/email-verification/resend",
-                                "/api/v1/members/email/exists",
-                                "/api/v1/members/nickname/exists",
                                 "/api/v1/members/signup",
+
+                                // 비밀번호 재설정 (로그인 전)
+                                "/api/v1/auth/password-reset/request",
+                                "/api/v1/auth/password-reset/verify",
+                                "/api/v1/auth/password-reset/confirm",
+
+                                // 로그인/토큰
                                 "/api/v1/auth/login",
                                 "/api/v1/auth/refresh",
-                                "/api/v1/auth/logout"
+                                "/api/v1/auth/logout",
+
+                                // 중복/존재 여부 검사
+                                "/api/v1/members/email/exists",
+                                "/api/v1/members/nickname/exists"
                         ).permitAll()
 
                         // 나머지는 인증 필요
@@ -76,16 +88,22 @@ public class SecurityConfig {
         config.setAllowCredentials(true);
         config.setAllowedOriginPatterns(List.of(
                 "http://localhost:5173",
+
+                // legacy (.kro.kr)
                 "https://travlocks.kro.kr",
+                "https://www.travlocks.kro.kr",
                 "https://api.travlocks.kro.kr",
+
+                // new (.com)
+                "https://travlocks.com",
+                "https://www.travlocks.com",
+                "https://api.travlocks.com",
+
+                // Vercel preview
                 "https://*.vercel.app"
         ));
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        config.setAllowedHeaders(List.of(
-                "Authorization",
-                "Content-Type",
-                "X-Requested-With"
-        ));
+        config.addAllowedMethod("*");
+        config.addAllowedHeader("*");
 
         config.setMaxAge(3600L);
 

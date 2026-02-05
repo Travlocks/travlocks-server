@@ -1,5 +1,6 @@
 package org.umc.travlocksserver.domain.template.repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.domain.PageRequest;
@@ -9,8 +10,8 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.umc.travlocksserver.domain.location.entity.Region;
 import org.umc.travlocksserver.domain.member.dto.response.CreatedTemplateDTO;
-import org.umc.travlocksserver.domain.member.dto.response.MemberMyPageResponseDTO;
 import org.umc.travlocksserver.domain.template.entity.Template;
 
 @Repository
@@ -90,6 +91,26 @@ public interface TemplateRepository extends JpaRepository<Template, Long>, Templ
     void transferOwner(@Param("memberId") Long memberId,
                        @Param("deletedMemberId") Long deletedMemberId);
 
+	@Query("""
+		SELECT t.id
+		FROM Template t
+		WHERE t.updatedAt between :from and :to
+	""")
+	List<Long> findRecentlyUpdatedTemplateIds(
+			LocalDateTime from,
+			LocalDateTime to
+	);
+
+	@Query("""
+		SELECT r
+		FROM Template t
+			JOIN t.templateCities tc
+			JOIN tc.city c
+			JOIN c.region r
+		WHERE t.id = :templateId
+	""")
+	List<Region> findRegionByTemplateId(Long templateId);
+
     @Query("""
     select new org.umc.travlocksserver.domain.member.dto.response.CreatedTemplateDTO(
         t.id,
@@ -116,5 +137,4 @@ public interface TemplateRepository extends JpaRepository<Template, Long>, Templ
         List<CreatedTemplateDTO> all = findRecentCreatedTemplatesInternalwithFavorite(memberId);
         return all.size() > limit ? all.subList(0, limit) : all;
     }
-
 }

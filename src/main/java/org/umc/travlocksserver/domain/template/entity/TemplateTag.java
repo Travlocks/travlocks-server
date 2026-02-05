@@ -2,6 +2,7 @@ package org.umc.travlocksserver.domain.template.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.umc.travlocksserver.domain.template.enums.TagType;
 import org.umc.travlocksserver.global.entity.CreatedBaseEntity;
 
 @Getter
@@ -25,12 +26,18 @@ public class TemplateTag extends CreatedBaseEntity {
     @JoinColumn(name = "template_id", nullable = false)
     private Template template;
 
-    @Column(name = "ranking", nullable = false)
-    private Integer ranking;
-
-    @Column(name = "confidence", nullable = false)
-    private Double confidence;
+    @Column(nullable = false, length = 16)
+    private TagType type;
 
     @Column(name = "version", nullable = false)
     private Integer version;
+
+    public static TemplateTag create(Tag tag, Template template, TagType type, Integer version) {
+        return TemplateTag.builder()
+                .tag(tag)
+                .template(template)
+                .type(type)
+                .version(version)
+                .build();
+    }
 }

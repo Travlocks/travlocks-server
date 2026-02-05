@@ -22,7 +22,8 @@ public class SwaggerConfig {
         return new OpenAPI()
                 .info(apiInfo())
                 .servers(List.of(
-                        new Server().url("https://api.travlocks.kro.kr")
+                        new Server().url("https://api.travlocks.com").description("COM"),
+                        new Server().url("https://api.travlocks.kro.kr").description("KRO (legacy)")
                 ))
                 .components(components())
                 .addSecurityItem(new SecurityRequirement().addList(JWT_SCHEME_NAME));

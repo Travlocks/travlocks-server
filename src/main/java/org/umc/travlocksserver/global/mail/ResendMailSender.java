@@ -51,4 +51,16 @@ public class ResendMailSender implements MailSender {
 
         send(toEmail, subject, htmlBody);
     }
+
+    // 비밀번호 재설정 링크 전용
+    public void sendPasswordResetLink(String toEmail, String resetUrl, long ttlMinutes) {
+        String subject = "[트래블록스] 비밀번호 재설정 안내";
+
+        String template = templateLoader.load("mail/password-reset-link.html");
+        String htmlBody = template
+                .replace("{{RESET_URL}}", resetUrl)
+                .replace("{{TTL_MINUTES}}", String.valueOf(ttlMinutes));
+
+        send(toEmail, subject, htmlBody);
+    }
 }

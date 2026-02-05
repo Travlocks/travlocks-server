@@ -19,4 +19,12 @@ public class Tag extends CreatedBaseEntity {
 
     @Column(nullable = false, length = 10)
     private String name;
+
+    public Tag(String name) {
+        this.name = name;
+    }
+
+    public static Tag create(String name) {
+        return new Tag(name);
+    }
 }
