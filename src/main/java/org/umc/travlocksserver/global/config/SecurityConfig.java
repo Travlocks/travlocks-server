@@ -3,6 +3,7 @@ package org.umc.travlocksserver.global.config;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -39,6 +40,7 @@ public class SecurityConfig {
 
                 // 인가 설정
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         // Swagger 관련 URL 허용
                         .requestMatchers(
                                 "/swagger-ui/**",
@@ -86,16 +88,22 @@ public class SecurityConfig {
         config.setAllowCredentials(true);
         config.setAllowedOriginPatterns(List.of(
                 "http://localhost:5173",
+
+                // legacy (.kro.kr)
                 "https://travlocks.kro.kr",
+                "https://www.travlocks.kro.kr",
                 "https://api.travlocks.kro.kr",
+
+                // new (.com)
+                "https://travlocks.com",
+                "https://www.travlocks.com",
+                "https://api.travlocks.com",
+
+                // Vercel preview
                 "https://*.vercel.app"
         ));
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        config.setAllowedHeaders(List.of(
-                "Authorization",
-                "Content-Type",
-                "X-Requested-With"
-        ));
+        config.addAllowedMethod("*");
+        config.addAllowedHeader("*");
 
         config.setMaxAge(3600L);
 
