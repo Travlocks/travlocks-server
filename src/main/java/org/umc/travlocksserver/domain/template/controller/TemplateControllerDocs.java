@@ -2,6 +2,10 @@ package org.umc.travlocksserver.domain.template.controller;
 
 import java.util.List;
 
+import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.umc.travlocksserver.domain.template.dto.request.TemplatePreInputRequestDTO;
+import org.umc.travlocksserver.domain.template.dto.response.TemplatePreInputResponseDTO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,6 +32,25 @@ import org.umc.travlocksserver.domain.template.dto.response.TemplateDetailRespon
 
 @Tag(name = "Template API", description = "템플릿 관련 API 입니다.")
 public interface TemplateControllerDocs {
+
+	@Operation(
+		summary = "사전 정보 입력 API",
+		description = """
+			여행지, 기간, 교통수단, 테마 정보를 제출하면 캔버스 편집용 여정 작업물(초안)을 최초 생성합니다.
+			
+			- 기본 전체공개 (isPublic=true)
+			- 공유 링크용 UUID(shareToken)는 생성 시점에 함께 발급
+			"""
+	)
+	@ApiResponses({
+		@ApiResponse(responseCode = "201", description = "여정 작업물 초안 생성 성공"),
+		@ApiResponse(responseCode = "400", description = "필수 데이터 누락", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+		@ApiResponse(responseCode = "404", description = "존재하지 않는 cityId 또는 travelThemeId", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+	})
+	ResponseEntity<SuccessResponse<TemplatePreInputResponseDTO>> createPreInput(
+		@Valid @RequestBody TemplatePreInputRequestDTO request,
+		@AuthenticationPrincipal Long memberId
+	);
 
 	@Operation(
 		summary = "AI 추천 템플릿 조회 API",
