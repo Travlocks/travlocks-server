@@ -13,6 +13,7 @@ import org.umc.travlocksserver.domain.template.entity.TemplateDay;
 import org.umc.travlocksserver.domain.template.entity.TemplateVlock;
 import org.umc.travlocksserver.domain.template.enums.TransportType;
 import org.umc.travlocksserver.domain.template.exception.TemplateException;
+import org.umc.travlocksserver.domain.template.repository.TemplateCityRepository;
 import org.umc.travlocksserver.domain.template.repository.TemplateDayRepository;
 import org.umc.travlocksserver.domain.template.repository.TemplateRepository;
 import org.umc.travlocksserver.domain.template.repository.TemplateVlockRepository;
@@ -28,6 +29,7 @@ public class TemplateCanvasQueryService {
 	private final TemplateRepository templateRepository;
 	private final TemplateDayRepository templateDayRepository;
 	private final TemplateVlockRepository templateVlockRepository;
+	private final TemplateCityRepository templateCityRepository;
 
 	private final TemplateRouteQueryService templateRouteQueryService;
 
@@ -40,6 +42,8 @@ public class TemplateCanvasQueryService {
 			.orElseThrow(() -> new TemplateException(TemplateErrorCode.TEMPLATE_CANVAS_NOT_FOUND));
 
 		List<TemplateVlock> templateVlocks = templateVlockRepository.findAllByTemplateDayIdFetchVlock(day.getId());
+
+		List<Long> cities = templateCityRepository.findCityIdsByTemplateId(templateId);
 
 		double totalStayHours = 0;
 		int totalMoveMinutes = 0;
@@ -69,7 +73,8 @@ public class TemplateCanvasQueryService {
 			));
 		}
 
-		double totalHours = totalStayHours + (double) totalMoveMinutes / 60;
+		double totalMoveHours = (double) totalMoveMinutes / 60;
+		double totalHours = totalStayHours + totalMoveHours;
 
 		return new TemplateCanvasResponseDTO(
 			template.getId(),
@@ -77,8 +82,9 @@ public class TemplateCanvasQueryService {
 			dayNo,
 			day.getVlockCount(),
 			totalHours,
-			totalMoveMinutes,
+			totalMoveHours,
 			totalStayHours,
+			cities,
 			vlocks,
 			template.getCreatedAt()
 		);
