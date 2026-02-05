@@ -53,15 +53,6 @@ public interface TemplateControllerDocs {
 	);
 
 	@Operation(
-		summary = "여행지 목록 조회 API",
-		description = "사전정보 입력 시 여행지 선택 드롭다운용 지역/도시 목록을 조회합니다."
-	)
-	@ApiResponses({
-		@ApiResponse(responseCode = "200", description = "지역 목록 조회 성공")
-	})
-	ResponseEntity<SuccessResponse<RegionListResponseDTO>> getRegions();
-
-	@Operation(
 		summary = "AI 추천 템플릿 조회 API",
 		description = "Rule-based 방식으로 추천된 템플릿을 조회하는 API 입니다."
 	)

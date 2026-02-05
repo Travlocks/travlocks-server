@@ -38,9 +38,7 @@ import org.umc.travlocksserver.domain.template.service.query.TemplateRouteQueryS
 import org.umc.travlocksserver.domain.template.dto.response.TemplateDetailResponseDTO;
 import org.umc.travlocksserver.global.annotation.LoginUser;
 import org.umc.travlocksserver.global.response.SuccessResponse;
-import org.umc.travlocksserver.domain.template.service.query.RegionQueryService;
-import org.umc.travlocksserver.domain.template.dto.response.RegionListResponseDTO;
-import org.springframework.web.bind.annotation.GetMapping;
+
 
 import java.util.List;
 
@@ -55,7 +53,6 @@ public class TemplateController implements TemplateControllerDocs {
 	private final TemplateRemixService templateRemixService;
 	private final TemplateCanvasQueryService templateCanvasQueryService;
 	private final TemplatePreInputService templatePreInputService;
-	private final RegionQueryService regionQueryService;
 	private final TemplateDayOptimizeCommandService templateDayOptimizeCommandService;
 	private final TemplateRouteQueryService templateRouteQueryService;
 
@@ -105,17 +102,6 @@ public class TemplateController implements TemplateControllerDocs {
 		return ResponseEntity
 				.status(successCode.getStatus())
 				.body(SuccessResponse.ok(successCode, data));
-	}
-
-	@GetMapping("/regions")
-	@Operation(summary = "여행지 목록 조회", description = "사전정보 입력 시 여행지 선택 드롭다운용")
-	public ResponseEntity<SuccessResponse<RegionListResponseDTO>> getRegions() {
-		TemplateSuccessCode successCode = TemplateSuccessCode.REGION_RETRIEVE_SUCCESS;
-		RegionListResponseDTO response = regionQueryService.getAllRegions();
-
-		return ResponseEntity
-				.status(successCode.getStatus())
-				.body(SuccessResponse.ok(successCode, response));
 	}
 
 	@GetMapping("/{templateId}/days/{dayNo}/canvas")
