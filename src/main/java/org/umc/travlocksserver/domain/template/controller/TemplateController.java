@@ -11,6 +11,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import jakarta.validation.Valid;
+import io.swagger.v3.oas.annotations.Operation;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.umc.travlocksserver.domain.template.dto.request.TemplatePreInputRequestDTO;
+import org.umc.travlocksserver.domain.template.dto.response.TemplatePreInputResponseDTO;
+import org.umc.travlocksserver.domain.template.service.command.TemplatePreInputService;
 import org.umc.travlocksserver.domain.member.entity.Member;
 import org.umc.travlocksserver.domain.template.code.TemplateSuccessCode;
 import org.umc.travlocksserver.domain.template.dto.response.BatchRouteResponseDTO;
@@ -33,6 +39,7 @@ import org.umc.travlocksserver.domain.template.dto.response.TemplateDetailRespon
 import org.umc.travlocksserver.global.annotation.LoginUser;
 import org.umc.travlocksserver.global.response.SuccessResponse;
 
+
 import java.util.List;
 
 @Validated
@@ -45,6 +52,7 @@ public class TemplateController implements TemplateControllerDocs {
 	private final TemplateDayCommandService templateDayCommandService;
 	private final TemplateRemixService templateRemixService;
 	private final TemplateCanvasQueryService templateCanvasQueryService;
+	private final TemplatePreInputService templatePreInputService;
 	private final TemplateDayOptimizeCommandService templateDayOptimizeCommandService;
 	private final TemplateRouteQueryService templateRouteQueryService;
 
@@ -81,6 +89,19 @@ public class TemplateController implements TemplateControllerDocs {
 		return ResponseEntity
 			.status(successCode.getStatus())
 			.body(SuccessResponse.ok(successCode, data));
+	}
+
+	@PostMapping("/pre-inputs")
+	public ResponseEntity<SuccessResponse<TemplatePreInputResponseDTO>> createPreInput(
+			@Valid @RequestBody TemplatePreInputRequestDTO request,
+			@AuthenticationPrincipal Long memberId
+	) {
+		TemplateSuccessCode successCode = TemplateSuccessCode.TEMPLATE_PREINPUT_CREATE_SUCCESS;
+		TemplatePreInputResponseDTO data = templatePreInputService.createPreInput(memberId, request);
+
+		return ResponseEntity
+				.status(successCode.getStatus())
+				.body(SuccessResponse.ok(successCode, data));
 	}
 
 	@GetMapping("/{templateId}/days/{dayNo}/canvas")
