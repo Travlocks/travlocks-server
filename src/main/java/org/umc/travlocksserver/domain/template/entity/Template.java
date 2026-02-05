@@ -92,9 +92,17 @@ public class Template extends SoftDeleteBaseEntity {
     @Column(name = "avg_rating", nullable = false)
     private Double avgRating = 0.0;
 
+    @Builder.Default
+    @Column(nullable = false)
+    private int tagVersion = 0;
+
 	public void increaseRemixCount() {
 		this.remixCount = (this.remixCount == null ? 0 : this.remixCount) + 1;
 	}
+
+    public void increaseTagVersion() {
+        this.tagVersion++;
+    }
 
 	public static Template remixOf(Template original, Member remixer, String shareToken) {
 		return Template.builder()
@@ -118,6 +126,7 @@ public class Template extends SoftDeleteBaseEntity {
 			.remixCount(0)
 			.ratingCount(0)
 			.avgRating(0.0)
+            .tagVersion(0)
 			.build();
 	}
 

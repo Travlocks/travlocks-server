@@ -69,6 +69,12 @@ suggestion:
     ai-candidate-pool: 40
     max-duplicate-category: 2
 
+tag:
+  cron: "0 5 * * * *"
+  zone: "Asia/Seoul"
+  grace-minutes: 15
+  lookback-minutes: 60
+
 kakao:
   rest-api-key: ${KAKAO_REST_API_KEY}
   base-url: https://dapi.kakao.com
