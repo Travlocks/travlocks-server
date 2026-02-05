@@ -107,6 +107,7 @@ public interface TemplateRepository extends JpaRepository<Template, Long>, Templ
 			JOIN t.templateCities tc
 			JOIN tc.city c
 			JOIN c.region r
+		WHERE t.id = :templateId
 	""")
 	List<Region> findRegionByTemplateId(Long templateId);
 
