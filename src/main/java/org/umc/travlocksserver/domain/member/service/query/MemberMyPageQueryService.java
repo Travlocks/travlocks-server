@@ -15,7 +15,7 @@ import org.umc.travlocksserver.domain.template.repository.TemplateRepository;
 import org.umc.travlocksserver.domain.travelstyle.repository.PreferredTravelStyleRepository;
 import org.umc.travlocksserver.domain.traveltheme.repository.PreferredTravelThemeRepository;
 import org.umc.travlocksserver.domain.vlock.repository.VlockRepository;
-import org.umc.travlocksserver.global.response.PageResponse;
+import org.umc.travlocksserver.global.response.PageResponseDTO;
 
 import java.util.List;
 
@@ -54,8 +54,8 @@ public class MemberMyPageQueryService {
         );
     }
 
-    public PageResponse<TemplateCardResponseDTO> getMyTemplates(Long memberId, Pageable pageable) {
+    public PageResponseDTO<TemplateCardResponseDTO> getMyTemplates(Long memberId, Pageable pageable) {
         Page<TemplateCardResponseDTO> response = templateRepository.findMyTemplates(memberId, pageable);
-        return PageResponse.from(response);
+        return PageResponseDTO.from(response);
     }
 }

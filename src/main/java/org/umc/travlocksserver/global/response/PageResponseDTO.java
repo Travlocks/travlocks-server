@@ -6,7 +6,7 @@ import org.springframework.data.domain.Page;
 import java.util.List;
 
 @Builder
-public record PageResponse<T>(
+public record PageResponseDTO<T>(
         List<T> content,
 
         int page,
@@ -19,8 +19,8 @@ public record PageResponse<T>(
         boolean last,
         boolean empty
 ) {
-    public static <T> PageResponse<T> from(Page<T> page) {
-        return PageResponse.<T>builder()
+    public static <T> PageResponseDTO<T> from(Page<T> page) {
+        return PageResponseDTO.<T>builder()
                 .content(page.getContent())
                 .page(page.getNumber())
                 .size(page.getSize())

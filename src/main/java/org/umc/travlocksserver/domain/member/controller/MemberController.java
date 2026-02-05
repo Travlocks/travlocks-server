@@ -24,7 +24,7 @@ import org.umc.travlocksserver.domain.template.code.TemplateSuccessCode;
 import org.umc.travlocksserver.domain.template.dto.response.TemplateCardResponseDTO;
 import org.umc.travlocksserver.domain.template.dto.response.TemplateCursorResponseDTO;
 import org.umc.travlocksserver.global.annotation.LoginUser;
-import org.umc.travlocksserver.global.response.PageResponse;
+import org.umc.travlocksserver.global.response.PageResponseDTO;
 import org.umc.travlocksserver.global.response.SuccessResponse;
 
 import jakarta.validation.Valid;
@@ -178,12 +178,12 @@ public class MemberController implements MemberControllerDocs {
     }
 
     @GetMapping("/me/templates")
-    public ResponseEntity<SuccessResponse<PageResponse<TemplateCardResponseDTO>>> getMyTemplates(
+    public ResponseEntity<SuccessResponse<PageResponseDTO<TemplateCardResponseDTO>>> getMyTemplates(
             @AuthenticationPrincipal Long memberId,
             @PageableDefault(size = 9)
             Pageable pageable
     ) {
-        PageResponse<TemplateCardResponseDTO> response = memberMyPageQueryService.getMyTemplates(memberId, pageable);
+        PageResponseDTO<TemplateCardResponseDTO> response = memberMyPageQueryService.getMyTemplates(memberId, pageable);
         return ResponseEntity
                 .status(TemplateSuccessCode.TEMPLATE_LIST_GET_SUCCESS.getStatus())
                 .body(SuccessResponse.ok(TemplateSuccessCode.TEMPLATE_LIST_GET_SUCCESS, response));
