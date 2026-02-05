@@ -114,10 +114,11 @@ public class AuthService {
         // refreshToken -> Set-Cookie
         ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
                 .httpOnly(true)
-                .secure(false) // 운영환경에선 true로 변경
+                .secure(true)
                 .path("/")
+                .domain(".travlocks.com")
                 .maxAge(refreshTtl)
-                .sameSite("Lax") // 운영환경에선 None으로 변경
+                .sameSite("None")
                 .build();
 
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
@@ -147,10 +148,11 @@ public class AuthService {
         // 쿠키 삭제
         ResponseCookie deleteCookie = ResponseCookie.from("refreshToken", "")
                 .httpOnly(true)
-                .secure(false) // 운영환경 true
+                .secure(true)
                 .path("/")
+                .domain(".travlocks.com")
                 .maxAge(0)
-                .sameSite("Lax") // 운영환경 None
+                .sameSite("None")
                 .build();
 
         response.addHeader(HttpHeaders.SET_COOKIE, deleteCookie.toString());
