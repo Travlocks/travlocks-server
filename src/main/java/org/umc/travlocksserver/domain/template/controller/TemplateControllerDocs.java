@@ -5,7 +5,9 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.umc.travlocksserver.domain.template.dto.request.TemplateRatingCreateRequestDTO;
 import org.umc.travlocksserver.domain.template.dto.response.BatchRouteResponseDTO;
 import org.umc.travlocksserver.domain.template.dto.response.PopularTemplateResponse;
 import org.umc.travlocksserver.domain.template.dto.response.TemplateCanvasResponseDTO;
@@ -22,6 +24,8 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+
 import org.umc.travlocksserver.domain.template.dto.response.TemplateRecommendationsDTO;
 import org.umc.travlocksserver.domain.member.entity.Member;
 import org.umc.travlocksserver.domain.template.dto.response.TemplateDetailResponseDTO;
@@ -274,4 +278,28 @@ public interface TemplateControllerDocs {
 				@PathVariable Long templateId,
 				@PathVariable Integer dayNo
 		);
+
+	@Operation(
+		summary = "템플릿 평점 등록 API",
+		description = """
+			특정 템플릿에 평점을 등록합니다.
+	
+			[Path Variable]
+			- templateId: 평점을 등록할 템플릿 ID
+	
+			[Request Body]
+			- rating: 평점(1.0 ~ 5.0)
+			- content: 리뷰 내용(선택)
+			"""
+	)
+	@ApiResponses({
+		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "템플릿 평점 등록 성공"),
+		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "요청 값 검증 실패(rating 범위 오류 등)", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "존재하지 않는 템플릿", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+	})
+	ResponseEntity<SuccessResponse<Void>> createTemplateRating(
+		@PathVariable Long templateId,
+		@AuthenticationPrincipal Long memberId,
+		@Valid @RequestBody TemplateRatingCreateRequestDTO request
+	);
 }

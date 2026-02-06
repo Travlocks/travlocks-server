@@ -104,6 +104,10 @@ public class Template extends SoftDeleteBaseEntity {
         this.tagVersion++;
     }
 
+	public void updateAvgRating(Double avgRating) {
+		this.avgRating = avgRating;
+	}
+
 	public static Template remixOf(Template original, Member remixer, String shareToken) {
 		return Template.builder()
 			.parentTemplate(original)
@@ -120,7 +124,7 @@ public class Template extends SoftDeleteBaseEntity {
 			.progressRate(0)
 			.startDate(null)
 			.endDate(null)
-			.isPublic(false)
+			.isPublic(true)
 			.shareToken(shareToken)
 			.favoriteCount(0)
 			.remixCount(0)
