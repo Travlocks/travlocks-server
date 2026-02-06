@@ -34,7 +34,7 @@ public interface FavoriteRepository extends JpaRepository<Favorite, Long> {
 			JOIN t.owner o
 			JOIN t.travelTheme tt
 		WHERE f.member.id = :memberId
-		ORDER BY f.updatedAt DESC, f.id DESC
+		ORDER BY f.createdAt DESC, f.id DESC
 	""")
 	Page<TemplateCardResponseDTO> findMyFavoriteTemplates(@Param("memberId") Long memberId, Pageable pageable);
 
