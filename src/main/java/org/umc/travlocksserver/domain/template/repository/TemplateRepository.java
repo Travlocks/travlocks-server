@@ -159,4 +159,25 @@ public interface TemplateRepository extends JpaRepository<Template, Long>, Templ
 		ORDER BY t.updatedAt DESC, t.id DESC
 	""")
 	Page<TemplateCardResponseDTO> findMyTemplates(Long memberId, Pageable pageable);
+
+	@Query("""
+		SELECT new org.umc.travlocksserver.domain.template.dto.response.TemplateCardResponseDTO(
+			t.id,
+			t.coverImageUrl,
+			t.title,
+			tt.id,
+			tt.content,
+			o.id,
+			o.nickname,
+			t.avgRating,
+			t.favoriteCount
+		)
+		FROM Template t
+			JOIN t.owner o
+			JOIN t.travelTheme tt
+		WHERE t.owner.id = :memberId
+		  AND t.isPublic = true
+		ORDER BY t.updatedAt DESC, t.id DESC
+	""")
+	Page<TemplateCardResponseDTO> findPublicTemplateCardsByOwnerId(@Param("memberId") Long memberId, Pageable pageable);
 }

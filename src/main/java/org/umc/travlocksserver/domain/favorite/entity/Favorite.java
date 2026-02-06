@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.umc.travlocksserver.domain.member.entity.Member;
 import org.umc.travlocksserver.domain.template.entity.Template;
-import org.umc.travlocksserver.global.entity.CreatedBaseEntity;
+import org.umc.travlocksserver.global.entity.BaseEntity;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -17,7 +17,7 @@ import org.umc.travlocksserver.global.entity.CreatedBaseEntity;
                 @UniqueConstraint(columnNames = {"member_id", "template_id"})
         }
 )
-public class Favorite extends CreatedBaseEntity {
+public class Favorite extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
