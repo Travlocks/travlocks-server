@@ -19,7 +19,7 @@ public class VlockCategoryController {
 
 	private final VlockCategoryQueryService vlockCategoryQueryService;
 
-	@GetMapping("/categories")
+	@GetMapping
 	public ResponseEntity<SuccessResponse<VlockCategoriesDTO>> getCategoriesVlocks() {
 		VlockCategoriesDTO responses = vlockCategoryQueryService.getAllCategories();
 
