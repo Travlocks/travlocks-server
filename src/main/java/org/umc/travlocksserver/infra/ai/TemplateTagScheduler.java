@@ -30,7 +30,7 @@ public class TemplateTagScheduler {
     private final TemplateTagService templateTagService;
 
 
-    @Scheduled(cron = "${tag.cron}", zone = "${tag.zone}")
+    // @Scheduled(cron = "${tag.cron}", zone = "${tag.zone}")
     public void run() {
         LocalDateTime now = LocalDateTime.now(ZoneId.of(zoneId));
         LocalDateTime to = now.minusMinutes(graceMinutes);

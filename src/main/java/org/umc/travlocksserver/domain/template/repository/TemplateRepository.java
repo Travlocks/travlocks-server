@@ -3,6 +3,7 @@ package org.umc.travlocksserver.domain.template.repository;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,6 +13,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.umc.travlocksserver.domain.location.entity.Region;
 import org.umc.travlocksserver.domain.member.dto.response.CreatedTemplateDTO;
+import org.umc.travlocksserver.domain.template.dto.response.TemplateCardResponseDTO;
 import org.umc.travlocksserver.domain.template.entity.Template;
 
 @Repository
@@ -137,4 +139,24 @@ public interface TemplateRepository extends JpaRepository<Template, Long>, Templ
         List<CreatedTemplateDTO> all = findRecentCreatedTemplatesInternalwithFavorite(memberId);
         return all.size() > limit ? all.subList(0, limit) : all;
     }
+
+	@Query("""
+		SELECT new org.umc.travlocksserver.domain.template.dto.response.TemplateCardResponseDTO(
+			t.id,
+			t.coverImageUrl,
+			t.title,
+			tt.id,
+			tt.content,
+			o.id,
+			o.nickname,
+			t.avgRating,
+			t.favoriteCount
+		)
+		FROM Template t
+			JOIN t.owner o
+			JOIN t.travelTheme tt
+		WHERE t.owner.id = :memberId
+		ORDER BY t.updatedAt DESC, t.id DESC
+	""")
+	Page<TemplateCardResponseDTO> findMyTemplates(Long memberId, Pageable pageable);
 }
