@@ -15,4 +15,6 @@ public interface TemplateRatingRepository extends JpaRepository<TemplateRating, 
 
     @Query("select coalesce(avg(tr.rating), 0.0) from TemplateRating tr where tr.template.id = :templateId")
     Double findAvgRatingByTemplateId(@Param("templateId") Long templateId);
+
+    boolean existsByTemplateIdAndMemberId(Long templateId, Long memberId);
 }

@@ -28,6 +28,10 @@ public class TemplateRatingCommandService {
 
 	public void createTemplateRating(Long templateId, Long memberId, TemplateRatingCreateRequestDTO request) {
 
+		if (templateRatingRepository.existsByTemplateIdAndMemberId(templateId, memberId)) {
+			throw new TemplateException(TemplateErrorCode.TEMPLATE_RATING_ALREADY_EXISTS);
+		}
+
 		Template template = templateRepository.findById(templateId)
 			.orElseThrow(() -> new TemplateException(TemplateErrorCode.TEMPLATE_NOT_FOUND));
 
