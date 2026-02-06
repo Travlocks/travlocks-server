@@ -46,7 +46,7 @@ public class Template extends SoftDeleteBaseEntity {
     @Column(name = "description")
     private String description;
 
-    @Column(name = "cover_image_url", nullable = false, length = 255)
+    @Column(name = "cover_image_url", nullable = true, length = 255)
     private String coverImageUrl;
 
     @Enumerated(EnumType.STRING)
