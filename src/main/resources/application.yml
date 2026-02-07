@@ -102,6 +102,8 @@ cache:
       cache-ttl-minutes: 15
     vlocks:
       cache-ttl-minutes: 60
+  categories:
+    cache-ttl-minutes: 1440
 
 tmap:
   api:
