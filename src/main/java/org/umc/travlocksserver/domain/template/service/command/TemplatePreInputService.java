@@ -84,8 +84,6 @@ public class TemplatePreInputService {
                 .coverImageUrl(null)  // 랜덤 이미지는 나중에 추가
                 .transportType(transportType)
                 .progressRate(0)
-                .startDate(null)
-                .endDate(null)
                 .tripDays(tripDays)
                 .vlockCount(0)
                 .isPublic(true)
