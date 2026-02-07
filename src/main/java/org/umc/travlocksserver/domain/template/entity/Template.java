@@ -57,12 +57,6 @@ public class Template extends SoftDeleteBaseEntity {
     @Column(name = "progress_rate", nullable = false)
     private Integer progressRate = 0;
 
-    @Column(name = "start_date")
-    private LocalDate startDate;
-
-    @Column(name = "end_date")
-    private LocalDate endDate;
-
     @Column(name = "trip_days", nullable = false, length = 20)
     private String tripDays;
 
@@ -122,8 +116,6 @@ public class Template extends SoftDeleteBaseEntity {
 
 			// 초기화
 			.progressRate(0)
-			.startDate(null)
-			.endDate(null)
 			.isPublic(true)
 			.shareToken(shareToken)
 			.favoriteCount(0)
