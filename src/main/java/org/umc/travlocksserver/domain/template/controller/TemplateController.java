@@ -1,6 +1,7 @@
 package org.umc.travlocksserver.domain.template.controller;
 
 import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -8,6 +9,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,6 +21,7 @@ import org.umc.travlocksserver.domain.template.dto.response.TemplatePreInputResp
 import org.umc.travlocksserver.domain.template.service.command.TemplatePreInputService;
 import org.umc.travlocksserver.domain.member.entity.Member;
 import org.umc.travlocksserver.domain.template.code.TemplateSuccessCode;
+import org.umc.travlocksserver.domain.template.dto.request.TemplateRatingCreateRequestDTO;
 import org.umc.travlocksserver.domain.template.dto.response.BatchRouteResponseDTO;
 import org.umc.travlocksserver.domain.template.dto.response.TemplateCanvasResponseDTO;
 import org.umc.travlocksserver.domain.template.dto.response.TemplateDayRouteResponseDTO;
@@ -29,6 +32,7 @@ import org.umc.travlocksserver.domain.template.dto.response.*;
 import org.umc.travlocksserver.domain.template.code.TemplateDaySuccessCode;
 import org.umc.travlocksserver.domain.template.service.command.TemplateDayCommandService;
 import org.umc.travlocksserver.domain.template.dto.response.VlockSuggestionsResponseDTO;
+import org.umc.travlocksserver.domain.template.service.command.TemplateRatingCommandService;
 import org.umc.travlocksserver.domain.template.service.command.TemplateRemixService;
 import org.umc.travlocksserver.domain.template.service.query.TemplateCanvasQueryService;
 import org.umc.travlocksserver.domain.template.service.command.TemplateDayOptimizeCommandService;
@@ -55,6 +59,7 @@ public class TemplateController implements TemplateControllerDocs {
 	private final TemplatePreInputService templatePreInputService;
 	private final TemplateDayOptimizeCommandService templateDayOptimizeCommandService;
 	private final TemplateRouteQueryService templateRouteQueryService;
+	private final TemplateRatingCommandService templateRatingCommandService;
 
     @GetMapping("/recommendations")
     public ResponseEntity<SuccessResponse<TemplateRecommendationsDTO>> getRecommendedTemplates(
@@ -205,5 +210,20 @@ public class TemplateController implements TemplateControllerDocs {
 						templates
 				)
 		);
+	}
+
+	@PostMapping("/{templateId}/ratings")
+	public ResponseEntity<SuccessResponse<Void>> createTemplateRating(
+		@PathVariable Long templateId,
+		@AuthenticationPrincipal Long memberId,
+		@Valid @RequestBody TemplateRatingCreateRequestDTO request
+	) {
+		TemplateSuccessCode successCode = TemplateSuccessCode.TEMPLATE_RATING_CREATE_SUCCESS;
+
+		templateRatingCommandService.createTemplateRating(templateId, memberId, request);
+
+		return ResponseEntity
+			.status(successCode.getStatus())
+			.body(SuccessResponse.ok(successCode));
 	}
 }
