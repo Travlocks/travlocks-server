@@ -28,6 +28,16 @@ import org.umc.travlocksserver.infra.kakao.KakaoPlace;
 import org.umc.travlocksserver.infra.redis.vlock.CachedVlockSuggestions;
 import org.umc.travlocksserver.infra.redis.vlock.VlockSuggestionCache;
 
+import org.umc.travlocksserver.domain.template.dto.request.TemplateVlockAddRequestDTO;
+import org.umc.travlocksserver.domain.template.dto.request.TemplateVlockReorderRequestDTO;
+import org.umc.travlocksserver.domain.template.dto.response.TemplateVlockAddResponseDTO;
+import org.umc.travlocksserver.domain.template.dto.response.TemplateVlockDeleteResponseDTO;
+import org.umc.travlocksserver.domain.template.dto.response.TemplateVlockReorderResponseDTO;
+import org.umc.travlocksserver.domain.template.entity.TemplateVlock;
+import org.umc.travlocksserver.domain.template.repository.TemplateVlockRepository;
+import org.umc.travlocksserver.domain.vlock.code.VlockErrorCode;
+import org.umc.travlocksserver.domain.vlock.exception.VlockException;
+import org.umc.travlocksserver.domain.vlock.repository.VlockRepository;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -37,6 +47,8 @@ import java.util.stream.Collectors;
 public class TemplateDayCommandService {
 
     private final TemplateDayRepository templateDayRepository;
+    private final TemplateVlockRepository templateVlockRepository;
+    private final VlockRepository vlockRepository;
 
     private final TemplateCityQueryService templateCityQueryService;
     private final VlockCommandService vlockCommandService;
@@ -75,6 +87,165 @@ public class TemplateDayCommandService {
     /**
      * Vlock 추천 결과를 반환하는 메서드
      */
+
+    // 블록 추가
+    public TemplateVlockAddResponseDTO addVlock(
+            Long memberId,
+            Long templateId,
+            Integer dayNo,
+            TemplateVlockAddRequestDTO request
+    ) {
+        // 1. TemplateDay 조회 및 권한 검증
+        TemplateDay templateDay = templateDayRepository
+                .findTemplateDayAccesible(memberId, templateId, dayNo)
+                .orElseThrow(() -> new TemplateDayException(TemplateDayErrorCode.TEMPLATE_DAY_NOT_FOUND));
+
+        // 2. Vlock 조회
+        Vlock vlock = vlockRepository.findById(request.vlockId())
+                .orElseThrow(() -> new VlockException(VlockErrorCode.VLOCK_NOT_FOUND));
+
+        // 3. 현재 마지막 orderNo 조회
+        Integer maxOrderNo = templateVlockRepository
+                .findByTemplateDayIdOrderByOrderNo(templateDay.getId())
+                .stream()
+                .map(TemplateVlock::getOrderNo)
+                .max(Integer::compareTo)
+                .orElse(0);
+
+        // 4. TemplateVlock 생성
+        TemplateVlock templateVlock = TemplateVlock.builder()
+                .templateDay(templateDay)
+                .vlock(vlock)
+                .orderNo(maxOrderNo + 1)
+                .stayHours(vlock.getVlockCategory().getStayHours())
+                .canvasX(request.canvasX())
+                .canvasY(request.canvasY())
+                .connectionPort(request.connectionPort())
+                .build();
+
+        templateVlockRepository.save(templateVlock);
+
+        // 5. vlockCount 증가
+        templateDay.incrementVlockCount();
+
+        // 6. 경고 메시지 생성
+        String warning = null;
+        if (templateDay.getVlockCount() > 4) {
+            warning = "하루 권장 블록 개수 4개가 초과되었습니다.";
+        }
+
+        return TemplateVlockAddResponseDTO.from(templateVlock, warning);
+    }
+
+    // 블록 삭제
+    public TemplateVlockDeleteResponseDTO deleteVlock(
+            Long memberId,
+            Long templateId,
+            Integer dayNo,
+            Long templateVlocksId
+    ) {
+        // 1. TemplateDay 조회 및 권한 검증
+        TemplateDay templateDay = templateDayRepository
+                .findTemplateDayAccesible(memberId, templateId, dayNo)
+                .orElseThrow(() -> new TemplateDayException(TemplateDayErrorCode.TEMPLATE_DAY_NOT_FOUND));
+
+        // 2. TemplateVlock 조회
+        TemplateVlock templateVlock = templateVlockRepository.findById(templateVlocksId)
+                .orElseThrow(() -> new TemplateDayException(TemplateDayErrorCode.TEMPLATE_VLOCK_NOT_FOUND));
+
+        // 3. 권한 확인 (해당 day의 블록인지)
+        if (!templateVlock.getTemplateDay().getId().equals(templateDay.getId())) {
+            throw new TemplateDayException(TemplateDayErrorCode.TEMPLATE_VLOCK_NOT_FOUND);
+        }
+
+        // 4. 삭제
+        templateVlockRepository.delete(templateVlock);
+
+        // 5. 남은 블록들 조회 및 orderNo 재정렬
+        List<TemplateVlock> remainingVlocks = templateVlockRepository
+                .findByTemplateDayIdOrderByOrderNo(templateDay.getId());
+
+        for (int i = 0; i < remainingVlocks.size(); i++) {
+            remainingVlocks.get(i).updateOrderNo(i + 1);
+        }
+
+        if (!remainingVlocks.isEmpty()) {
+            templateVlockRepository.saveAll(remainingVlocks);
+        }
+
+        // 6. vlockCount 감소
+        templateDay.decrementVlockCount();
+
+        return TemplateVlockDeleteResponseDTO.from(
+                templateVlocksId,
+                templateDay.getId(),
+                dayNo,
+                remainingVlocks
+        );
+    }
+
+    // 블록 순서 변경
+    public TemplateVlockReorderResponseDTO reorderVlocks(
+            Long memberId,
+            Long templateId,
+            Integer dayNo,
+            TemplateVlockReorderRequestDTO request
+    ) {
+        // 1. TemplateDay 조회 및 권한 검증
+        TemplateDay templateDay = templateDayRepository
+                .findTemplateDayAccesible(memberId, templateId, dayNo)
+                .orElseThrow(() -> new TemplateDayException(TemplateDayErrorCode.TEMPLATE_DAY_NOT_FOUND));
+
+        // 2. 모든 TemplateVlock 조회
+        List<Long> ids = request.vlockOrders().stream()
+                .map(TemplateVlockReorderRequestDTO.VlockOrder::templateVlocksId)
+                .toList();
+
+        List<TemplateVlock> templateVlocks = templateVlockRepository.findAllById(ids);
+
+        if (templateVlocks.size() != ids.size()) {
+            throw new TemplateDayException(TemplateDayErrorCode.TEMPLATE_VLOCK_NOT_FOUND);
+        }
+
+        // 3. 모든 블록이 해당 day에 속하는지 검증
+        boolean allBelongToDay = templateVlocks.stream()
+                .allMatch(tv -> tv.getTemplateDay().getId().equals(templateDay.getId()));
+
+        if (!allBelongToDay) {
+            throw new TemplateDayException(TemplateDayErrorCode.TEMPLATE_VLOCK_NOT_FOUND);
+        }
+
+        // 4. orderNo, 레이아웃 정보 일괄 업데이트
+        Map<Long, TemplateVlock> vlockMap = templateVlocks.stream()
+                .collect(Collectors.toMap(TemplateVlock::getId, v -> v));
+
+        for (var order : request.vlockOrders()) {
+            TemplateVlock tv = vlockMap.get(order.templateVlocksId());
+            tv.updateOrderNo(order.orderNo());
+            tv.updateLayout(
+                    order.canvasX(),
+                    order.canvasY(),
+                    order.connectionPort()
+            );
+        }
+
+        templateVlockRepository.saveAll(templateVlocks);
+
+        // 5. 정렬된 순서로 재조회
+        List<TemplateVlock> orderedVlocks = templateVlockRepository
+                .findByTemplateDayIdOrderByOrderNo(templateDay.getId());
+
+        // 6. 경고 메시지 생성 (TODO: 이동시간 계산 로직 추가 가능)
+        List<String> warnings = List.of();
+
+        return TemplateVlockReorderResponseDTO.from(
+                templateDay.getId(),
+                dayNo,
+                orderedVlocks,
+                warnings
+        );
+    }
+
     public VlockSuggestionsResponseDTO suggestVlocks(Long memberId, Long templateId, Integer dayNo) {
         long seed = System.currentTimeMillis();
 
