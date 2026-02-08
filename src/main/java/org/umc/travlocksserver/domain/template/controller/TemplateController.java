@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import jakarta.validation.Valid;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -42,6 +44,11 @@ import org.umc.travlocksserver.domain.template.service.query.TemplateRouteQueryS
 import org.umc.travlocksserver.domain.template.dto.response.TemplateDetailResponseDTO;
 import org.umc.travlocksserver.global.annotation.LoginUser;
 import org.umc.travlocksserver.global.response.SuccessResponse;
+import org.umc.travlocksserver.domain.template.dto.request.TemplateVlockAddRequestDTO;
+import org.umc.travlocksserver.domain.template.dto.request.TemplateVlockReorderRequestDTO;
+import org.umc.travlocksserver.domain.template.dto.response.TemplateVlockAddResponseDTO;
+import org.umc.travlocksserver.domain.template.dto.response.TemplateVlockDeleteResponseDTO;
+import org.umc.travlocksserver.domain.template.dto.response.TemplateVlockReorderResponseDTO;
 
 
 import java.util.List;
@@ -94,6 +101,63 @@ public class TemplateController implements TemplateControllerDocs {
 		return ResponseEntity
 			.status(successCode.getStatus())
 			.body(SuccessResponse.ok(successCode, data));
+	}
+
+	@PostMapping("/{templateId}/days/{dayNo}/vlocks")
+	public ResponseEntity<SuccessResponse<TemplateVlockAddResponseDTO>> addVlock(
+			@PathVariable Long templateId,
+			@PathVariable Integer dayNo,
+			@Valid @RequestBody TemplateVlockAddRequestDTO request,
+			@AuthenticationPrincipal Long memberId
+	) {
+		TemplateVlockAddResponseDTO response = templateDayCommandService.addVlock(
+				memberId,
+				templateId,
+				dayNo,
+				request
+		);
+
+		return ResponseEntity
+				.status(TemplateDaySuccessCode.TEMPLATE_VLOCK_ADD_SUCCESS.getStatus())
+				.body(SuccessResponse.ok(TemplateDaySuccessCode.TEMPLATE_VLOCK_ADD_SUCCESS, response));
+	}
+
+	@DeleteMapping("/{templateId}/days/{dayNo}/vlocks/{templateVlocksId}")
+	public ResponseEntity<SuccessResponse<TemplateVlockDeleteResponseDTO>> deleteVlock(
+			@PathVariable Long templateId,
+			@PathVariable Integer dayNo,
+			@PathVariable Long templateVlocksId,
+			@AuthenticationPrincipal Long memberId
+	) {
+		TemplateVlockDeleteResponseDTO response = templateDayCommandService.deleteVlock(
+				memberId,
+				templateId,
+				dayNo,
+				templateVlocksId
+		);
+
+		return ResponseEntity.ok(
+				SuccessResponse.ok(TemplateDaySuccessCode.TEMPLATE_VLOCK_DELETE_SUCCESS, response)
+		);
+	}
+
+	@PatchMapping("/{templateId}/days/{dayNo}/vlocks/reorder")
+	public ResponseEntity<SuccessResponse<TemplateVlockReorderResponseDTO>> reorderVlocks(
+			@PathVariable Long templateId,
+			@PathVariable Integer dayNo,
+			@Valid @RequestBody TemplateVlockReorderRequestDTO request,
+			@AuthenticationPrincipal Long memberId
+	) {
+		TemplateVlockReorderResponseDTO response = templateDayCommandService.reorderVlocks(
+				memberId,
+				templateId,
+				dayNo,
+				request
+		);
+
+		return ResponseEntity.ok(
+				SuccessResponse.ok(TemplateDaySuccessCode.TEMPLATE_VLOCK_REORDER_SUCCESS, response)
+		);
 	}
 
 	@PostMapping("/pre-inputs")
