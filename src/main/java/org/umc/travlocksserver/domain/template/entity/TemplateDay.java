@@ -39,4 +39,15 @@ public class TemplateDay extends CreatedBaseEntity {
 
     @OneToMany(mappedBy = "templateDay")
     private List<TemplateVlock> templateVlocks = new ArrayList<>();
+
+    //  vlockCount 증감 메서드 추가
+    public void incrementVlockCount() {
+        this.vlockCount++;
+    }
+
+    public void decrementVlockCount() {
+        if (this.vlockCount > 0) {
+            this.vlockCount--;
+        }
+    }
 }
