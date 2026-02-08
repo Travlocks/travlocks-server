@@ -12,7 +12,6 @@ import org.umc.travlocksserver.domain.member.repository.MemberRepository;
 @Service
 @RequiredArgsConstructor
 public class MemberPasswordUpdateService {
-    private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Transactional

@@ -24,6 +24,7 @@ public enum MemberErrorCode implements BaseCode {
     PASSWORD_MISMATCH(HttpStatus.BAD_REQUEST, "현재 비밀번호가 일치하지 않습니다."),
     SAME_AS_CURRENT_PASSWORD(HttpStatus.BAD_REQUEST, "새 비밀번호가 현재 비밀번호와 동일합니다."),
     MEMBER_DELETED(HttpStatus.UNAUTHORIZED, "탈퇴한 회원입니다."),
+    INVALID_ONBOARDING_STATUS(HttpStatus.BAD_REQUEST, "온보딩 상태의 회원만 완료할 수 있습니다."),
     ;
 
 	private final HttpStatus status;

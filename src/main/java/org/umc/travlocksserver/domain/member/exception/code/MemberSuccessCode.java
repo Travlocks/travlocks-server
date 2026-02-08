@@ -18,7 +18,8 @@ public enum MemberSuccessCode implements BaseCode {
     MEMBER_PROFILE_UPDATED(HttpStatus.OK, "프로필이 수정되었습니다."),
     FAVORITE_TEMPLATE_LIST_GET_SUCCESS(HttpStatus.OK, "내 즐겨찾기 목록 조회에 성공했습니다."),
     MEMBER_WITHDRAW_SUCCESS(HttpStatus.OK, "회원 탈퇴가 완료되었습니다."),
-    MEMBER_MY_PAGE_RETRIEVED(HttpStatus.OK, "마이페이지 조회에 성공했습니다.")
+    MEMBER_MY_PAGE_RETRIEVED(HttpStatus.OK, "마이페이지 조회에 성공했습니다."),
+    MEMBER_OAUTH_ONBOARDING_COMPLETED(HttpStatus.OK, "OAuth 온보딩이 완료되었습니다."),
     ;
 
 	private final HttpStatus status;

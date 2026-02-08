@@ -8,17 +8,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.umc.travlocksserver.domain.member.dto.request.MemberPasswordUpdateRequestDTO;
-import org.umc.travlocksserver.domain.member.dto.request.MemberProfileUpdateRequestDTO;
-import org.umc.travlocksserver.domain.member.dto.request.MemberSignupRequestDTO;
-import org.umc.travlocksserver.domain.member.dto.request.MemberWithdrawRequestDTO;
+import org.umc.travlocksserver.domain.member.dto.request.*;
 import org.umc.travlocksserver.domain.member.dto.response.*;
 import org.umc.travlocksserver.domain.member.entity.Member;
 import org.umc.travlocksserver.domain.member.exception.code.MemberSuccessCode;
-import org.umc.travlocksserver.domain.member.service.command.MemberPasswordUpdateService;
-import org.umc.travlocksserver.domain.member.service.command.MemberProfileUpdateService;
-import org.umc.travlocksserver.domain.member.service.command.MemberSignupService;
-import org.umc.travlocksserver.domain.member.service.command.MemberWithdrawService;
+import org.umc.travlocksserver.domain.member.service.command.*;
 import org.umc.travlocksserver.domain.member.service.query.*;
 import org.umc.travlocksserver.domain.template.code.TemplateSuccessCode;
 import org.umc.travlocksserver.domain.template.dto.response.TemplateCardResponseDTO;
@@ -47,6 +41,7 @@ public class MemberController implements MemberControllerDocs {
     private final MemberProfileUpdateService memberProfileUpdateService;
     private final MemberWithdrawService memberWithdrawService;
     private final MemberMyPageQueryService memberMyPageQueryService;
+    private final MemberOAuthOnboardingService memberOAuthOnboardingService;
 
     @GetMapping("/email/exists")
     public ResponseEntity<SuccessResponse<MemberEmailExistsResponseDTO>> checkEmailExists(
@@ -188,4 +183,19 @@ public class MemberController implements MemberControllerDocs {
                 .status(TemplateSuccessCode.TEMPLATE_LIST_GET_SUCCESS.getStatus())
                 .body(SuccessResponse.ok(TemplateSuccessCode.TEMPLATE_LIST_GET_SUCCESS, response));
     }
+
+    @PostMapping("/members/onboarding")
+    public ResponseEntity<SuccessResponse<MemberSignupResponseDTO>> completeOAuthOnboarding(
+            @LoginUser Member member,
+            @Valid @RequestBody MemberOAuthOnboardingRequestDTO request,
+            HttpServletResponse response
+    ) {
+        MemberSuccessCode successCode = MemberSuccessCode.MEMBER_OAUTH_ONBOARDING_COMPLETED;
+        MemberSignupResponseDTO data = memberOAuthOnboardingService.completeOAuthOnboarding(member, request, response);
+
+        return ResponseEntity
+                .status(successCode.getStatus())
+                .body(SuccessResponse.ok(successCode, data));
+    }
+
 }
