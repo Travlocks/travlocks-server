@@ -117,13 +117,14 @@ public interface TemplateRepository extends JpaRepository<Template, Long>, Templ
     select new org.umc.travlocksserver.domain.member.dto.response.CreatedTemplateDTO(
         t.id,
         t.title,
-        coalesce(min(c.name), ''),
+        min(r.id),
         t.createdAt,
         case when count(f.id) > 0 then true else false end
     )
     from Template t
     left join t.templateCities tc
     left join tc.city c
+    left join c.region r
     left join Favorite f
         on f.template.id = t.id
        and f.member.id = :memberId

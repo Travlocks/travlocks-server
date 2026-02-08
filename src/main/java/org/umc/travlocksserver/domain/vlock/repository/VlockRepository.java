@@ -8,7 +8,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.umc.travlocksserver.domain.member.dto.response.CreatedVlockDTO;
-import org.umc.travlocksserver.domain.member.dto.response.MemberMyPageResponseDTO;
 import org.umc.travlocksserver.domain.vlock.entity.Vlock;
 
 import java.util.List;
@@ -68,7 +67,7 @@ public interface VlockRepository extends JpaRepository<Vlock,Long>, VlockReposit
     select new org.umc.travlocksserver.domain.member.dto.response.CreatedVlockDTO(
         v.id,
         v.name,
-        v.city.name,
+        v.city.region.id,
         v.createdAt
     )
     from Vlock v

@@ -4,8 +4,8 @@ import java.time.LocalDateTime;
 
 public record CreatedVlockDTO(
         Long vlockId,
-        String name,
-        String city,
+        String vlockName,
+        Long regionId,
         LocalDateTime createdAt
 ) {}
 

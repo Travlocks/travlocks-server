@@ -4,8 +4,8 @@ import java.time.LocalDateTime;
 
 public record CreatedTemplateDTO(
         Long templateId,
-        String title,
-        String city,
+        String templateTitle,
+        Long regionId,
         LocalDateTime createdAt,
         boolean isFavorite
 ) {}
