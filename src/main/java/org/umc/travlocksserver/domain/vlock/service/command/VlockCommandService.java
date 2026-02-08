@@ -136,7 +136,7 @@ public class VlockCommandService {
             default -> "기타";
         };
 
-        return vlockCategoryQueryService.getByName(name)
+        return vlockCategoryQueryService.getByName(mappedName)
                 .orElseGet(() -> vlockCategoryQueryService.getByName("기타")
                         .orElseThrow(() -> new VlockCategoryException(VlockCategoryErrorCode.DEFAULT_VLOCK_CATEGORY_NOT_FOUND)));
     }

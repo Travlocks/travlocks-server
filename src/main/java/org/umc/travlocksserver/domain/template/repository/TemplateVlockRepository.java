@@ -25,6 +25,11 @@ public interface TemplateVlockRepository extends JpaRepository<TemplateVlock, Lo
     """)
     List<Vlock> findDistinctVlocksByTemplateDayId(@Param("templateDayId") Long templateDayId);
 
+	@Query("""
+    	SELECT tv.vlock.id
+    	FROM TemplateVlock tv
+   		WHERE tv.templateDay.template.id = :templateId
+    """)
     List<Long> findAllVlockIdsByTemplateDayTemplateId(Long templateId);
 
 	@Query("""
