@@ -1,11 +1,10 @@
 package org.umc.travlocksserver.domain.template.dto.request;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import org.umc.travlocksserver.domain.template.enums.TripDays;
 
 import java.util.List;
 
@@ -17,7 +16,7 @@ public record TemplatePreInputRequestDTO(
 
         @NotNull(message = "여행 기간 정보는 필수입니다.")
         @Valid
-        TripDTO trip,
+        TripDays tripDays,
 
         @NotEmpty(message = "교통수단은 최소 1개 이상 선택해야 합니다.")
         List<String> transportTypes,
@@ -27,14 +26,4 @@ public record TemplatePreInputRequestDTO(
         List<Long> travelThemeIds
 
 ) {
-    public record TripDTO(
-            @NotNull(message = "여행 일수는 필수입니다.")
-            @Min(value = 1, message = "여행 일수는 최소 1일입니다.")
-            @Max(value = 5, message = "여행 일수는 최대 5일입니다.")
-            Integer days,
-
-            @NotNull(message = "여행 박수는 필수입니다.")
-            @Min(value = 0, message = "여행 박수는 0 이상이어야 합니다.")
-            Integer nights
-    ) {}
 }
