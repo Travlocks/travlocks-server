@@ -14,6 +14,7 @@ import org.umc.travlocksserver.domain.template.dto.response.TemplateRecommendati
 import org.umc.travlocksserver.domain.template.dto.response.TemplateExploreResponseDTO;
 import org.umc.travlocksserver.domain.template.dto.response.*;
 import org.umc.travlocksserver.domain.template.entity.Template;
+import org.umc.travlocksserver.domain.template.enums.TripDays;
 import org.umc.travlocksserver.domain.template.exception.TemplateException;
 import org.umc.travlocksserver.domain.template.repository.TemplateExploreRepositoryCustom;
 import org.umc.travlocksserver.domain.template.repository.TemplateRepository;
@@ -139,7 +140,7 @@ public class TemplateQueryService {
                 template.getCoverImageUrl(),
                 template.getOwner().getId(),
                 template.getAvgRating(),
-                template.getTripDays(),
+                template.getTripDays().getDescription(),
                 template.getRemixCount(),
                 template.getDescription(),
                 tags,
@@ -152,7 +153,7 @@ public class TemplateQueryService {
             String keyword,
             List<String> cities,
             List<String> themes,
-            List<String> tripDays,
+            List<TripDays> tripDays,
             List<String> transportTypes,
             String sort,
             int page
