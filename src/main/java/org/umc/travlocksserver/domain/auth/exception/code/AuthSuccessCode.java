@@ -17,7 +17,8 @@ public enum AuthSuccessCode implements BaseCode {
     AUTH_LOGOUT_SUCCESS(HttpStatus.OK, "로그아웃에 성공했습니다."),
     PASSWORD_RESET_LINK_SENT(HttpStatus.OK,  "비밀번호 재설정 링크가 전송되었습니다."),
     PASSWORD_RESET_TOKEN_VERIFIED(HttpStatus.OK, "비밀번호 재설정 토큰이 유효합니다."),
-    PASSWORD_RESET_SUCCESS(HttpStatus.OK, "비밀번호가 재설정되었습니다.")
+    PASSWORD_RESET_SUCCESS(HttpStatus.OK, "비밀번호가 재설정되었습니다."),
+    OAUTH_LOGIN_SUCCESS(HttpStatus.OK, "OAuth 로그인에 성공했습니다."),
     ;
 
 	private final HttpStatus status;

@@ -10,6 +10,7 @@ import org.umc.travlocksserver.domain.auth.dto.response.*;
 import org.umc.travlocksserver.domain.auth.exception.code.AuthSuccessCode;
 import org.umc.travlocksserver.domain.auth.service.command.AuthService;
 import org.umc.travlocksserver.domain.auth.service.command.EmailVerificationService;
+import org.umc.travlocksserver.domain.auth.service.command.OAuthLoginService;
 import org.umc.travlocksserver.domain.auth.service.command.PasswordResetService;
 import org.umc.travlocksserver.global.response.SuccessResponse;
 
@@ -23,6 +24,7 @@ public class AuthController implements AuthControllerDocs {
 	private final EmailVerificationService emailVerificationService;
     private final AuthService authService;
     private final PasswordResetService passwordResetService;
+    private final OAuthLoginService oAuthLoginService;
 
 	@PostMapping("/email-verification")
 	public ResponseEntity<SuccessResponse<AuthSendEmailResponseDTO>> sendEmailVerificationCode(
@@ -129,6 +131,21 @@ public class AuthController implements AuthControllerDocs {
         return ResponseEntity
                 .status(successCode.getStatus())
                 .body(SuccessResponse.ok(successCode, null));
+    }
+
+    @PostMapping("/oauth/{provider}")
+    public ResponseEntity<SuccessResponse<AuthOAuthLoginResponseDTO>> oauthLogin(
+            @PathVariable String provider,
+            @Valid @RequestBody AuthOAuthLoginRequestDTO request,
+            HttpServletResponse response
+    ) {
+        AuthSuccessCode successCode = AuthSuccessCode.OAUTH_LOGIN_SUCCESS;
+        AuthOAuthLoginResponseDTO data =
+                oAuthLoginService.oauthLogin(provider, request, response);
+
+        return ResponseEntity
+                .status(successCode.getStatus())
+                .body(SuccessResponse.ok(successCode, data));
     }
 
 }
