@@ -69,9 +69,14 @@ public interface VlockRepository extends JpaRepository<Vlock,Long>, VlockReposit
         v.id,
         v.name,
         v.city.name,
+        case
+            when v.coverImgUrl is null then concat('https://travlocks-bucket.s3.ap-northeast-2.amazonaws.com/', vc.defaultCreationImageKey)
+            else v.coverImgUrl
+        end,
         v.createdAt
     )
     from Vlock v
+        join v.vlockCategory vc
     where v.owner.id = :memberId
       and v.deletedAt is null
     order by v.createdAt desc, v.id desc

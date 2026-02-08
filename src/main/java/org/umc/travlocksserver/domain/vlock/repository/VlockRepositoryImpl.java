@@ -9,6 +9,8 @@ import org.umc.travlocksserver.domain.vlock.dto.response.VlockCategoryDTO;
 
 import com.querydsl.core.types.ConstructorExpression;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.CaseBuilder;
+import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
@@ -18,6 +20,7 @@ import static org.umc.travlocksserver.domain.vlock.entity.QVlock.vlock;
 import static org.umc.travlocksserver.domain.vlock.entity.QVlockCategory.vlockCategory;
 import static org.umc.travlocksserver.domain.location.entity.QCity.city;
 import static org.umc.travlocksserver.domain.location.entity.QRegion.region;
+import static org.umc.travlocksserver.global.aws.S3Path.S3_DOMAIN;
 
 @RequiredArgsConstructor
 public class VlockRepositoryImpl implements VlockRepositoryCustom {
@@ -29,7 +32,7 @@ public class VlockRepositoryImpl implements VlockRepositoryCustom {
 	/** 인기 블록 조회 */
 	@Override
 	public List<VlockResponseDTO> findPopularVlocks(Long cityId) {
-		return baseQuery(cityId)
+		return baseQuery(cityId, categoryDefaultImage())
 			.orderBy(vlock.usageCount.desc(), vlock.id.desc())
 			.limit(POPULAR_VLOCK_LIMIT)
 			.fetch();
@@ -38,15 +41,22 @@ public class VlockRepositoryImpl implements VlockRepositoryCustom {
 	/** 카테고리 블록 조회 */
 	@Override
 	public List<VlockResponseDTO> findCategoryVlocks(Long cityId, Long categoryId) {
-		return baseQuery(cityId)
+		return baseQuery(cityId, categoryDefaultImage())
 			.where(vlockCategory.id.eq(categoryId))
 			.orderBy(vlock.usageCount.desc(), vlock.id.desc())
 			.fetch();
 	}
 
-	private JPAQuery<VlockResponseDTO> baseQuery(Long cityId) {
+	private StringExpression categoryDefaultImage() {
+		return new CaseBuilder()
+			.when(vlock.coverImgUrl.isNull())
+			.then(vlockCategory.defaultCategoryImageKey.prepend(S3_DOMAIN))
+			.otherwise(vlock.coverImgUrl);
+	}
+
+	private JPAQuery<VlockResponseDTO> baseQuery(Long cityId, StringExpression coverImgUrl) {
 		return queryFactory
-			.select(vlockResponseProjection())
+			.select(vlockResponseProjection(coverImgUrl))
 			.from(vlock)
 			.join(vlock.vlockCategory, vlockCategory)
 			.join(vlock.city, city)
@@ -58,7 +68,7 @@ public class VlockRepositoryImpl implements VlockRepositoryCustom {
 			);
 	}
 
-	private ConstructorExpression<VlockResponseDTO> vlockResponseProjection() {
+	private ConstructorExpression<VlockResponseDTO> vlockResponseProjection(StringExpression coverImgUrl) {
 		return Projections.constructor(VlockResponseDTO.class,
 			vlock.id,
 			vlock.owner.id,
@@ -81,7 +91,7 @@ public class VlockRepositoryImpl implements VlockRepositoryCustom {
 			vlock.name,
 			vlock.address,
 			vlock.memo,
-			vlock.coverImgUrl,
+			coverImgUrl,
 			vlock.linkUrl,
 
 			vlock.latitude,

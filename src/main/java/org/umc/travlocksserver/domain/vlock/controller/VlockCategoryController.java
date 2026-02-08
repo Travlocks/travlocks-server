@@ -15,7 +15,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/vlocks/categories")
-public class VlockCategoryController {
+public class VlockCategoryController implements VlockCategoryControllerDocs {
 
 	private final VlockCategoryQueryService vlockCategoryQueryService;
 

@@ -1,5 +1,7 @@
 package org.umc.travlocksserver.domain.vlock.dto.response;
 
+import static org.umc.travlocksserver.global.aws.S3Path.S3_DOMAIN;
+
 import java.time.LocalDateTime;
 
 import org.umc.travlocksserver.domain.location.dto.CityDTO;
@@ -30,6 +32,11 @@ public record VlockResponseDTO(
 	LocalDateTime updatedAt
 ) {
 	public static VlockResponseDTO from(Vlock vlock) {
+		String coverImgUrl = vlock.getCoverImgUrl();
+		if (coverImgUrl == null || coverImgUrl.isBlank()) {
+			coverImgUrl = S3_DOMAIN + vlock.getVlockCategory().getDefaultCreationImageKey();
+		}
+
 		return new VlockResponseDTO(
 			vlock.getId(),
 			vlock.getOwner().getId(),
@@ -41,7 +48,7 @@ public record VlockResponseDTO(
 			vlock.getName(),
 			vlock.getAddress(),
 			vlock.getMemo(),
-			vlock.getCoverImgUrl(),
+			coverImgUrl,
 			vlock.getLinkUrl(),
 
 			vlock.getLatitude(),

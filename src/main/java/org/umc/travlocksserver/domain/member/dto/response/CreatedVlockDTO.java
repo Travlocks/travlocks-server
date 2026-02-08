@@ -6,6 +6,7 @@ public record CreatedVlockDTO(
         Long vlockId,
         String name,
         String city,
+        String coverImgUrl,
         LocalDateTime createdAt
 ) {}
 

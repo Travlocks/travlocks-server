@@ -1,6 +1,7 @@
 package org.umc.travlocksserver.domain.vlock.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.umc.travlocksserver.domain.vlock.dto.response.VlockCategoriesDTO;
 import org.umc.travlocksserver.global.response.SuccessResponse;
 import org.umc.travlocksserver.infra.redis.vlock.CachedVlockCategoryList;
 
@@ -25,5 +26,5 @@ public interface VlockCategoryControllerDocs {
 		@ApiResponse(responseCode = "200", description = "Vlock category retrieved successfully"),
 		@ApiResponse(responseCode = "500", description = "Default vlock category does not exist")
 	})
-	ResponseEntity<SuccessResponse<CachedVlockCategoryList>> getCategoriesVlocks();
+	ResponseEntity<SuccessResponse<VlockCategoriesDTO>> getCategoriesVlocks();
 }

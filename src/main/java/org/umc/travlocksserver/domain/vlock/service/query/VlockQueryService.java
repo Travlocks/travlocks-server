@@ -10,7 +10,7 @@ import org.umc.travlocksserver.domain.location.repository.CityRepository;
 import org.umc.travlocksserver.domain.member.exception.MemberException;
 import org.umc.travlocksserver.domain.member.exception.code.MemberErrorCode;
 import org.umc.travlocksserver.domain.member.repository.MemberRepository;
-import org.umc.travlocksserver.domain.vlock.code.VlockErrorCode;
+import org.umc.travlocksserver.domain.vlock.code.VlockCategoryErrorCode;
 import org.umc.travlocksserver.domain.vlock.dto.response.VlockResponseDTO;
 import org.umc.travlocksserver.domain.vlock.entity.Vlock;
 import org.umc.travlocksserver.domain.vlock.exception.VlockException;
@@ -92,7 +92,7 @@ public class VlockQueryService {
 
     private void validateCategoryExists(Long categoryId) {
         if (!categoryRepository.existsById(categoryId)) {
-            throw new VlockException(VlockErrorCode.CATEGORY_NOT_FOUND);
+            throw new VlockException(VlockCategoryErrorCode.DEFAULT_VLOCK_CATEGORY_NOT_FOUND);
         }
     }
 }
