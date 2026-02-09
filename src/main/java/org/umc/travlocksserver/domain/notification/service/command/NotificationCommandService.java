@@ -74,12 +74,12 @@ public class NotificationCommandService {
     /**
      * 사용자에게 읽지 않은 알림이 있음(SSE 이벤트)을 실시간으로 푸시
      * */
-    public void signalHasUnread(Long receiverId) {
+    public void signalHasUnread(Long receiverId, boolean hasUnread) {
         Map<String, SseEmitter> emitters = emitterRepository.getEmitters(receiverId);
         if (emitters.isEmpty())
             return;
 
-        NotificationSsePayloadDTO payload = new NotificationSsePayloadDTO(true);
+        NotificationSsePayloadDTO payload = new NotificationSsePayloadDTO(hasUnread);
 
         for (Map.Entry<String, SseEmitter> entry : emitters.entrySet()) {
             try {
@@ -92,5 +92,9 @@ public class NotificationCommandService {
                 emitterRepository.remove(receiverId, entry.getKey());  // 연결 정리
             }
         }
+    }
+    public void deleteAllNotification(Long memberId) {
+        notificationRepository.deleteAllByReceiverId(memberId);
+        signalHasUnread(memberId, false);
     }
 }
