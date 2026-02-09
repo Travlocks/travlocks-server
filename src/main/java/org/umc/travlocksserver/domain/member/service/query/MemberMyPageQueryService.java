@@ -5,10 +5,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.umc.travlocksserver.domain.favorite.repository.FavoriteRepository;
 import org.umc.travlocksserver.domain.member.dto.response.CreatedTemplateDTO;
 import org.umc.travlocksserver.domain.member.dto.response.CreatedVlockDTO;
 import org.umc.travlocksserver.domain.member.dto.response.MemberMyPageResponseDTO;
 import org.umc.travlocksserver.domain.member.entity.Member;
+import org.umc.travlocksserver.domain.member.exception.MemberException;
+import org.umc.travlocksserver.domain.member.exception.code.MemberErrorCode;
 import org.umc.travlocksserver.domain.member.repository.MemberRepository;
 import org.umc.travlocksserver.domain.template.dto.response.TemplateCardResponseDTO;
 import org.umc.travlocksserver.domain.template.repository.TemplateRepository;
@@ -28,7 +31,8 @@ public class MemberMyPageQueryService {
     private final PreferredTravelStyleRepository preferredTravelStyleRepository;
     private final PreferredTravelThemeRepository preferredTravelThemeRepository;
     private final VlockRepository vlockRepository;
-    private final TemplateRepository templateRepository;
+	private final TemplateRepository templateRepository;
+	private final FavoriteRepository favoriteRepository;
 	private final S3Properties s3Properties;
 
     @Transactional(readOnly = true)
@@ -60,4 +64,12 @@ public class MemberMyPageQueryService {
         Page<TemplateCardResponseDTO> response = templateRepository.findMyTemplates(memberId, pageable);
         return PageResponseDTO.from(response);
     }
+
+	public PageResponseDTO<TemplateCardResponseDTO> getMyFavoriteTemplates(Long memberId, Pageable pageable) {
+		memberRepository.findById(memberId)
+			.orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+
+		Page<TemplateCardResponseDTO> page = favoriteRepository.findMyFavoriteTemplates(memberId, pageable);
+		return PageResponseDTO.from(page);
+	}
 }
