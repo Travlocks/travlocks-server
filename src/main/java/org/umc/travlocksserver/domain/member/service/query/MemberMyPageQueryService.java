@@ -44,6 +44,7 @@ public class MemberMyPageQueryService {
                 member.getNickname(),
                 member.getIntroduction(),
                 member.getProfileImageUrl(),
+                member.getEmail(),
                 styleIds,
                 themeIds,
                 new MemberMyPageResponseDTO.Counts(

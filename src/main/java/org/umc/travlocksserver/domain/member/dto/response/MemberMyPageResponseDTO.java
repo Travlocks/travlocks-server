@@ -7,6 +7,7 @@ public record MemberMyPageResponseDTO(
         String nickname,
         String introduction,
         String profileImageUrl,
+        String email,
         List<Long> preferredTravelStyleIds,
         List<Long> preferredTravelThemeIds,
         Counts counts,
