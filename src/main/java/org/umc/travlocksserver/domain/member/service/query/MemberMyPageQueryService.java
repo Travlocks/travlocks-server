@@ -5,16 +5,20 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.umc.travlocksserver.domain.favorite.repository.FavoriteRepository;
 import org.umc.travlocksserver.domain.member.dto.response.CreatedTemplateDTO;
 import org.umc.travlocksserver.domain.member.dto.response.CreatedVlockDTO;
 import org.umc.travlocksserver.domain.member.dto.response.MemberMyPageResponseDTO;
 import org.umc.travlocksserver.domain.member.entity.Member;
+import org.umc.travlocksserver.domain.member.exception.MemberException;
+import org.umc.travlocksserver.domain.member.exception.code.MemberErrorCode;
 import org.umc.travlocksserver.domain.member.repository.MemberRepository;
 import org.umc.travlocksserver.domain.template.dto.response.TemplateCardResponseDTO;
 import org.umc.travlocksserver.domain.template.repository.TemplateRepository;
 import org.umc.travlocksserver.domain.travelstyle.repository.PreferredTravelStyleRepository;
 import org.umc.travlocksserver.domain.traveltheme.repository.PreferredTravelThemeRepository;
 import org.umc.travlocksserver.domain.vlock.repository.VlockRepository;
+import org.umc.travlocksserver.global.aws.S3Properties;
 import org.umc.travlocksserver.global.response.PageResponseDTO;
 
 import java.util.List;
@@ -27,7 +31,9 @@ public class MemberMyPageQueryService {
     private final PreferredTravelStyleRepository preferredTravelStyleRepository;
     private final PreferredTravelThemeRepository preferredTravelThemeRepository;
     private final VlockRepository vlockRepository;
-    private final TemplateRepository templateRepository;
+	private final TemplateRepository templateRepository;
+	private final FavoriteRepository favoriteRepository;
+	private final S3Properties s3Properties;
 
     @Transactional(readOnly = true)
     public MemberMyPageResponseDTO getMyPage(Member member) {
@@ -36,7 +42,7 @@ public class MemberMyPageQueryService {
         List<Long> styleIds = preferredTravelStyleRepository.findPreferredStyleIdsByMemberId(memberId);
         List<Long> themeIds = preferredTravelThemeRepository.findPreferredThemeIdsByMemberId(memberId);
 
-        List<CreatedVlockDTO> vlocks = vlockRepository.findRecentCreatedVlocks(memberId, 4);
+        List<CreatedVlockDTO> vlocks = vlockRepository.findRecentCreatedVlocks(memberId, 4, s3Properties.domain());
         List<CreatedTemplateDTO> templates = templateRepository.findRecentCreatedTemplates(memberId, 4);
 
         return new MemberMyPageResponseDTO(
@@ -60,4 +66,12 @@ public class MemberMyPageQueryService {
         Page<TemplateCardResponseDTO> response = templateRepository.findMyTemplates(memberId, pageable);
         return PageResponseDTO.from(response);
     }
+
+	public PageResponseDTO<TemplateCardResponseDTO> getMyFavoriteTemplates(Long memberId, Pageable pageable) {
+		memberRepository.findById(memberId)
+			.orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+
+		Page<TemplateCardResponseDTO> page = favoriteRepository.findMyFavoriteTemplates(memberId, pageable);
+		return PageResponseDTO.from(page);
+	}
 }

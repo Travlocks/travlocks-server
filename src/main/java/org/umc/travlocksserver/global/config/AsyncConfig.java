@@ -4,7 +4,7 @@ import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.annotation.EnableAsync;
-import org.umc.travlocksserver.global.exception.AsyncExceptionHandler;
+import org.umc.travlocksserver.global.exception.handler.AsyncExceptionHandler;
 
 @Configuration
 @EnableAsync

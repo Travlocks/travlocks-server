@@ -6,6 +6,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.multipart.MultipartFile;
 import org.umc.travlocksserver.domain.vlock.dto.request.VlockRequestDTO;
 import org.umc.travlocksserver.domain.vlock.dto.request.VlockUpdateRequestDTO;
 import org.umc.travlocksserver.domain.vlock.dto.response.VlockResponseDTO;
@@ -24,6 +27,7 @@ public interface VlockControllerDocs {
 		summary = "블록 생성",
 		description = """
 		템플릿에 사용될 블록을 생성합니다.
+		썸네일 이미지는 서버에서 제공하는 카테고리별 기본 이미지가 사용됩니다.
 		
 		- 요청에 포함된 카테고리와 도시는 필수입니다.
 		- 모든 검증이 완료되면 블록이 생성됩니다.
@@ -54,7 +58,7 @@ public interface VlockControllerDocs {
 		@ApiResponse(responseCode = "404", description = "City Id is invalid")
 	})
 	ResponseEntity<SuccessResponse<List<VlockResponseDTO>>> getPopularVlocks(
-		@PathVariable Long cityId);
+		@RequestParam Long cityId);
 
 	@Operation(
 		summary = "카테고리 블록 조회",
@@ -70,8 +74,8 @@ public interface VlockControllerDocs {
 		@ApiResponse(responseCode = "404", description = "City Id or Category Id is invalid")
 	})
 	ResponseEntity<SuccessResponse<List<VlockResponseDTO>>> getCategoriesVlocks(
-		@PathVariable Long cityId,
-		@PathVariable Long categoryId);
+		@RequestParam Long cityId,
+		@RequestParam Long categoryId);
 
 	@Operation(
 		summary = "내가 생성한 블록 조회",
@@ -88,14 +92,15 @@ public interface VlockControllerDocs {
 	})
 	ResponseEntity<SuccessResponse<List<VlockResponseDTO>>> getMyVlocks(
 		@AuthenticationPrincipal Long memberId,
-		@PathVariable Long cityId);
+		@RequestParam Long cityId);
 
 	@Operation(
 		summary = "블록 수정",
 		description = """
 		사용자가 생성한 블록의 정보를 수정합니다.
+		블록 수정을 통해 사용자가 원하는 블록의 썸네일 이미지를 설정할 수 있습니다.
 		
-		- 수정 가능 항목 : 블록 이름, 주소, 카테고리, 도시, 메모, URL, 공개/비공개 여부
+		- 수정 가능 항목 : 블록 이름, 주소, 카테고리, 도시, 메모, URL, 공개/비공개 여부, 썸네일 이미지
 		- 본인이 생성한 블록만 수정할 수 있습니다.
 		- 삭제된 블록(deletedAt != null)은 수정할 수 없습니다.
 		"""
@@ -109,7 +114,8 @@ public interface VlockControllerDocs {
 	ResponseEntity<SuccessResponse<VlockResponseDTO>> updateVlock(
 		@AuthenticationPrincipal Long memberId,
 		@PathVariable Long vlockId,
-		@Valid @RequestBody VlockUpdateRequestDTO request
+		@Valid @RequestPart VlockUpdateRequestDTO request,
+		@RequestPart(required = false) MultipartFile coverImg
 	);
 
 	@Operation(

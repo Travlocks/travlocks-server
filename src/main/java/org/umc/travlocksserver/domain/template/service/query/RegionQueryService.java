@@ -38,9 +38,7 @@ public class RegionQueryService {
                                     .stream()
                                     .map(city -> new RegionListResponseDTO.CityDTO(
                                             city.getId(),
-                                            city.getName(),
-                                            city.getLatitude(),
-                                            city.getLongitude()
+                                            city.getName()
                                     ))
                                     .toList();
 

@@ -29,7 +29,12 @@ public record VlockResponseDTO(
 	LocalDateTime createdAt,
 	LocalDateTime updatedAt
 ) {
-	public static VlockResponseDTO from(Vlock vlock) {
+	public static VlockResponseDTO from(Vlock vlock, String s3Domain) {
+		String coverImgUrl = vlock.getCoverImgUrl();
+		if (coverImgUrl == null || coverImgUrl.isBlank()) {
+			coverImgUrl = s3Domain + vlock.getVlockCategory().getDefaultCreationImageKey();
+		}
+
 		return new VlockResponseDTO(
 			vlock.getId(),
 			vlock.getOwner().getId(),
@@ -41,7 +46,7 @@ public record VlockResponseDTO(
 			vlock.getName(),
 			vlock.getAddress(),
 			vlock.getMemo(),
-			vlock.getCoverImgUrl(),
+			coverImgUrl,
 			vlock.getLinkUrl(),
 
 			vlock.getLatitude(),

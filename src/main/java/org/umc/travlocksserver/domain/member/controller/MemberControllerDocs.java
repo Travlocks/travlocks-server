@@ -5,10 +5,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.umc.travlocksserver.domain.member.dto.request.MemberPasswordUpdateRequestDTO;
 import org.umc.travlocksserver.domain.member.dto.request.MemberProfileUpdateRequestDTO;
 import org.umc.travlocksserver.domain.member.dto.request.MemberSignupRequestDTO;
@@ -17,7 +17,6 @@ import org.umc.travlocksserver.domain.member.dto.response.MemberNicknameExistsRe
 import org.umc.travlocksserver.domain.member.dto.response.MemberProfileResponseDTO;
 import org.umc.travlocksserver.domain.member.dto.response.MemberSignupResponseDTO;
 import org.umc.travlocksserver.domain.template.dto.response.TemplateCardResponseDTO;
-import org.umc.travlocksserver.domain.template.dto.response.TemplateCursorResponseDTO;
 import org.umc.travlocksserver.domain.member.dto.request.MemberWithdrawRequestDTO;
 import org.umc.travlocksserver.domain.member.dto.response.*;
 import org.umc.travlocksserver.domain.member.entity.Member;
@@ -100,46 +99,36 @@ public interface MemberControllerDocs {
 					특정 유저의 프로필과 공개 템플릿 목록을 조회합니다.
 					
 					[Query Params]
-					- cursor: 다음 목록 조회를 위한 커서(마지막으로 받은 templateId). 첫 조회는 null
-					- limit: 한 번에 가져올 템플릿 개수(기본 9)
-					
-					[Cursor Pagination]
-					- hasNext=true 인 경우, 응답의 nextCursor 값을 다음 요청의 cursor로 전달하세요.
+					- page: 페이지 번호(0부터 시작, 기본 0)
+					- size: 한 번에 가져올 템플릿 개수(기본 9)
 					"""
 	)
 	@ApiResponses({
-			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "유저 프로필 조회 성공"),
-			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "요청 값 검증 실패 (cursor/limit 범위 오류 등)", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "존재하지 않는 유저", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+			@ApiResponse(responseCode = "200", description = "유저 프로필 조회 성공"),
+			@ApiResponse(responseCode = "404", description = "존재하지 않는 유저", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 	})
 	ResponseEntity<SuccessResponse<MemberProfileResponseDTO>> getMemberProfile(
 			@PathVariable Long memberId,
-			@RequestParam(name = "cursor", required = false) Long cursor,
-			@RequestParam(name = "limit", defaultValue = "9") int limit
+			@PageableDefault(size = 9) Pageable pageable
 	);
 
 	@Operation(
-			summary = "내 즐겨찾기 목록 조회 API",
+			summary = "마이페이지 내 즐겨찾기 목록 조회 API",
 			description = """
-					로그인한 유저의 즐겨찾기(찜) 템플릿 목록을 조회합니다.
+				    마이페이지에서 즐겨찾기 템플릿 목록을 조회합니다.
 					
 					[Query Params]
-					- cursor: 다음 목록 조회를 위한 커서(마지막으로 받은 templateId). 첫 조회는 null
-					- limit: 한 번에 가져올 템플릿 개수(기본 9)
-					
-					[Cursor Pagination]
-					- hasNext=true 인 경우, 응답의 nextCursor 값을 다음 요청의 cursor로 전달하세요.
+					- page: 페이지 번호(0부터 시작, 기본 0)
+					- size: 한 번에 가져올 템플릿 개수(기본 9)
 					"""
 	)
 	@ApiResponses({
 			@ApiResponse(responseCode = "200", description = "내 즐겨찾기 목록 조회 성공"),
-			@ApiResponse(responseCode = "400", description = "요청 값 검증 실패 (cursor/limit 범위 오류 등)", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
 			@ApiResponse(responseCode = "404", description = "존재하지 않는 유저", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 	})
-	ResponseEntity<SuccessResponse<TemplateCursorResponseDTO>> getMyFavoriteTemplates(
-			@Parameter(hidden = true) @AuthenticationPrincipal Long memberId,
-			@RequestParam(name = "cursor", required = false) Long cursor,
-			@RequestParam(name = "limit", defaultValue = "9") int limit
+	ResponseEntity<SuccessResponse<PageResponseDTO<TemplateCardResponseDTO>>> getMyFavoriteTemplates(
+			@AuthenticationPrincipal Long memberId,
+			@PageableDefault(size = 9) Pageable pageable
 	);
 
 	@Operation(
@@ -236,9 +225,11 @@ public interface MemberControllerDocs {
 	@Operation(
 			summary = "마이페이지 내 템플릿 조회 API",
 			description = """
-							마이페이지에서 내 템플릿 리스트를 조회하는 API입니다.
-							페이지네이션이 있기 때문에 query param으로 page를 받습니다.
-							이때 첫페이지일 경우 page = 0입니다.
+					마이페이지에서 내 템플릿 리스트를 조회하는 API입니다.
+					페이지네이션이 있기 때문에 query param으로 page를 받습니다.
+						
+					- page: 페이지 번호(0부터 시작)
+					- size: 페이지 크기
 					"""
 	)
 	@ApiResponse(responseCode = "200", description = "템플릿 리스트 조회에 성공했습니다.")

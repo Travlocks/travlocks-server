@@ -13,7 +13,6 @@ import org.umc.travlocksserver.global.entity.SoftDeleteBaseEntity;
 public class Region extends SoftDeleteBaseEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "region_id")
     private Long id;
 

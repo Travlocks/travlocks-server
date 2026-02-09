@@ -13,11 +13,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import jakarta.validation.Valid;
-import io.swagger.v3.oas.annotations.Operation;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.umc.travlocksserver.domain.template.dto.request.TemplatePreInputRequestDTO;
 import org.umc.travlocksserver.domain.template.dto.response.TemplatePreInputResponseDTO;
+import org.umc.travlocksserver.domain.template.enums.TripDays;
 import org.umc.travlocksserver.domain.template.service.command.TemplatePreInputService;
 import org.umc.travlocksserver.domain.member.entity.Member;
 import org.umc.travlocksserver.domain.template.code.TemplateSuccessCode;
@@ -42,7 +40,6 @@ import org.umc.travlocksserver.domain.template.service.query.TemplateRouteQueryS
 import org.umc.travlocksserver.domain.template.dto.response.TemplateDetailResponseDTO;
 import org.umc.travlocksserver.global.annotation.LoginUser;
 import org.umc.travlocksserver.global.response.SuccessResponse;
-
 
 import java.util.List;
 
@@ -183,7 +180,7 @@ public class TemplateController implements TemplateControllerDocs {
 			String keyword,
 			List<String> cities,
 			List<String> themes,
-			List<String> tripDays,
+			List<TripDays> tripDays,
 			List<String> transportTypes,
 			String sort,
 			int page
