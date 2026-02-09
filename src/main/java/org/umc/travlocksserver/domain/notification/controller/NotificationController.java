@@ -17,7 +17,7 @@ import org.umc.travlocksserver.global.security.cookie.CookieFactory;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/notifications")
-public class NotificationController {
+public class NotificationController implements NotificationControllerDocs {
 
     private final CookieFactory cookieFactory;
 
