@@ -30,8 +30,8 @@ public class PasswordResetService {
     private final PasswordEncoder passwordEncoder;
     private static final SecureRandom RANDOM = new SecureRandom();
 
-    // 최소 8자 + 영문 포함 + 숫자 포함
-    private static final Pattern PASSWORD_RULE = Pattern.compile("^(?=.*[A-Za-z])(?=.*\\d).{8,}$");
+    private static final Pattern PASSWORD_RULE =
+            Pattern.compile("^(?=.*\\d)(?=.*[A-Za-z])[A-Za-z\\d!@#$%^&*()_+=\\-]{8,20}$");
 
     @Value("${password-reset.redirect-uri}")
     private String redirectUri;

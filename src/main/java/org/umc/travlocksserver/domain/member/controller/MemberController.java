@@ -16,7 +16,6 @@ import org.umc.travlocksserver.domain.member.service.command.*;
 import org.umc.travlocksserver.domain.member.service.query.*;
 import org.umc.travlocksserver.domain.template.code.TemplateSuccessCode;
 import org.umc.travlocksserver.domain.template.dto.response.TemplateCardResponseDTO;
-import org.umc.travlocksserver.domain.template.dto.response.TemplateCursorResponseDTO;
 import org.umc.travlocksserver.global.annotation.LoginUser;
 import org.umc.travlocksserver.global.response.PageResponseDTO;
 import org.umc.travlocksserver.global.response.SuccessResponse;
@@ -36,7 +35,6 @@ public class MemberController implements MemberControllerDocs {
     private final MemberNicknameCheckService memberNicknameCheckService;
     private final MemberSignupService memberSignupService;
     private final MemberProfileQueryService memberProfileQueryService;
-    private final FavoriteTemplateQueryService favoriteTemplateQueryService;
     private final MemberPasswordUpdateService memberPasswordUpdateService;
     private final MemberProfileUpdateService memberProfileUpdateService;
     private final MemberWithdrawService memberWithdrawService;
@@ -83,28 +81,28 @@ public class MemberController implements MemberControllerDocs {
 
     @GetMapping("/{memberId}/profile")
     public ResponseEntity<SuccessResponse<MemberProfileResponseDTO>> getMemberProfile(
-            @PathVariable Long memberId,
-            @RequestParam(name = "cursor", required = false) Long cursor,
-            @RequestParam(name = "limit", defaultValue = "9") int limit
+        @PathVariable Long memberId,
+        @PageableDefault(size = 9)
+        Pageable pageable
     ) {
         MemberSuccessCode successCode = MemberSuccessCode.MEMBER_PROFILE_GET_SUCCESS;
 
-        MemberProfileResponseDTO data = memberProfileQueryService.getMemberProfile(memberId, cursor, limit);
+        MemberProfileResponseDTO data = memberProfileQueryService.getMemberProfile(memberId, pageable);
 
         return ResponseEntity
-                .status(successCode.getStatus())
-                .body(SuccessResponse.ok(successCode, data));
+            .status(successCode.getStatus())
+            .body(SuccessResponse.ok(successCode, data));
     }
 
     @GetMapping("/me/favorites")
-    public ResponseEntity<SuccessResponse<TemplateCursorResponseDTO>> getMyFavoriteTemplates(
-            @AuthenticationPrincipal Long memberId,
-            @RequestParam(name = "cursor", required = false) Long cursor,
-            @RequestParam(name = "limit", defaultValue = "9") int limit
+    public ResponseEntity<SuccessResponse<PageResponseDTO<TemplateCardResponseDTO>>> getMyFavoriteTemplates(
+        @AuthenticationPrincipal Long memberId,
+        @PageableDefault(size = 9)
+        Pageable pageable
     ) {
         MemberSuccessCode successCode = MemberSuccessCode.FAVORITE_TEMPLATE_LIST_GET_SUCCESS;
 
-        TemplateCursorResponseDTO data = favoriteTemplateQueryService.getMyFavoriteTemplates(memberId, cursor, limit);
+        PageResponseDTO<TemplateCardResponseDTO> data = memberMyPageQueryService.getMyFavoriteTemplates(memberId, pageable);
 
         return ResponseEntity
                 .status(successCode.getStatus())

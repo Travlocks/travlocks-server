@@ -1,8 +1,6 @@
 package org.umc.travlocksserver.domain.template.service.command;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.crossstore.ChangeSetPersister;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.umc.travlocksserver.domain.location.entity.Region;
@@ -44,7 +42,7 @@ public class TemplateTagService {
 
         Region region = templateRepository.findRegionByTemplateId(templateId).get(0);
         String travelTheme = String.valueOf(template.getTravelTheme().getContent());
-        String travelDays= template.getTripDays();
+        String tripDays= template.getTripDays().getDescription();
 
         String travelTransit = switch(template.getTransportType()) {
             case WALK -> "도보";
@@ -52,7 +50,7 @@ public class TemplateTagService {
             case CAR -> "차";
         };
 
-        List<String> fixedInfoTags = List.of(travelTheme, travelDays, travelTransit);
+        List<String> fixedInfoTags = List.of(travelTheme, tripDays, travelTransit);
         List<String> cities = cityRepository.findNameByRegionId(region.getId());
 
         // AI 호출

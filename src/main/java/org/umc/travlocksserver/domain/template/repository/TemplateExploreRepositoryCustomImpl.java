@@ -9,13 +9,11 @@ import org.umc.travlocksserver.domain.template.dto.response.QTemplateExploreResp
 import org.umc.travlocksserver.domain.template.entity.QTemplate;
 import org.umc.travlocksserver.domain.member.entity.QMember;
 import org.umc.travlocksserver.domain.template.enums.TransportType;
+import org.umc.travlocksserver.domain.template.enums.TripDays;
 import org.umc.travlocksserver.domain.traveltheme.entity.QTravelTheme;
 import org.umc.travlocksserver.domain.template.entity.QTemplateCity;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Repository
 @RequiredArgsConstructor
@@ -29,7 +27,7 @@ public class TemplateExploreRepositoryCustomImpl implements TemplateExploreRepos
             String keyword,
             List<String> cityNames,
             List<String> travelThemes,
-            List<String> tripDays,
+            List<TripDays> tripDays,
             List<String> transportTypes,
             String sort,
             int offset
@@ -74,42 +72,12 @@ public class TemplateExploreRepositoryCustomImpl implements TemplateExploreRepos
                 .fetch();
     }
 
-    private com.querydsl.core.types.Predicate tripDaysIn(List<String> tripDays, QTemplate t) {
+    private com.querydsl.core.types.Predicate tripDaysIn(List<TripDays> tripDays, QTemplate t) {
         if (tripDays == null || tripDays.isEmpty()) return null;
 
-        Set<String> dbValues = new HashSet<>();
-
-        for (String front : tripDays) {
-            switch (front) {
-                case "당일치기" -> dbValues.add("당일치기");
-                case "1박 2일", "2박 3일", "3박 4일" -> dbValues.add(front);
-                case "4일 이상" -> {
-                    List<String> allTripDaysFromDB = fetchAllTripDaysFromDB();
-                    allTripDaysFromDB.stream()
-                            .filter(d -> {
-                                if (d.equals("당일치기")) return false;
-                                try {
-                                    int days = Integer.parseInt(d.split("박")[0]);
-                                    return days >= 4;
-                                } catch (Exception e) {
-                                    return false;
-                                }
-                            })
-                            .forEach(dbValues::add);
-                }
-            }
-        }
+        Set<TripDays> dbValues = new HashSet<>(tripDays);
 
         return t.tripDays.in(dbValues);
-    }
-
-    public List<String> fetchAllTripDaysFromDB() {
-        QTemplate t = QTemplate.template;
-        return queryFactory
-                .select(t.tripDays)
-                .distinct()
-                .from(t)
-                .fetch();
     }
 
     private com.querydsl.core.types.Predicate transportTypesIn(List<String> transportTypes, QTemplate t) {

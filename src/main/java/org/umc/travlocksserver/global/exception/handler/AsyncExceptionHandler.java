@@ -1,4 +1,4 @@
-package org.umc.travlocksserver.global.exception;
+package org.umc.travlocksserver.global.exception.handler;
 
 import java.lang.reflect.Method;
 
