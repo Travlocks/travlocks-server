@@ -93,7 +93,6 @@ public class VlockRepositoryImpl implements VlockRepositoryCustom {
 			vlock.address,
 			vlock.memo,
 			coverImgUrl,
-			vlock.linkUrl,
 
 			vlock.latitude,
 			vlock.longitude,
