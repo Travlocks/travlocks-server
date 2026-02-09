@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
+import org.umc.travlocksserver.domain.notification.entity.Notification;
 import org.umc.travlocksserver.domain.notification.service.command.NotificationCommandService;
 
 @Component
@@ -20,7 +21,7 @@ public class NotificationEventHandler {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void onTemplateActivity(TemplateActivityEvent event) {
         try {
-            notificationCommandService.createNotification(
+            Notification saved = notificationCommandService.createNotification(
                     event.ownerId(),
                     event.actorId(),
                     event.templateId(),
@@ -28,6 +29,7 @@ public class NotificationEventHandler {
             );
 
             notificationCommandService.signalHasUnread(event.ownerId(), true);
+            notificationCommandService.pushNotificationCreated(saved);
         } catch (Exception e) {
             log.warn("알림 생성 중 오류가 발생했습니다. event={}", event, e);
         }

@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import org.umc.travlocksserver.domain.member.entity.Member;
 import org.umc.travlocksserver.domain.member.service.query.MemberQueryService;
+import org.umc.travlocksserver.domain.notification.dto.response.NotificationAllResponseDTO;
 import org.umc.travlocksserver.domain.notification.dto.sse.NotificationSsePayloadDTO;
 import org.umc.travlocksserver.domain.notification.entity.Notification;
 import org.umc.travlocksserver.domain.notification.enums.NotificationType;
@@ -15,6 +16,7 @@ import org.umc.travlocksserver.domain.notification.repository.NotificationReposi
 import org.umc.travlocksserver.domain.notification.sse.SseEmitterRepository;
 import org.umc.travlocksserver.domain.notification.sse.SseEventNames;
 import org.umc.travlocksserver.global.jwt.JwtTokenProvider;
+import org.umc.travlocksserver.global.util.TimeAgoFormatter;
 
 import java.io.IOException;
 import java.util.Map;
@@ -35,6 +37,7 @@ public class NotificationCommandService {
     private final NotificationRepository notificationRepository;
     private final MemberQueryService memberQueryService;
     private final JwtTokenProvider jwtTokenProvider;
+    private final TimeAgoFormatter timeAgoFormatter;
 
     /**
      * 클라이언트의 SSE 연결 생성 및 등록
@@ -66,9 +69,9 @@ public class NotificationCommandService {
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void createNotification(Long receiverId, Long actorId, Long templateId, NotificationType type) {
+    public Notification createNotification(Long receiverId, Long actorId, Long templateId, NotificationType type) {
         Member member = memberQueryService.getById(actorId);
-        notificationRepository.save(
+        return notificationRepository.save(
                 Notification.create(
                         receiverId,
                         actorId,
@@ -89,17 +92,49 @@ public class NotificationCommandService {
         NotificationSsePayloadDTO payload = new NotificationSsePayloadDTO(hasUnread);
 
         for (Map.Entry<String, SseEmitter> entry : emitters.entrySet()) {
+            String emitterId = entry.getKey();
+            SseEmitter emitter = entry.getValue();
             try {
-                entry.getValue().send(
+                emitter.send(
+                        SseEmitter.event()
+                                .name(SseEventNames.UNREAD)
+                                .data(payload)
+                );
+            } catch (IOException e) {  // SSE 연결이 끊겼는데 보내려고 할 떄
+                emitterRepository.remove(receiverId, emitterId);  // 연결 정리
+            }
+        }
+    }
+
+    /**
+     * 사용자에게 들어온 새로운 알림(SSE 이벤트)을 실시간으로 푸시
+     * */
+    public void pushNotificationCreated(Notification notification) {
+        Map<String, SseEmitter> emitters = emitterRepository.getEmitters(notification.getReceiverId());
+
+        if (emitters.isEmpty()) {
+            return;
+        }
+
+        NotificationAllResponseDTO.NotificationDTO payload = NotificationAllResponseDTO.NotificationDTO.
+                from(notification, timeAgoFormatter.format(notification.getCreatedAt()));
+
+        for (Map.Entry<String, SseEmitter> entry : emitters.entrySet()) {
+            String emitterId = entry.getKey();
+            SseEmitter emitter = entry.getValue();
+
+            try {
+                emitter.send(
                         SseEmitter.event()
                                 .name(SseEventNames.NOTIFICATION)
                                 .data(payload)
                 );
-            } catch (IOException e) {  // SSE 연결이 끊겼는데 보내려고 할 떄
-                emitterRepository.remove(receiverId, entry.getKey());  // 연결 정리
+            } catch (IOException e) {
+                emitterRepository.remove(notification.getReceiverId(), emitterId);
             }
         }
     }
+
 
     public String generateSseToken(Long memberId) {
         long ttlSeconds = SSE_TOKEN_TTL_MS / 1000L;
