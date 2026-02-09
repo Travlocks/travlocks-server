@@ -3,6 +3,7 @@ package org.umc.travlocksserver.domain.notification.service.command;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import org.umc.travlocksserver.domain.member.entity.Member;
@@ -21,6 +22,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class NotificationCommandService {
 
     @Value("${sse.timeout-ms}")
@@ -63,7 +65,7 @@ public class NotificationCommandService {
         return emitter;
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void createNotification(Long receiverId, Long actorId, Long templateId, NotificationType type) {
         Member member = memberQueryService.getById(actorId);
         notificationRepository.save(
