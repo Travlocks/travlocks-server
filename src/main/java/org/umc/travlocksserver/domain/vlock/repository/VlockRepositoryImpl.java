@@ -6,6 +6,7 @@ import org.umc.travlocksserver.domain.location.dto.CityDTO;
 import org.umc.travlocksserver.domain.location.dto.RegionDTO;
 import org.umc.travlocksserver.domain.vlock.dto.response.VlockResponseDTO;
 import org.umc.travlocksserver.domain.vlock.dto.response.VlockCategoryDTO;
+import org.umc.travlocksserver.global.aws.S3Properties;
 
 import com.querydsl.core.types.ConstructorExpression;
 import com.querydsl.core.types.Projections;
@@ -20,7 +21,6 @@ import static org.umc.travlocksserver.domain.vlock.entity.QVlock.vlock;
 import static org.umc.travlocksserver.domain.vlock.entity.QVlockCategory.vlockCategory;
 import static org.umc.travlocksserver.domain.location.entity.QCity.city;
 import static org.umc.travlocksserver.domain.location.entity.QRegion.region;
-import static org.umc.travlocksserver.global.aws.S3Path.S3_DOMAIN;
 
 @RequiredArgsConstructor
 public class VlockRepositoryImpl implements VlockRepositoryCustom {
@@ -28,6 +28,7 @@ public class VlockRepositoryImpl implements VlockRepositoryCustom {
 	private static final int POPULAR_VLOCK_LIMIT = 20;
 
 	private final JPAQueryFactory queryFactory;
+	private final S3Properties s3Properties;
 
 	/** 인기 블록 조회 */
 	@Override
@@ -50,7 +51,7 @@ public class VlockRepositoryImpl implements VlockRepositoryCustom {
 	private StringExpression categoryDefaultImage() {
 		return new CaseBuilder()
 			.when(vlock.coverImgUrl.isNull())
-			.then(vlockCategory.defaultCategoryImageKey.prepend(S3_DOMAIN))
+			.then(vlockCategory.defaultCategoryImageKey.prepend(s3Properties.domain()))
 			.otherwise(vlock.coverImgUrl);
 	}
 

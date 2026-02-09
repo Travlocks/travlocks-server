@@ -16,6 +16,7 @@ import org.umc.travlocksserver.domain.vlock.entity.Vlock;
 import org.umc.travlocksserver.domain.vlock.exception.VlockException;
 import org.umc.travlocksserver.domain.vlock.repository.VlockCategoryRepository;
 import org.umc.travlocksserver.domain.vlock.repository.VlockRepository;
+import org.umc.travlocksserver.global.aws.S3Properties;
 
 import java.util.List;
 
@@ -28,6 +29,7 @@ public class VlockQueryService {
     private final MemberRepository memberRepository;
     private final CityRepository cityRepository;
     private final VlockCategoryRepository categoryRepository;
+	private final S3Properties s3Properties;
 
     public List<Vlock> getPopularByCityIds(List<Long> cityIds, Pageable pageable) {
         return vlockRepository.findPopularByCityIds(cityIds, pageable);
@@ -74,7 +76,7 @@ public class VlockQueryService {
         return vlockRepository
                 .findAllByOwnerIdAndCityIdAndDeletedAtIsNullOrderByUsageCountDescIdDesc(memberId, cityId)
                 .stream()
-                .map(VlockResponseDTO::from)
+                .map(vlock -> VlockResponseDTO.from(vlock, s3Properties.domain()))
                 .toList();
     }
 

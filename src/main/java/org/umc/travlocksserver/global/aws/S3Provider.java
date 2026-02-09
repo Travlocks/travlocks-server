@@ -1,7 +1,5 @@
 package org.umc.travlocksserver.global.aws;
 
-import static org.umc.travlocksserver.global.aws.S3Path.*;
-
 import java.io.IOException;
 import java.util.UUID;
 
@@ -23,6 +21,7 @@ import software.amazon.awssdk.services.s3.model.S3Exception;
 public class S3Provider {
 
 	private final S3Client s3Client;
+	private final S3Properties s3Properties;
 
 	@Value("${aws.s3.bucket}")
 	private String bucket;
@@ -49,7 +48,7 @@ public class S3Provider {
 			throw new S3ExceptionHandler(ErrorCode.S3_UPLOAD_FAIL);
 		}
 
-		return String.format(S3_DOMAIN + "%s", fileName);
+		return String.format(s3Properties.domain() + "%s", fileName);
 	}
 
 	public void deleteFile(String fileUrl) {

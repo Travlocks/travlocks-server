@@ -70,7 +70,7 @@ public interface VlockRepository extends JpaRepository<Vlock,Long>, VlockReposit
         v.name,
         v.city.name,
         case
-            when v.coverImgUrl is null then concat('https://travlocks-bucket.s3.ap-northeast-2.amazonaws.com/', vc.defaultCreationImageKey)
+            when v.coverImgUrl is null then concat(:s3Domain, vc.defaultCreationImageKey)
             else v.coverImgUrl
         end,
         v.createdAt
@@ -82,10 +82,11 @@ public interface VlockRepository extends JpaRepository<Vlock,Long>, VlockReposit
     order by v.createdAt desc, v.id desc
     """)
     List<CreatedVlockDTO> findRecentCreatedVlocksInternal(
-            @Param("memberId") Long memberId
+            @Param("memberId") Long memberId,
+			@Param("s3Domain") String s3Domain
     );
-    default List<CreatedVlockDTO> findRecentCreatedVlocks(Long memberId, int limit) {
-        List<CreatedVlockDTO> all = findRecentCreatedVlocksInternal(memberId);
+    default List<CreatedVlockDTO> findRecentCreatedVlocks(Long memberId, int limit, String s3Domain) {
+        List<CreatedVlockDTO> all = findRecentCreatedVlocksInternal(memberId, s3Domain);
         return all.size() > limit ? all.subList(0, limit) : all;
     }
 

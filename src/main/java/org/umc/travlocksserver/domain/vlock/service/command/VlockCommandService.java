@@ -27,6 +27,7 @@ import org.umc.travlocksserver.domain.vlock.exception.VlockException;
 import org.umc.travlocksserver.domain.vlock.repository.VlockCategoryRepository;
 import org.umc.travlocksserver.domain.vlock.repository.VlockRepository;
 import org.umc.travlocksserver.domain.vlock.service.query.VlockCategoryQueryService;
+import org.umc.travlocksserver.global.aws.S3Properties;
 import org.umc.travlocksserver.global.aws.S3Provider;
 import org.umc.travlocksserver.infra.kakao.KakaoPlace;
 
@@ -44,6 +45,7 @@ public class VlockCommandService {
 	private final VlockCategoryQueryService vlockCategoryQueryService;
 	private final CityQueryService cityQueryService;
 	private final S3Provider s3Provider;
+	private final S3Properties s3Properties;
 
 	public VlockResponseDTO createVlock(Long memberId, VlockRequestDTO request) {
 		VlockCreateCommand command = new VlockCreateCommand(
@@ -56,7 +58,7 @@ public class VlockCommandService {
 
 		Vlock savedVlock = vlockRepository.save(Vlock.create(command));
 
-		return VlockResponseDTO.from(savedVlock);
+		return VlockResponseDTO.from(savedVlock, s3Properties.domain());
 	}
 
 	public VlockResponseDTO updateVlock(
@@ -97,7 +99,7 @@ public class VlockCommandService {
 
 		vlock.update(command);
 
-		return VlockResponseDTO.from(vlock);
+		return VlockResponseDTO.from(vlock, s3Properties.domain());
 	}
 
 	public void deleteVlock(Long memberId, Long vlockId) {
