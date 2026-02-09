@@ -22,8 +22,6 @@ import org.umc.travlocksserver.domain.template.repository.TemplateDayRepository;
 import org.umc.travlocksserver.domain.template.repository.TemplateRepository;
 import org.umc.travlocksserver.domain.traveltheme.entity.TravelTheme;
 import org.umc.travlocksserver.domain.traveltheme.repository.TravelThemeRepository;
-import org.umc.travlocksserver.global.exception.GeneralException;
-import org.umc.travlocksserver.global.code.ErrorCode;
 import org.umc.travlocksserver.domain.template.code.TemplateErrorCode;
 import org.umc.travlocksserver.domain.template.exception.TemplateException;
 
@@ -74,7 +72,6 @@ public class TemplatePreInputService {
 
         // 5. Template 생성
         String shareToken = UUID.randomUUID().toString();
-        String tripDays = formatTripDays(request.trip().days(), request.trip().nights());
 
         Template template = Template.builder()
                 .owner(member)
@@ -84,9 +81,7 @@ public class TemplatePreInputService {
                 .coverImageUrl(null)  // 랜덤 이미지는 나중에 추가
                 .transportType(transportType)
                 .progressRate(0)
-                .startDate(null)
-                .endDate(null)
-                .tripDays(tripDays)
+                .tripDays(request.tripDays())
                 .vlockCount(0)
                 .isPublic(true)
                 .shareToken(shareToken)
@@ -108,13 +103,14 @@ public class TemplatePreInputService {
         templateCityRepository.saveAll(templateCities);
 
         // 7. TemplateDay 생성 (days 수만큼)
-        List<TemplateDay> templateDays = createTemplateDays(savedTemplate, request.trip().days());
+        int days = request.tripDays().getDays();
+        List<TemplateDay> templateDays = createTemplateDays(savedTemplate, days);
         templateDayRepository.saveAll(templateDays);
 
         // 8. Response 반환
         return TemplatePreInputResponseDTO.of(
                 savedTemplate.getId(),
-                request.trip().days(),
+                days,
                 shareToken
         );
     }
@@ -131,15 +127,5 @@ public class TemplatePreInputService {
                         .vlockCount(0)
                         .build())
                 .toList();
-    }
-
-    /**
-     * "N박 M일" 형식 문자열 생성
-     */
-    private String formatTripDays(int days, int nights) {
-        if (nights == 0) {
-            return days + "일";  // 당일치기
-        }
-        return nights + "박 " + days + "일";
     }
 }

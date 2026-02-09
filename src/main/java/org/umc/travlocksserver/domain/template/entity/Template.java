@@ -4,10 +4,10 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.umc.travlocksserver.domain.member.entity.Member;
 import org.umc.travlocksserver.domain.template.enums.TransportType;
+import org.umc.travlocksserver.domain.template.enums.TripDays;
 import org.umc.travlocksserver.domain.traveltheme.entity.TravelTheme;
 import org.umc.travlocksserver.global.entity.SoftDeleteBaseEntity;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -57,14 +57,9 @@ public class Template extends SoftDeleteBaseEntity {
     @Column(name = "progress_rate", nullable = false)
     private Integer progressRate = 0;
 
-    @Column(name = "start_date")
-    private LocalDate startDate;
-
-    @Column(name = "end_date")
-    private LocalDate endDate;
-
+    @Enumerated(EnumType.STRING)
     @Column(name = "trip_days", nullable = false, length = 20)
-    private String tripDays;
+    private TripDays tripDays;
 
     @Builder.Default
     @Column(name = "vlock_count", nullable = false)
@@ -122,8 +117,6 @@ public class Template extends SoftDeleteBaseEntity {
 
 			// 초기화
 			.progressRate(0)
-			.startDate(null)
-			.endDate(null)
 			.isPublic(true)
 			.shareToken(shareToken)
 			.favoriteCount(0)
