@@ -38,7 +38,8 @@ public class OAuthLoginService {
     public AuthOAuthLoginResponseDTO oauthLogin(
             String providerParam,
             AuthOAuthLoginRequestDTO request,
-            HttpServletResponse response) {
+            HttpServletResponse response
+    ) {
         OAuthProvider provider = parseProvider(providerParam);
 
         if (provider != OAuthProvider.GOOGLE) {
@@ -92,8 +93,7 @@ public class OAuthLoginService {
         }
 
         String profileImageUrl = defaultProfileImageProvider.pickRandomUrl();
-        String tempNickname = "user-" + UUID.randomUUID().toString().substring(0, 8);
-
+        String tempNickname = generateUniqueTempNickname();
         Member member = Member.builder()
                 .email(email)
                 .nickname(tempNickname)
@@ -129,5 +129,19 @@ public class OAuthLoginService {
             throw new AuthException(AuthErrorCode.OAUTH_PROVIDER_NOT_SUPPORTED);
         }
     }
+
+    /**
+     * 임시 닉네임 생성
+     */
+    private String generateUniqueTempNickname() {
+        for (int i = 0; i < 10; i++) {
+            String candidate = "u" + UUID.randomUUID().toString().replace("-", "").substring(0, 9);
+            if (!memberRepository.existsByNickname(candidate)) {
+                return candidate;
+            }
+        }
+        throw new MemberException(MemberErrorCode.NICKNAME_ALREADY_EXISTS); // 또는 별도 에러코드
+    }
+
 }
 

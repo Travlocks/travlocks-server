@@ -184,7 +184,7 @@ public class MemberController implements MemberControllerDocs {
                 .body(SuccessResponse.ok(TemplateSuccessCode.TEMPLATE_LIST_GET_SUCCESS, response));
     }
 
-    @PostMapping("/members/onboarding")
+    @PostMapping("/onboarding")
     public ResponseEntity<SuccessResponse<MemberSignupResponseDTO>> completeOAuthOnboarding(
             @LoginUser Member member,
             @Valid @RequestBody MemberOAuthOnboardingRequestDTO request,

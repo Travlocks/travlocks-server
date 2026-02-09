@@ -30,7 +30,7 @@ public class MemberOAuthOnboardingService {
             throw new MemberException(MemberErrorCode.INVALID_ONBOARDING_STATUS);
         }
 
-        if (memberRepository.existsByNickname(request.nickname())) {
+        if (memberRepository.existsByNicknameAndIdNot(request.nickname(), member.getId())) {
             throw new MemberException(MemberErrorCode.NICKNAME_ALREADY_EXISTS);
         }
 
