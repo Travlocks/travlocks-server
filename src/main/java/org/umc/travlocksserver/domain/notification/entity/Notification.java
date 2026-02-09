@@ -10,6 +10,7 @@ import org.umc.travlocksserver.global.entity.CreatedBaseEntity;
 @Builder(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Table(name = "notifications")
 public class Notification extends CreatedBaseEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
