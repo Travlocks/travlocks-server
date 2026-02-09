@@ -12,7 +12,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.umc.travlocksserver.domain.location.entity.Region;
-import org.umc.travlocksserver.domain.member.dto.response.CreatedTemplateDTO;
+import org.umc.travlocksserver.domain.member.dto.response.MyPageRecentTemplateDTO;
 import org.umc.travlocksserver.domain.template.dto.response.TemplateCardResponseDTO;
 import org.umc.travlocksserver.domain.template.entity.Template;
 
@@ -114,7 +114,7 @@ public interface TemplateRepository extends JpaRepository<Template, Long>, Templ
 	List<Region> findRegionByTemplateId(Long templateId);
 
     @Query("""
-    select new org.umc.travlocksserver.domain.member.dto.response.CreatedTemplateDTO(
+    select new org.umc.travlocksserver.domain.member.dto.response.MyPageRecentTemplateDTO(
         t.id,
         t.title,
         min(r.id),
@@ -133,11 +133,11 @@ public interface TemplateRepository extends JpaRepository<Template, Long>, Templ
     group by t.id, t.title, t.createdAt
     order by t.createdAt desc, t.id desc
     """)
-    List<CreatedTemplateDTO> findRecentCreatedTemplatesInternalwithFavorite(
+    List<MyPageRecentTemplateDTO> findRecentCreatedTemplatesInternalwithFavorite(
             @Param("memberId") Long memberId
     );
-    default List<CreatedTemplateDTO> findRecentCreatedTemplates(Long memberId, int limit) {
-        List<CreatedTemplateDTO> all = findRecentCreatedTemplatesInternalwithFavorite(memberId);
+    default List<MyPageRecentTemplateDTO> findRecentCreatedTemplates(Long memberId, int limit) {
+        List<MyPageRecentTemplateDTO> all = findRecentCreatedTemplatesInternalwithFavorite(memberId);
         return all.size() > limit ? all.subList(0, limit) : all;
     }
 

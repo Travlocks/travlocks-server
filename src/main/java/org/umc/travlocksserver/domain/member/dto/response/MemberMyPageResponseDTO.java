@@ -20,7 +20,7 @@ public record MemberMyPageResponseDTO(
     ) {}
 
     public record Recent(
-            List<CreatedVlockDTO> createdVlocks,
-            List<CreatedTemplateDTO> createdTemplates
+            List<MyPageRecentVlockDTO> myPageRecentVlocks,
+            List<MyPageRecentTemplateDTO> myPageRecentTemplates
     ) {}
 }

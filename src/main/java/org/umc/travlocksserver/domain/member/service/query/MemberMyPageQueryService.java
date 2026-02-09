@@ -6,8 +6,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.umc.travlocksserver.domain.favorite.repository.FavoriteRepository;
-import org.umc.travlocksserver.domain.member.dto.response.CreatedTemplateDTO;
-import org.umc.travlocksserver.domain.member.dto.response.CreatedVlockDTO;
+import org.umc.travlocksserver.domain.member.dto.response.MyPageRecentTemplateDTO;
+import org.umc.travlocksserver.domain.member.dto.response.MyPageRecentVlockDTO;
 import org.umc.travlocksserver.domain.member.dto.response.MemberMyPageResponseDTO;
 import org.umc.travlocksserver.domain.member.entity.Member;
 import org.umc.travlocksserver.domain.member.exception.MemberException;
@@ -42,8 +42,8 @@ public class MemberMyPageQueryService {
         List<Long> styleIds = preferredTravelStyleRepository.findPreferredStyleIdsByMemberId(memberId);
         List<Long> themeIds = preferredTravelThemeRepository.findPreferredThemeIdsByMemberId(memberId);
 
-        List<CreatedVlockDTO> vlocks = vlockRepository.findRecentCreatedVlocks(memberId, 4, s3Properties.domain());
-        List<CreatedTemplateDTO> templates = templateRepository.findRecentCreatedTemplates(memberId, 4);
+        List<MyPageRecentVlockDTO> vlocks = vlockRepository.findRecentCreatedVlocks(memberId, 4);
+        List<MyPageRecentTemplateDTO> templates = templateRepository.findRecentCreatedTemplates(memberId, 4);
 
         return new MemberMyPageResponseDTO(
                 member.getId(),
