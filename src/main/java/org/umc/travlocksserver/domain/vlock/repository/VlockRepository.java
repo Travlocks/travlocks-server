@@ -75,12 +75,9 @@ public interface VlockRepository extends JpaRepository<Vlock,Long>, VlockReposit
       and v.deletedAt is null
     order by v.createdAt desc, v.id desc
     """)
-    List<MyPageRecentVlockDTO> findRecentCreatedVlocksInternal(
-            @Param("memberId") Long memberId
+    List<MyPageRecentVlockDTO> findRecentCreatedVlocks(
+            @Param("memberId") Long memberId,
+            Pageable pageable
     );
-    default List<MyPageRecentVlockDTO> findRecentCreatedVlocks(Long memberId, int limit) {
-        List<MyPageRecentVlockDTO> all = findRecentCreatedVlocksInternal(memberId);
-        return all.size() > limit ? all.subList(0, limit) : all;
-    }
 
 }

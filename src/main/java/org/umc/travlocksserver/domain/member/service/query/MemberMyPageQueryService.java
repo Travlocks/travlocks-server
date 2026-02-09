@@ -2,6 +2,7 @@ package org.umc.travlocksserver.domain.member.service.query;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,8 +43,12 @@ public class MemberMyPageQueryService {
         List<Long> styleIds = preferredTravelStyleRepository.findPreferredStyleIdsByMemberId(memberId);
         List<Long> themeIds = preferredTravelThemeRepository.findPreferredThemeIdsByMemberId(memberId);
 
-        List<MyPageRecentVlockDTO> vlocks = vlockRepository.findRecentCreatedVlocks(memberId, 4);
-        List<MyPageRecentTemplateDTO> templates = templateRepository.findRecentCreatedTemplates(memberId, 4);
+        PageRequest recent4 = PageRequest.of(0, 4);
+
+        List<MyPageRecentVlockDTO> vlocks =
+                vlockRepository.findRecentCreatedVlocks(memberId, recent4);
+        List<MyPageRecentTemplateDTO> templates =
+                templateRepository.findRecentCreatedTemplatesWithFavorite(memberId, recent4);
 
         return new MemberMyPageResponseDTO(
                 member.getId(),
