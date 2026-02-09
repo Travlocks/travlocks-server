@@ -44,18 +44,30 @@ public class TemplateVlock extends BaseEntity {
     @Column(name = "canvas_y")
     private Double canvasY;
 
+    //  입력 포트 (이전 블록에서 받음)
     @Enumerated(EnumType.STRING)
-    @Column(name = "connection_port", length = 20)
-    private ConnectionPortType connectionPort;
+    @Column(name = "input_port", length = 20)
+    private ConnectionPortType inputPort;
+
+    //  출력 포트 (다음 블록으로 보냄)
+    @Enumerated(EnumType.STRING)
+    @Column(name = "output_port", length = 20)
+    private ConnectionPortType outputPort;
 
     // 메서드
     public void updateOrderNo(Integer orderNo) {
         this.orderNo = orderNo;
     }
 
-    public void updateLayout(Double canvasX, Double canvasY, ConnectionPortType connectionPort) {
+    public void updateLayout(
+            Double canvasX,
+            Double canvasY,
+            ConnectionPortType inputPort,
+            ConnectionPortType outputPort
+    ) {
         this.canvasX = canvasX;
         this.canvasY = canvasY;
-        this.connectionPort = connectionPort;
+        this.inputPort = inputPort;
+        this.outputPort = outputPort;
     }
 }

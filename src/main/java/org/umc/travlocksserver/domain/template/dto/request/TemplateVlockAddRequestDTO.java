@@ -11,5 +11,8 @@ public record TemplateVlockAddRequestDTO(
 
         Double canvasY,
 
-        ConnectionPortType connectionPort  // TOP_LEFT, BOTTOM_LEFT, TOP_RIGHT, BOTTOM_RIGHT, null
+        ConnectionPortType inputPort,
+
+        ConnectionPortType outputPort
+
 ) {}

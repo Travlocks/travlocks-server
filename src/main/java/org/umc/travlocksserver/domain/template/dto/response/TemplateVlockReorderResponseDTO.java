@@ -35,7 +35,8 @@ public record TemplateVlockReorderResponseDTO(
             Double stayHours,
             Double canvasX,
             Double canvasY,
-            ConnectionPortType connectionPort,
+            ConnectionPortType inputPort,
+            ConnectionPortType outputPort,
             VlockBrief vlock,
             MoveToNext moveToNext
     ) {
@@ -46,7 +47,8 @@ public record TemplateVlockReorderResponseDTO(
                     tv.getStayHours(),
                     tv.getCanvasX(),
                     tv.getCanvasY(),
-                    tv.getConnectionPort(),
+                    tv.getInputPort(),
+                    tv.getOutputPort(),
                     new VlockBrief(
                             tv.getVlock().getId(),
                             tv.getVlock().getName(),

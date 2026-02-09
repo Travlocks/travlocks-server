@@ -14,7 +14,8 @@ public record TemplateVlockAddResponseDTO(
         Double stayHours,
         Double canvasX,
         Double canvasY,
-        ConnectionPortType connectionPort,
+        ConnectionPortType inputPort,
+        ConnectionPortType outputPort,
         VlockDetailDTO vlock,
         LocalDateTime createdAt,
         String warning  //  경고 메시지 추가 (블록 개수 초과 등)
@@ -28,7 +29,8 @@ public record TemplateVlockAddResponseDTO(
                 tv.getStayHours(),
                 tv.getCanvasX(),
                 tv.getCanvasY(),
-                tv.getConnectionPort(),
+                tv.getInputPort(),
+                tv.getOutputPort(),
                 VlockDetailDTO.from(tv.getVlock()),
                 tv.getCreatedAt(),
                 warning

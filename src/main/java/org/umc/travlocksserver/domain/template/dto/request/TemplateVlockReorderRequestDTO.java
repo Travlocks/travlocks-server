@@ -22,6 +22,8 @@ public record TemplateVlockReorderRequestDTO(
 
             Double canvasY,
 
-            ConnectionPortType connectionPort
+            ConnectionPortType inputPort,   // 이전 블록에서 받는 포트
+
+            ConnectionPortType outputPort   // 다음 블록으로 보내는 포트
     ) {}
 }

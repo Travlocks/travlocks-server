@@ -120,7 +120,8 @@ public class TemplateDayCommandService {
                 .stayHours(vlock.getVlockCategory().getStayHours())
                 .canvasX(request.canvasX())
                 .canvasY(request.canvasY())
-                .connectionPort(request.connectionPort())
+                .inputPort(request.inputPort())
+                .outputPort(request.outputPort())
                 .build();
 
         templateVlockRepository.save(templateVlock);
@@ -225,7 +226,8 @@ public class TemplateDayCommandService {
             tv.updateLayout(
                     order.canvasX(),
                     order.canvasY(),
-                    order.connectionPort()
+                    order.inputPort(),
+                    order.outputPort()
             );
         }
 
