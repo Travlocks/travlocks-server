@@ -7,7 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.umc.travlocksserver.domain.auth.dto.request.*;
 import org.umc.travlocksserver.domain.auth.dto.response.*;
-import org.umc.travlocksserver.domain.auth.exception.code.AuthSuccessCode;
+import org.umc.travlocksserver.domain.auth.code.AuthSuccessCode;
 import org.umc.travlocksserver.domain.auth.service.command.AuthService;
 import org.umc.travlocksserver.domain.auth.service.command.EmailVerificationService;
 import org.umc.travlocksserver.domain.auth.service.command.OAuthLoginService;

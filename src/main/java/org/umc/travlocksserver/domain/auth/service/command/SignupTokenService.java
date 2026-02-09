@@ -3,7 +3,7 @@ package org.umc.travlocksserver.domain.auth.service.command;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.umc.travlocksserver.domain.auth.exception.AuthException;
-import org.umc.travlocksserver.domain.auth.exception.code.AuthErrorCode;
+import org.umc.travlocksserver.domain.auth.code.AuthErrorCode;
 import org.umc.travlocksserver.domain.auth.repository.SignupTokenRedisRepository;
 
 @Service

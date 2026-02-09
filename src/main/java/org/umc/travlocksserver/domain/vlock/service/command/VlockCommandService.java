@@ -10,7 +10,7 @@ import org.umc.travlocksserver.domain.location.repository.CityRepository;
 import org.umc.travlocksserver.domain.location.service.query.CityQueryService;
 import org.umc.travlocksserver.domain.member.entity.Member;
 import org.umc.travlocksserver.domain.member.exception.MemberException;
-import org.umc.travlocksserver.domain.member.exception.code.MemberErrorCode;
+import org.umc.travlocksserver.domain.member.code.MemberErrorCode;
 import org.umc.travlocksserver.domain.member.repository.MemberRepository;
 import org.umc.travlocksserver.domain.vlock.code.VlockCategoryErrorCode;
 import org.umc.travlocksserver.domain.vlock.code.VlockErrorCode;

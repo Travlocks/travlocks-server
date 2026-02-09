@@ -8,10 +8,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.umc.travlocksserver.domain.auth.dto.request.AuthPasswordResetConfirmRequestDTO;
 import org.umc.travlocksserver.domain.auth.dto.response.AuthPasswordResetVerifyResponseDTO;
 import org.umc.travlocksserver.domain.auth.exception.AuthException;
-import org.umc.travlocksserver.domain.auth.exception.code.AuthErrorCode;
+import org.umc.travlocksserver.domain.auth.code.AuthErrorCode;
 import org.umc.travlocksserver.domain.auth.repository.PasswordResetTokenRedisRepository;
-import org.umc.travlocksserver.domain.member.exception.MemberException;
-import org.umc.travlocksserver.domain.member.exception.code.MemberErrorCode;
 import org.umc.travlocksserver.domain.member.repository.MemberRepository;
 import org.umc.travlocksserver.global.mail.ResendMailSender;
 

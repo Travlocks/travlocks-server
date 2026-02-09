@@ -9,7 +9,7 @@ import org.umc.travlocksserver.domain.location.exception.CityException;
 import org.umc.travlocksserver.domain.location.repository.CityRepository;
 import org.umc.travlocksserver.domain.member.entity.Member;
 import org.umc.travlocksserver.domain.member.exception.MemberException;
-import org.umc.travlocksserver.domain.member.exception.code.MemberErrorCode;
+import org.umc.travlocksserver.domain.member.code.MemberErrorCode;
 import org.umc.travlocksserver.domain.member.repository.MemberRepository;
 import org.umc.travlocksserver.domain.template.dto.request.TemplatePreInputRequestDTO;
 import org.umc.travlocksserver.domain.template.dto.response.TemplatePreInputResponseDTO;
@@ -22,8 +22,6 @@ import org.umc.travlocksserver.domain.template.repository.TemplateDayRepository;
 import org.umc.travlocksserver.domain.template.repository.TemplateRepository;
 import org.umc.travlocksserver.domain.traveltheme.entity.TravelTheme;
 import org.umc.travlocksserver.domain.traveltheme.repository.TravelThemeRepository;
-import org.umc.travlocksserver.global.exception.GeneralException;
-import org.umc.travlocksserver.global.code.ErrorCode;
 import org.umc.travlocksserver.domain.template.code.TemplateErrorCode;
 import org.umc.travlocksserver.domain.template.exception.TemplateException;
 

@@ -1,4 +1,4 @@
-package org.umc.travlocksserver.domain.auth.exception.code;
+package org.umc.travlocksserver.domain.auth.code;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

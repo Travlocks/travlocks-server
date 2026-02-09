@@ -1,4 +1,4 @@
-package org.umc.travlocksserver.domain.member.exception.code;
+package org.umc.travlocksserver.domain.member.code;
 
 import org.springframework.http.HttpStatus;
 import org.umc.travlocksserver.global.code.BaseCode;

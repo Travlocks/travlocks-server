@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import org.umc.travlocksserver.domain.member.dto.request.*;
 import org.umc.travlocksserver.domain.member.dto.response.*;
 import org.umc.travlocksserver.domain.member.entity.Member;
-import org.umc.travlocksserver.domain.member.exception.code.MemberSuccessCode;
+import org.umc.travlocksserver.domain.member.code.MemberSuccessCode;
 import org.umc.travlocksserver.domain.member.service.command.*;
 import org.umc.travlocksserver.domain.member.service.query.*;
 import org.umc.travlocksserver.domain.template.code.TemplateSuccessCode;
