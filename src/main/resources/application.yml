@@ -50,7 +50,7 @@ oauth:
     jwk-set-uri: https://www.googleapis.com/oauth2/v3/certs
 
 password-reset:
-  redirect-uri: ${PASSWORD_RESET_REDIRECT_URI:http://localhost:5173/password-reset}
+  redirect-uri: ${PASSWORD_RESET_REDIRECT_URI:https://www.travlocks.com/password-reset}
   ttl-minutes: ${PASSWORD_RESET_TTL_MINUTES:5}
 
 app:
