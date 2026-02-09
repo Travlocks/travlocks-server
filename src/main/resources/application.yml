@@ -111,4 +111,12 @@ tmap:
 sse:
   timeout-ms: 3600000  # 1시간
   heartbeat-ms: 30000  # 30초
-  token-ttl-ms: 1800000 # 30분
+
+cookie:
+  sse-token:
+    name: SSE_TOKEN
+    path: /api/v1/notifications
+    token-ttl-ms: 1800000 # 30분
+    same-site: None
+    secure: true
+    http-only: true  # 로컬 http면 false, 운영 https면 true

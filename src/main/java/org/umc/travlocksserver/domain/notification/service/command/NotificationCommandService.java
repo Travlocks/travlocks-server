@@ -13,6 +13,7 @@ import org.umc.travlocksserver.domain.notification.enums.NotificationType;
 import org.umc.travlocksserver.domain.notification.repository.NotificationRepository;
 import org.umc.travlocksserver.domain.notification.sse.SseEmitterRepository;
 import org.umc.travlocksserver.domain.notification.sse.SseEventNames;
+import org.umc.travlocksserver.global.jwt.JwtTokenProvider;
 
 import java.io.IOException;
 import java.util.Map;
@@ -25,9 +26,13 @@ public class NotificationCommandService {
     @Value("${sse.timeout-ms}")
     private long SSE_TIMEOUT_MS;
 
+    @Value("${cookie.sse-token.token-ttl-ms}")
+    private long SSE_TOKEN_TTL_MS;
+
     private final SseEmitterRepository emitterRepository;
     private final NotificationRepository notificationRepository;
     private final MemberQueryService memberQueryService;
+    private final JwtTokenProvider jwtTokenProvider;
 
     /**
      * 클라이언트의 SSE 연결 생성 및 등록
@@ -93,6 +98,12 @@ public class NotificationCommandService {
             }
         }
     }
+
+    public String generateSseToken(Long memberId) {
+        long ttlSeconds = SSE_TOKEN_TTL_MS / 1000L;
+        return jwtTokenProvider.generateSseToken(memberId, ttlSeconds);
+    }
+
     public void deleteAllNotification(Long memberId) {
         notificationRepository.deleteAllByReceiverId(memberId);
         signalHasUnread(memberId, false);

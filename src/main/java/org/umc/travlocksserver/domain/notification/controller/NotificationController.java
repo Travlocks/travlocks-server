@@ -2,7 +2,6 @@ package org.umc.travlocksserver.domain.notification.controller;
 
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -10,38 +9,26 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import org.umc.travlocksserver.domain.notification.constant.NotificationSuccessCode;
 import org.umc.travlocksserver.domain.notification.service.command.NotificationCommandService;
-import org.umc.travlocksserver.global.jwt.JwtTokenProvider;
 import org.umc.travlocksserver.global.response.SuccessResponse;
-
-import java.time.Duration;
+import org.umc.travlocksserver.global.security.cookie.CookieFactory;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/notifications")
 public class NotificationController {
 
-    private final JwtTokenProvider jwtTokenProvider;
+    private final CookieFactory cookieFactory;
 
     private final NotificationCommandService notificationCommandService;
 
-    @Value("${sse.token-ttl-ms}")
-    private long tokenTtlMs;
 
     @PostMapping("/sse-token")
     public ResponseEntity<SuccessResponse<Void>> issueSseToken(
             @AuthenticationPrincipal Long memberId,
             HttpServletResponse response
     ) {
-        long ttlSeconds = tokenTtlMs / 1000L;
-        String sseToken = jwtTokenProvider.generateSseToken(memberId, ttlSeconds);
-
-        ResponseCookie cookie = ResponseCookie.from("SSE_TOKEN", sseToken)
-                .httpOnly(true)
-                .secure(true)  // 로컬 http면 false, 운영 https면 true
-                .sameSite("None")
-                .path("/api/v1/notifications")
-                .maxAge(Duration.ofSeconds(ttlSeconds))
-                .build();
+        String sseToken = notificationCommandService.generateSseToken(memberId);
+        ResponseCookie cookie = cookieFactory.createSseTokenCookie(sseToken);
 
         response.addHeader("Set-Cookie", cookie.toString());
 
