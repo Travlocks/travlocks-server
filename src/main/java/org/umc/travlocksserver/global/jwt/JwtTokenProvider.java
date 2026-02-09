@@ -14,4 +14,7 @@ public interface JwtTokenProvider {
 
     void validateAccessTokenOrThrow(String accessToken);
     Long extractMemberIdFromAccessToken(String accessToken);
+
+    String generateSseToken(Long memberId, long sseTtlSeconds);
+    Long extractMemberIdFromSseToken(String sseToken);
 }

@@ -107,3 +107,6 @@ tmap:
   api:
     key: ${TMAP_API_KEY}
     base-url: ${TMAP_BASE_URL:https://apis.openapi.sk.com}
+
+sse:
+  token-ttl-ms: 1800000 # 30분
