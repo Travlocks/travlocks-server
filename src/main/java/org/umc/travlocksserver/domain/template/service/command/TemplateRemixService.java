@@ -5,12 +5,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.umc.travlocksserver.domain.member.entity.Member;
 import org.umc.travlocksserver.domain.member.exception.MemberException;
 import org.umc.travlocksserver.domain.member.exception.code.MemberErrorCode;
 import org.umc.travlocksserver.domain.member.repository.MemberRepository;
+import org.umc.travlocksserver.domain.notification.enums.NotificationType;
+import org.umc.travlocksserver.domain.notification.event.TemplateActivityEvent;
 import org.umc.travlocksserver.domain.template.code.TemplateErrorCode;
 import org.umc.travlocksserver.domain.template.dto.response.TemplateRemixResponseDTO;
 import org.umc.travlocksserver.domain.template.entity.Template;
@@ -36,6 +39,8 @@ public class TemplateRemixService {
 	private final TemplateDayRepository templateDayRepository;
 	private final TemplateVlockRepository templateVlockRepository;
 
+	private final ApplicationEventPublisher eventPublisher;
+
 	public TemplateRemixResponseDTO remix(Long templateId, Long remixerId) {
 		Template original = templateRepository.findById(templateId)
 			.orElseThrow(() -> new TemplateException(TemplateErrorCode.TEMPLATE_NOT_FOUND));
@@ -51,6 +56,15 @@ public class TemplateRemixService {
 		copyTemplateVlocks(dayMap);
 
 		original.increaseRemixCount();
+
+		// 이벤트 발행
+		eventPublisher.publishEvent(new TemplateActivityEvent(
+				original.getOwner().getId(),
+				remixer.getId(),
+				remixer.getNickname(),
+				original.getId(),
+				NotificationType.TEMPLATE_REMIXED
+				));
 
 		return new TemplateRemixResponseDTO(original.getId(), remixedTemplate.getId());
 	}

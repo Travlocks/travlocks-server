@@ -109,4 +109,6 @@ tmap:
     base-url: ${TMAP_BASE_URL:https://apis.openapi.sk.com}
 
 sse:
+  timeout-ms: 3600000  # 1시간
+  heartbeat-ms: 30000  # 30초
   token-ttl-ms: 1800000 # 30분
