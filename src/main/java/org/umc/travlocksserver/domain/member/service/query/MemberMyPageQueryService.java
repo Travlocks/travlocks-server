@@ -18,6 +18,7 @@ import org.umc.travlocksserver.domain.template.repository.TemplateRepository;
 import org.umc.travlocksserver.domain.travelstyle.repository.PreferredTravelStyleRepository;
 import org.umc.travlocksserver.domain.traveltheme.repository.PreferredTravelThemeRepository;
 import org.umc.travlocksserver.domain.vlock.repository.VlockRepository;
+import org.umc.travlocksserver.global.aws.S3Properties;
 import org.umc.travlocksserver.global.response.PageResponseDTO;
 
 import java.util.List;
@@ -32,6 +33,7 @@ public class MemberMyPageQueryService {
     private final VlockRepository vlockRepository;
 	private final TemplateRepository templateRepository;
 	private final FavoriteRepository favoriteRepository;
+	private final S3Properties s3Properties;
 
     @Transactional(readOnly = true)
     public MemberMyPageResponseDTO getMyPage(Member member) {
@@ -40,7 +42,7 @@ public class MemberMyPageQueryService {
         List<Long> styleIds = preferredTravelStyleRepository.findPreferredStyleIdsByMemberId(memberId);
         List<Long> themeIds = preferredTravelThemeRepository.findPreferredThemeIdsByMemberId(memberId);
 
-        List<CreatedVlockDTO> vlocks = vlockRepository.findRecentCreatedVlocks(memberId, 4);
+        List<CreatedVlockDTO> vlocks = vlockRepository.findRecentCreatedVlocks(memberId, 4, s3Properties.domain());
         List<CreatedTemplateDTO> templates = templateRepository.findRecentCreatedTemplates(memberId, 4);
 
         return new MemberMyPageResponseDTO(

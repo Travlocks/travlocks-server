@@ -13,7 +13,6 @@ import org.umc.travlocksserver.global.entity.CreatedSoftDeleteBaseEntity;
 public class VlockCategory extends CreatedSoftDeleteBaseEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "vlock_category_id")
     private Long id;
 
@@ -22,4 +21,10 @@ public class VlockCategory extends CreatedSoftDeleteBaseEntity {
 
     @Column(nullable = false)
     private Double stayHours;
+
+	@Column(name = "default_creation_image_key", nullable = false)
+	private String defaultCreationImageKey;
+
+	@Column(name = "default_category_image_key", nullable = false)
+	private String defaultCategoryImageKey;
 }

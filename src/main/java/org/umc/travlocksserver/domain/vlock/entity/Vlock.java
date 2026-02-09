@@ -5,6 +5,8 @@ import lombok.*;
 
 import org.umc.travlocksserver.domain.location.entity.City;
 import org.umc.travlocksserver.domain.member.entity.Member;
+import org.umc.travlocksserver.domain.vlock.dto.command.VlockCreateCommand;
+import org.umc.travlocksserver.domain.vlock.dto.command.VlockUpdateCommand;
 import org.umc.travlocksserver.global.entity.SoftDeleteBaseEntity;
 
 @Getter
@@ -67,27 +69,18 @@ public class Vlock extends SoftDeleteBaseEntity {
 		return this.owner.getId().equals(memberId);
 	}
 
-	public static Vlock create(
-		VlockCategory category,
-		City city,
-		Member owner,
-		String name,
-		Double latitude,
-		Double longitude,
-		String address,
-		String memo
-	) {
+	public static Vlock create(VlockCreateCommand command) {
 		return Vlock.builder()
-				.vlockCategory(category)
-				.city(city)
-				.owner(owner)
-				.name(name)
-                .latitude(latitude)
-                .longitude(longitude)
-				.address(address)
-				.memo(memo)
-                .coverImgUrl("")
-                .linkUrl("")
+				.vlockCategory(command.category())
+				.city(command.city())
+				.owner(command.owner())
+				.name(command.name())
+				.address(command.address())
+				.linkUrl(command.linkUrl())
+				.coverImgUrl(null)
+				.memo(command.memo())
+				.latitude(command.latitude())
+				.longitude(command.longitude())
 				.usageCount(0)
 				.isPublic(false)
 				.build();
@@ -108,7 +101,7 @@ public class Vlock extends SoftDeleteBaseEntity {
 				.vlockCategory(vlockCategory)
 				.city(city)
 				.name(name)
-				.coverImgUrl("")
+				.coverImgUrl(null)
 				.latitude(latitude)
 				.longitude(longitude)
 				.address(address)
@@ -118,37 +111,23 @@ public class Vlock extends SoftDeleteBaseEntity {
 				.build();
 	}
 
-	public void update(
-		VlockCategory category,
-		City city,
-		String name,
-		Double latitude,
-		Double longitude,
-		String address,
-		String memo,
-		String coverImgUrl,
-		String linkUrl,
-		Boolean isPublic
-	) {
-		this.vlockCategory = category;
-		this.city = city;
-		this.name = name;
-		this.latitude = latitude;
-		this.longitude = longitude;
-		this.address = address;
-		if (memo != null) {
-			this.memo = memo;
+	public void update(VlockUpdateCommand command) {
+		this.vlockCategory = command.category();
+		this.city = command.city();
+		this.name = command.name();
+		this.address = command.address();
+		this.latitude = command.latitude();
+		this.longitude = command.longitude();
+		this.coverImgUrl = command.coverImgUrl();
+
+		if (command.memo() != null) {
+			this.memo = command.memo();
 		}
-		// 추후 prefix: https 검증 필요
-		if (coverImgUrl != null) {
-			this.coverImgUrl = coverImgUrl;
+		if (command.linkUrl() != null) {
+			this.linkUrl = command.linkUrl();
 		}
-		// 추후 prefix: https 검증 필요
-		if (linkUrl != null) {
-			this.linkUrl = linkUrl;
-		}
-		if (isPublic != null) {
-			this.isPublic = isPublic;
+		if (command.isPublic() != null) {
+			this.isPublic = command.isPublic();
 		}
 	}
 }

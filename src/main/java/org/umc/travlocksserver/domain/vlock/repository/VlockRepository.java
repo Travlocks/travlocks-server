@@ -69,18 +69,24 @@ public interface VlockRepository extends JpaRepository<Vlock,Long>, VlockReposit
         v.id,
         v.name,
         v.city.name,
+        case
+            when v.coverImgUrl is null then concat(:s3Domain, vc.defaultCreationImageKey)
+            else v.coverImgUrl
+        end,
         v.createdAt
     )
     from Vlock v
+        join v.vlockCategory vc
     where v.owner.id = :memberId
       and v.deletedAt is null
     order by v.createdAt desc, v.id desc
     """)
     List<CreatedVlockDTO> findRecentCreatedVlocksInternal(
-            @Param("memberId") Long memberId
+            @Param("memberId") Long memberId,
+			@Param("s3Domain") String s3Domain
     );
-    default List<CreatedVlockDTO> findRecentCreatedVlocks(Long memberId, int limit) {
-        List<CreatedVlockDTO> all = findRecentCreatedVlocksInternal(memberId);
+    default List<CreatedVlockDTO> findRecentCreatedVlocks(Long memberId, int limit, String s3Domain) {
+        List<CreatedVlockDTO> all = findRecentCreatedVlocksInternal(memberId, s3Domain);
         return all.size() > limit ? all.subList(0, limit) : all;
     }
 

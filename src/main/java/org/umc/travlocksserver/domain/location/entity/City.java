@@ -13,7 +13,6 @@ import org.umc.travlocksserver.global.entity.SoftDeleteBaseEntity;
 public class City extends SoftDeleteBaseEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "city_id")
     private Long id;
 
@@ -24,11 +23,4 @@ public class City extends SoftDeleteBaseEntity {
 
     @Column(nullable = false, length = 10)
     private String name;
-
-    @Column(nullable = false)
-    private Double latitude;
-
-    @Column(name = "longitude", nullable = false)
-    private Double longitude;
-
 }

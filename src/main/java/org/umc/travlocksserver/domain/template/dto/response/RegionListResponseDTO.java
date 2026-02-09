@@ -13,9 +13,7 @@ public record RegionListResponseDTO(
 
     public record CityDTO(
             Long cityId,
-            String cityName,
-            Double latitude,
-            Double longitude
+            String cityName
     ) {}
 
     public static RegionListResponseDTO of(List<RegionDTO> regions) {
