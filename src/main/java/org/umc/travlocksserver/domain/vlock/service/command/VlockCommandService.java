@@ -3,6 +3,7 @@ package org.umc.travlocksserver.domain.vlock.service.command;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import org.umc.travlocksserver.domain.location.constant.CityErrorCode;
 import org.umc.travlocksserver.domain.location.entity.City;
 import org.umc.travlocksserver.domain.location.exception.CityException;
@@ -14,6 +15,8 @@ import org.umc.travlocksserver.domain.member.exception.code.MemberErrorCode;
 import org.umc.travlocksserver.domain.member.repository.MemberRepository;
 import org.umc.travlocksserver.domain.vlock.code.VlockCategoryErrorCode;
 import org.umc.travlocksserver.domain.vlock.code.VlockErrorCode;
+import org.umc.travlocksserver.domain.vlock.dto.command.VlockCreateCommand;
+import org.umc.travlocksserver.domain.vlock.dto.command.VlockUpdateCommand;
 import org.umc.travlocksserver.domain.vlock.dto.request.VlockRequestDTO;
 import org.umc.travlocksserver.domain.vlock.dto.request.VlockUpdateRequestDTO;
 import org.umc.travlocksserver.domain.vlock.dto.response.VlockResponseDTO;
@@ -24,6 +27,8 @@ import org.umc.travlocksserver.domain.vlock.exception.VlockException;
 import org.umc.travlocksserver.domain.vlock.repository.VlockCategoryRepository;
 import org.umc.travlocksserver.domain.vlock.repository.VlockRepository;
 import org.umc.travlocksserver.domain.vlock.service.query.VlockCategoryQueryService;
+import org.umc.travlocksserver.global.aws.S3Properties;
+import org.umc.travlocksserver.global.aws.S3Provider;
 import org.umc.travlocksserver.infra.kakao.KakaoPlace;
 
 import java.util.List;
@@ -39,50 +44,62 @@ public class VlockCommandService {
 	private final VlockRepository vlockRepository;
 	private final VlockCategoryQueryService vlockCategoryQueryService;
 	private final CityQueryService cityQueryService;
+	private final S3Provider s3Provider;
+	private final S3Properties s3Properties;
 
 	public VlockResponseDTO createVlock(Long memberId, VlockRequestDTO request) {
-		Member member = getMember(memberId);
-		VlockCategory category = getCategory(request.categoryId());
-		City city = getCity(request.cityId());
-
-		Vlock newVlock = Vlock.create(
-			category,
-			city,
-			member,
-			request.name(),
-			request.latitude(),
-			request.longitude(),
-			request.address(),
-			request.memo()
+		VlockCreateCommand command = new VlockCreateCommand(
+			getCategory(request.categoryId()),
+			getCity(request.cityId()),
+			getMember(memberId),
+			request.name(), request.address(), request.memo(),
+			request.linkUrl(), request.latitude(), request.longitude()
 		);
 
-		Vlock savedVlock = vlockRepository.save(newVlock);
+		Vlock savedVlock = vlockRepository.save(Vlock.create(command));
 
-		return VlockResponseDTO.from(savedVlock);
+		return VlockResponseDTO.from(savedVlock, s3Properties.domain());
 	}
 
-	public VlockResponseDTO updateVlock(Long memberId, Long vlockId, VlockUpdateRequestDTO request) {
+	public VlockResponseDTO updateVlock(
+		Long memberId,
+		Long vlockId,
+		VlockUpdateRequestDTO request,
+		MultipartFile coverImg
+	) {
 		validateMemberExists(memberId);
-
 		Vlock vlock = getOwnedVlock(memberId, vlockId);
 
-		VlockCategory category = getCategory(request.categoryId());
-		City city = getCity(request.cityId());
+		String oldImageUrl = vlock.getCoverImgUrl();
+		String newImageUrl = oldImageUrl;
 
-		vlock.update(
-			category,
-			city,
-			request.name(),
-			request.latitude(),
-			request.longitude(),
-			request.address(),
-			request.memo(),
-			request.coverImgUrl(),
-			request.linkUrl(),
-			request.isPublic()
+		boolean shouldDeleteOldFile = false;
+
+		if (Boolean.TRUE.equals(request.deleteCoverImg())) {
+			newImageUrl = null;
+			shouldDeleteOldFile = (oldImageUrl != null);
+		}
+
+		if (coverImg != null && !coverImg.isEmpty()) {
+			newImageUrl = s3Provider.uploadVlockFile(coverImg);
+			shouldDeleteOldFile = (oldImageUrl != null);
+		}
+
+		VlockUpdateCommand command = new VlockUpdateCommand(
+			getCategory(request.categoryId()),
+			getCity(request.cityId()),
+			request.name(), request.latitude(), request.longitude(),
+			request.address(), request.memo(), newImageUrl,
+			request.linkUrl(), request.isPublic()
 		);
 
-		return VlockResponseDTO.from(vlock);
+		if (shouldDeleteOldFile) {
+			s3Provider.deleteFile(oldImageUrl);
+		}
+
+		vlock.update(command);
+
+		return VlockResponseDTO.from(vlock, s3Properties.domain());
 	}
 
 	public void deleteVlock(Long memberId, Long vlockId) {
@@ -136,7 +153,7 @@ public class VlockCommandService {
             default -> "기타";
         };
 
-        return vlockCategoryQueryService.getByName(name)
+        return vlockCategoryQueryService.getByName(mappedName)
                 .orElseGet(() -> vlockCategoryQueryService.getByName("기타")
                         .orElseThrow(() -> new VlockCategoryException(VlockCategoryErrorCode.DEFAULT_VLOCK_CATEGORY_NOT_FOUND)));
     }
@@ -154,7 +171,7 @@ public class VlockCommandService {
 
 	private VlockCategory getCategory(Long categoryId) {
 		return vlockCategoryRepository.findById(categoryId)
-			.orElseThrow(() -> new VlockException(VlockErrorCode.CATEGORY_NOT_FOUND));
+			.orElseThrow(() -> new VlockException(VlockCategoryErrorCode.DEFAULT_VLOCK_CATEGORY_NOT_FOUND));
 	}
 
 	private City getCity(Long cityId) {

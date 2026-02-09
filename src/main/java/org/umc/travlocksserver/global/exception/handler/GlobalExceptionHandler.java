@@ -1,4 +1,4 @@
-package org.umc.travlocksserver.global.exception;
+package org.umc.travlocksserver.global.exception.handler;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -13,6 +13,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 import org.umc.travlocksserver.global.code.BaseCode;
 import org.umc.travlocksserver.global.code.ErrorCode;
+import org.umc.travlocksserver.global.exception.GeneralException;
 import org.umc.travlocksserver.global.response.ErrorResponse;
 import org.umc.travlocksserver.infra.ai.AiClientException;
 

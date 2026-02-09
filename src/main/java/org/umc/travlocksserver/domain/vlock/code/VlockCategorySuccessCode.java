@@ -1,15 +1,16 @@
 package org.umc.travlocksserver.domain.vlock.code;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.umc.travlocksserver.global.code.BaseCode;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
 @Getter
 @RequiredArgsConstructor
-public enum VlockCategoryErrorCode implements BaseCode {
+public enum VlockCategorySuccessCode implements BaseCode {
 
-	DEFAULT_VLOCK_CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "블록 카테고리가 존재하지 않습니다.")
+	DEFAULT_VLOCK_CATEGORY_GET_SUCCESS(HttpStatus.OK, "기본 블록 카테고리를 성공적으로 조회했습니다.")
 	;
 
 	private final HttpStatus status;

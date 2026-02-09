@@ -10,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum VlockErrorCode implements BaseCode {
 
-	CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 카테고리입니다."),
 	VLOCK_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 블록입니다."),
 	START_VLOCK_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 출발 블록입니다."),
 	END_VLOCK_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 도착 블록입니다."),

@@ -1,6 +1,8 @@
-<div align="center">
+<p align="center">
+  <img src="https://github.com/dinah05/email-template/blob/main/assets/travlocks_logo.png?raw=true" alt="Travlocks Logo" width="220" />
+</p>
 
-# Travlocks Web
+# Travlocks Server
 
 **UMC 9th Project 🚀**
 
@@ -22,7 +24,13 @@
 
 ## 📌 Travlocks는 이런 서비스예요
 
-> 작성 예정입니다.
+Travlocks는  
+**AI를 활용해 여행 일정을 빠르고 직관적으로 설계할 수 있도록 돕는 블록형 여행 일정 웹 서비스**입니다.
+- 텍스트 입력이나 복잡한 리스트 작성이 아닌,
+- 블록을 쌓듯 직관적으로 여행 일정을 구성해
+- 여행 설계의 **인지적 부담**을 줄이는 것에 집중합니다.
+
+> “여행을 ‘짜는’ 게 아닌 ‘쌓는’ 즐거움을 유저에게”
 
 </div>
 
