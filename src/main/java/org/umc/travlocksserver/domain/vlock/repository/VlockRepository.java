@@ -7,8 +7,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import org.umc.travlocksserver.domain.member.dto.response.CreatedVlockDTO;
-import org.umc.travlocksserver.domain.member.dto.response.MemberMyPageResponseDTO;
+import org.umc.travlocksserver.domain.member.dto.response.MyPageRecentVlockDTO;
 import org.umc.travlocksserver.domain.vlock.entity.Vlock;
 
 import java.util.List;
@@ -65,29 +64,20 @@ public interface VlockRepository extends JpaRepository<Vlock,Long>, VlockReposit
                        @Param("deletedMemberId") Long deletedMemberId);
 
     @Query("""
-    select new org.umc.travlocksserver.domain.member.dto.response.CreatedVlockDTO(
+    select new org.umc.travlocksserver.domain.member.dto.response.MyPageRecentVlockDTO(
         v.id,
         v.name,
-        v.city.name,
-        case
-            when v.coverImgUrl is null then concat(:s3Domain, vc.defaultCreationImageKey)
-            else v.coverImgUrl
-        end,
+        v.city.region.id,
         v.createdAt
     )
     from Vlock v
-        join v.vlockCategory vc
     where v.owner.id = :memberId
       and v.deletedAt is null
     order by v.createdAt desc, v.id desc
     """)
-    List<CreatedVlockDTO> findRecentCreatedVlocksInternal(
+    List<MyPageRecentVlockDTO> findRecentCreatedVlocks(
             @Param("memberId") Long memberId,
-			@Param("s3Domain") String s3Domain
+            Pageable pageable
     );
-    default List<CreatedVlockDTO> findRecentCreatedVlocks(Long memberId, int limit, String s3Domain) {
-        List<CreatedVlockDTO> all = findRecentCreatedVlocksInternal(memberId, s3Domain);
-        return all.size() > limit ? all.subList(0, limit) : all;
-    }
 
 }

@@ -37,16 +37,16 @@ import jakarta.validation.constraints.NotBlank;
 public interface MemberControllerDocs {
 
 	@Operation(
-			summary = "이메일 중복 검사 API",
+			summary = "이메일 존재 여부 검사 API",
 			description = """
-					회원가입 시 이메일 중복 여부를 확인합니다.
+					회원가입 시 이메일 존재 여부를 확인합니다.
 					
 					- data.exists=true  : 이미 사용 중인 이메일
 					- data.exists=false : 사용 가능한 이메일
 					"""
 	)
 	@ApiResponses({
-			@ApiResponse(responseCode = "200", description = "이메일 중복 검사 성공"),
+			@ApiResponse(responseCode = "200", description = "이메일 존재 여부 검사 성공"),
 			@ApiResponse(responseCode = "400", description = "요청 값 검증 실패(이메일 형식/빈 값 등)", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 	})
 	ResponseEntity<SuccessResponse<MemberEmailExistsResponseDTO>> checkEmailExists(
@@ -136,7 +136,7 @@ public interface MemberControllerDocs {
 			description = """
 					로그인한 사용자의 마이페이지 정보를 조회합니다.
 					
-					- 닉네임 / 한줄 소개
+					- 닉네임 / 한줄 소개 / 프로필 이미지 URL
 					- 선호 여행 스타일 ID 목록
 					- 선호 여행 테마 ID 목록
 					- 내가 생성한 블록 / 템플릿 / 즐겨찾기 수

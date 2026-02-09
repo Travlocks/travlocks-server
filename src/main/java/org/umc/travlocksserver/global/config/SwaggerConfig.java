@@ -23,7 +23,8 @@ public class SwaggerConfig {
                 .info(apiInfo())
                 .servers(List.of(
                         new Server().url("https://api.travlocks.com").description("COM"),
-                        new Server().url("https://api.travlocks.kro.kr").description("KRO (legacy)")
+                        new Server().url("https://api.travlocks.kro.kr").description("KRO (legacy)"),
+                        new Server().url("http://localhost:8080").description("LOCAL")
                 ))
                 .components(components())
                 .addSecurityItem(new SecurityRequirement().addList(JWT_SCHEME_NAME));

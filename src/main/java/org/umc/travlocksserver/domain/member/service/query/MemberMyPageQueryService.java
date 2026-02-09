@@ -2,12 +2,13 @@ package org.umc.travlocksserver.domain.member.service.query;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.umc.travlocksserver.domain.favorite.repository.FavoriteRepository;
-import org.umc.travlocksserver.domain.member.dto.response.CreatedTemplateDTO;
-import org.umc.travlocksserver.domain.member.dto.response.CreatedVlockDTO;
+import org.umc.travlocksserver.domain.member.dto.response.MyPageRecentTemplateDTO;
+import org.umc.travlocksserver.domain.member.dto.response.MyPageRecentVlockDTO;
 import org.umc.travlocksserver.domain.member.dto.response.MemberMyPageResponseDTO;
 import org.umc.travlocksserver.domain.member.entity.Member;
 import org.umc.travlocksserver.domain.member.exception.MemberException;
@@ -42,13 +43,19 @@ public class MemberMyPageQueryService {
         List<Long> styleIds = preferredTravelStyleRepository.findPreferredStyleIdsByMemberId(memberId);
         List<Long> themeIds = preferredTravelThemeRepository.findPreferredThemeIdsByMemberId(memberId);
 
-        List<CreatedVlockDTO> vlocks = vlockRepository.findRecentCreatedVlocks(memberId, 4, s3Properties.domain());
-        List<CreatedTemplateDTO> templates = templateRepository.findRecentCreatedTemplates(memberId, 4);
+        PageRequest recent4 = PageRequest.of(0, 4);
+
+        List<MyPageRecentVlockDTO> vlocks =
+                vlockRepository.findRecentCreatedVlocks(memberId, recent4);
+        List<MyPageRecentTemplateDTO> templates =
+                templateRepository.findRecentCreatedTemplatesWithFavorite(memberId, recent4);
 
         return new MemberMyPageResponseDTO(
                 member.getId(),
                 member.getNickname(),
                 member.getIntroduction(),
+                member.getProfileImageUrl(),
+                member.getEmail(),
                 styleIds,
                 themeIds,
                 new MemberMyPageResponseDTO.Counts(

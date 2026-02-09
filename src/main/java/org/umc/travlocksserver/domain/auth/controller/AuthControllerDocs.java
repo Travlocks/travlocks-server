@@ -139,7 +139,7 @@ public interface AuthControllerDocs {
               입력한 이메일이 서비스에 가입되지 않은 경우에도 동일한 성공 응답을 반환합니다.
             - 이 경우 실제 비밀번호 재설정 이메일은 발송되지 않습니다.
             - 메일에는 resetToken이 포함된 재설정 링크가 전달됩니다.
-              (예: https://travlocks.kro.kr/reset-password?token=...)
+              (예: https://www.travlocks.com/reset-password?token=...)
             """
     )
     @ApiResponses({
