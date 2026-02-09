@@ -71,7 +71,6 @@ suggestion:
 
 tag:
   cron: "0 5 * * * *"
-  zone: "Asia/Seoul"
   grace-minutes: 15
   lookback-minutes: 60
 
@@ -120,3 +119,6 @@ cookie:
     same-site: None
     secure: true
     http-only: true  # 로컬 http면 false, 운영 https면 true
+
+global:
+  timezone: Asia/Seoul

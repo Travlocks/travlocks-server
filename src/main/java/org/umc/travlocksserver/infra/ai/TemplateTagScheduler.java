@@ -17,7 +17,7 @@ import java.util.List;
 @Slf4j
 public class TemplateTagScheduler {
 
-    @Value("${tag.zone}")
+    @Value("${global.timezone}")
     private String zoneId;
 
     @Value("${tag.grace-minutes}")

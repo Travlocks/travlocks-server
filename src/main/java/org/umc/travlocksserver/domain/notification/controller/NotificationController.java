@@ -8,7 +8,9 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import org.umc.travlocksserver.domain.notification.constant.NotificationSuccessCode;
+import org.umc.travlocksserver.domain.notification.dto.response.NotificationAllResponseDTO;
 import org.umc.travlocksserver.domain.notification.service.command.NotificationCommandService;
+import org.umc.travlocksserver.domain.notification.service.query.NotificationQueryService;
 import org.umc.travlocksserver.global.response.SuccessResponse;
 import org.umc.travlocksserver.global.security.cookie.CookieFactory;
 
@@ -20,7 +22,7 @@ public class NotificationController {
     private final CookieFactory cookieFactory;
 
     private final NotificationCommandService notificationCommandService;
-
+    private final NotificationQueryService notificationQueryService;
 
     @PostMapping("/sse-token")
     public ResponseEntity<SuccessResponse<Void>> issueSseToken(
@@ -48,5 +50,17 @@ public class NotificationController {
         notificationCommandService.deleteAllNotification(memberId);
         return ResponseEntity
                 .ok(SuccessResponse.ok(NotificationSuccessCode.NOTIFICATION_DELETED_SUCCESS));
+    }
+
+    @GetMapping
+    public ResponseEntity<SuccessResponse<NotificationAllResponseDTO>> getNotifications(
+            @AuthenticationPrincipal Long memberId,
+            @RequestParam(required = false) String cursor,
+            @RequestParam(defaultValue = "10") Integer size
+    ) {
+        NotificationAllResponseDTO response = notificationQueryService.getNotifications(memberId, cursor, size);
+        return ResponseEntity.ok(
+                SuccessResponse.ok(NotificationSuccessCode.NOTIFICATION_GET_SUCCESS, response)
+        );
     }
 }
