@@ -86,7 +86,6 @@ suggestion:
 
 tag:
   cron: "0 5 * * * *"
-  zone: "Asia/Seoul"
   grace-minutes: 15
   lookback-minutes: 60
 
@@ -124,3 +123,19 @@ tmap:
   api:
     key: ${TMAP_API_KEY}
     base-url: ${TMAP_BASE_URL:https://apis.openapi.sk.com}
+
+sse:
+  timeout-ms: 3600000  # 1시간
+  heartbeat-ms: 30000  # 30초
+
+cookie:
+  sse-token:
+    name: SSE_TOKEN
+    path: /api/v1/notifications
+    token-ttl-ms: 1800000 # 30분
+    same-site: None
+    secure: true
+    http-only: true  # 로컬 http면 false, 운영 https면 true
+
+global:
+  timezone: Asia/Seoul
