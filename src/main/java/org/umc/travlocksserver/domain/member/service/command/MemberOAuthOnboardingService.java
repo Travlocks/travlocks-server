@@ -34,11 +34,10 @@ public class MemberOAuthOnboardingService {
             throw new MemberException(MemberErrorCode.NICKNAME_ALREADY_EXISTS);
         }
 
-        // member 업데이트 (닉네임 + ACTIVE 전환)
         member.changeNickname(request.nickname());
         member.changeStatusActive();
 
-        // 약관/선호 처리(기존 삭제 후 insert)
+        // 약관/선호 처리
         var result = processor.process(
                 member,
                 request.consents().stream()
