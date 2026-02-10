@@ -83,7 +83,6 @@ public class NotificationCommandService {
     /**
      * 사용자에게 읽지 않은 알림이 있음(SSE 이벤트)을 실시간으로 푸시
      * */
-    @Transactional
     public void signalHasUnread(Long receiverId, boolean hasUnread) {
         Map<String, SseEmitter> emitters = emitterRepository.getEmitters(receiverId);
         if (emitters.isEmpty())
@@ -135,12 +134,12 @@ public class NotificationCommandService {
         }
     }
 
-
     public String generateSseToken(Long memberId) {
         long ttlSeconds = SSE_TOKEN_TTL_MS / 1000L;
         return jwtTokenProvider.generateSseToken(memberId, ttlSeconds);
     }
 
+    @Transactional
     public void deleteAllNotification(Long memberId) {
         notificationRepository.deleteAllByReceiverId(memberId);
         signalHasUnread(memberId, false);
