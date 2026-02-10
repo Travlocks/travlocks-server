@@ -18,10 +18,14 @@ spring:
       hibernate:
         format_sql: true
 
-logging:
-  level:
-    org.hibernate.SQL: debug
-    org.hibernate.orm.jdbc.bind: trace
+#logging:
+#  level:
+#    org.hibernate.SQL: debug
+#    org.hibernate.orm.jdbc.bind: trace
+  logging:
+    level:
+      org.hibernate.SQL: WARN
+      org.hibernate.orm.jdbc.bind: OFF
 
   data:
     redis:
