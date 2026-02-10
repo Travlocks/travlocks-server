@@ -17,7 +17,6 @@ import org.umc.travlocksserver.domain.template.repository.TemplateCityRepository
 import org.umc.travlocksserver.domain.template.repository.TemplateDayRepository;
 import org.umc.travlocksserver.domain.template.repository.TemplateRepository;
 import org.umc.travlocksserver.domain.template.repository.TemplateVlockRepository;
-import org.umc.travlocksserver.domain.vlock.dto.response.VlockBriefDTO;
 
 import lombok.RequiredArgsConstructor;
 
@@ -45,7 +44,7 @@ public class TemplateCanvasQueryService {
 
 		List<Long> cities = templateCityRepository.findCityIdsByTemplateId(templateId);
 
-		double totalStayHours = 0;
+		double totalStayHours = 0.0;
 		int totalMoveMinutes = 0;
 
 		List<TemplateCanvasVlockDTO> vlocks = new ArrayList<>(templateVlocks.size());
@@ -60,33 +59,21 @@ public class TemplateCanvasQueryService {
 			totalStayHours += cur.getStayHours();
 			totalMoveMinutes += nextMoveMinutes;
 
-			vlocks.add(new TemplateCanvasVlockDTO(
-				cur.getId(),
-				cur.getOrderNo(),
-				cur.getStayHours(),
-				nextMoveMinutes,
-				new VlockBriefDTO(
-					cur.getVlock().getId(),
-					cur.getVlock().getName(),
-					cur.getVlock().getVlockCategory().getName()
-				)
-			));
+			vlocks.add(TemplateCanvasVlockDTO.from(cur, nextMoveMinutes));
 		}
 
-		double totalMoveHours = (double) totalMoveMinutes / 60;
+		double totalMoveHours = Math.round(((double) totalMoveMinutes / 60.0) * 100) / 100.0;
 		double totalHours = totalStayHours + totalMoveHours;
 
-		return new TemplateCanvasResponseDTO(
-			template.getId(),
-			template.getTitle(),
+		return TemplateCanvasResponseDTO.from(
+			template,
 			dayNo,
-			day.getVlockCount(),
+			day,
 			totalHours,
 			totalMoveHours,
 			totalStayHours,
 			cities,
-			vlocks,
-			template.getCreatedAt()
+			vlocks
 		);
 	}
 
