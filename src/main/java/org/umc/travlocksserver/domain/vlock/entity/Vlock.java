@@ -57,8 +57,6 @@ public class Vlock extends SoftDeleteBaseEntity {
     @Column(length = 200)
     private String memo;
 
-    private String linkUrl;
-
     @Column(nullable = false)
     private Integer usageCount;
 
@@ -76,8 +74,7 @@ public class Vlock extends SoftDeleteBaseEntity {
 				.owner(command.owner())
 				.name(command.name())
 				.address(command.address())
-				.linkUrl(command.linkUrl())
-				.coverImgUrl(null)
+				.coverImgUrl(command.coverImgUrl())
 				.memo(command.memo())
 				.latitude(command.latitude())
 				.longitude(command.longitude())
@@ -93,8 +90,7 @@ public class Vlock extends SoftDeleteBaseEntity {
 			String name,
 			Double latitude,
 			Double longitude,
-			String address,
-			String linkUrl
+			String address
 	) {
 		return Vlock.builder()
 				.externalPlaceId(externalPlaceId)
@@ -105,7 +101,6 @@ public class Vlock extends SoftDeleteBaseEntity {
 				.latitude(latitude)
 				.longitude(longitude)
 				.address(address)
-				.linkUrl(linkUrl)
 				.usageCount(0)
 				.isPublic(true)
 				.build();
@@ -122,9 +117,6 @@ public class Vlock extends SoftDeleteBaseEntity {
 
 		if (command.memo() != null) {
 			this.memo = command.memo();
-		}
-		if (command.linkUrl() != null) {
-			this.linkUrl = command.linkUrl();
 		}
 		if (command.isPublic() != null) {
 			this.isPublic = command.isPublic();

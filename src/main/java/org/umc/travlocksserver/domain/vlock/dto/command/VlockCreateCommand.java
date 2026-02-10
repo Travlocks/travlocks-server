@@ -11,7 +11,7 @@ public record VlockCreateCommand(
 	String name,
 	String address,
 	String memo,
-	String linkUrl,
+	String coverImgUrl,
 	Double latitude,
 	Double longitude
 ) {
