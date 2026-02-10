@@ -33,6 +33,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.umc.travlocksserver.domain.template.dto.response.TemplateRecommendationsDTO;
 import org.umc.travlocksserver.domain.member.entity.Member;
 import org.umc.travlocksserver.domain.template.dto.response.TemplateDetailResponseDTO;
+import org.umc.travlocksserver.domain.template.dto.request.TemplateVlockAddRequestDTO;
+import org.umc.travlocksserver.domain.template.dto.request.TemplateVlockReorderRequestDTO;
+import org.umc.travlocksserver.domain.template.dto.response.TemplateVlockAddResponseDTO;
+import org.umc.travlocksserver.domain.template.dto.response.TemplateVlockDeleteResponseDTO;
+import org.umc.travlocksserver.domain.template.dto.response.TemplateVlockReorderResponseDTO;
 
 @Tag(name = "Template API", description = "템플릿 관련 API 입니다.")
 public interface TemplateControllerDocs {
@@ -54,6 +59,141 @@ public interface TemplateControllerDocs {
 	ResponseEntity<SuccessResponse<TemplatePreInputResponseDTO>> createPreInput(
 		@Valid @RequestBody TemplatePreInputRequestDTO request,
 		@AuthenticationPrincipal Long memberId
+	);
+
+	@Operation(
+			summary = "템플릿 블록 추가 API",
+			description = """
+            왼쪽 블록 라이브러리에서 선택한 블록을 캔버스에 추가합니다.
+            
+            [Path Variable]
+            - templateId: 템플릿 ID
+            - dayNo: 여행 일차 (1부터 시작)
+            
+            [Request Body]
+            - vlockId: 추가할 블록 ID
+            - canvasX: 캔버스 X 좌표
+            - canvasY: 캔버스 Y 좌표
+            - connectionPort: 연결 포트 (TOP_LEFT, BOTTOM_LEFT, TOP_RIGHT, BOTTOM_RIGHT)
+            
+            [참고]
+            - orderNo는 자동으로 마지막 + 1로 할당됩니다.
+            - 블록 4개 초과 시 경고 메시지가 포함됩니다.
+            """
+	)
+	@ApiResponses({
+			@ApiResponse(responseCode = "201", description = "블록 추가 성공"),
+			@ApiResponse(
+					responseCode = "400",
+					description = "필수 데이터 누락",
+					content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+			),
+			@ApiResponse(
+					responseCode = "401",
+					description = "인증 실패",
+					content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+			),
+			@ApiResponse(
+					responseCode = "403",
+					description = "권한 없음 (다른 사용자의 템플릿)",
+					content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+			),
+			@ApiResponse(
+					responseCode = "404",
+					description = "템플릿/블록을 찾을 수 없음",
+					content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+			)
+	})
+	ResponseEntity<SuccessResponse<TemplateVlockAddResponseDTO>> addVlock(
+			@PathVariable Long templateId,
+			@PathVariable Integer dayNo,
+			@Valid @RequestBody TemplateVlockAddRequestDTO request,
+			@AuthenticationPrincipal Long memberId
+	);
+
+	@Operation(
+			summary = "템플릿 블록 삭제 API",
+			description = """
+            템플릿 캔버스에서 특정 블록을 삭제합니다.
+            
+            [Path Variable]
+            - templateId: 템플릿 ID
+            - dayNo: 여행 일차
+            - templateVlocksId: 삭제할 블록의 연결 ID
+            
+            [참고]
+            - 삭제 후 남은 블록들의 orderNo가 자동으로 재정렬됩니다.
+            """
+	)
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "블록 삭제 성공"),
+			@ApiResponse(
+					responseCode = "401",
+					description = "인증 실패",
+					content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+			),
+			@ApiResponse(
+					responseCode = "403",
+					description = "권한 없음",
+					content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+			),
+			@ApiResponse(
+					responseCode = "404",
+					description = "블록을 찾을 수 없음",
+					content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+			)
+	})
+	ResponseEntity<SuccessResponse<TemplateVlockDeleteResponseDTO>> deleteVlock(
+			@PathVariable Long templateId,
+			@PathVariable Integer dayNo,
+			@PathVariable Long templateVlocksId,
+			@AuthenticationPrincipal Long memberId
+	);
+
+	@Operation(
+			summary = "템플릿 블록 순서 변경 API",
+			description = """
+            퍼즐 뷰에서 블록을 드래그하여 순서를 변경하거나, AI 스마트 정렬 결과를 적용합니다.
+            
+            [Path Variable]
+            - templateId: 템플릿 ID
+            - dayNo: 여행 일차
+            
+            [Request Body]
+            - vlockOrders: 블록 순서 목록 (모든 블록 포함 필수)
+              - templateVlocksId: 블록 연결 ID
+              - orderNo: 새로운 순서
+              - canvasX, canvasY: 새로운 좌표
+              - connectionPort: 새로운 연결 포트
+            
+            [참고]
+            - orderNo는 1부터 시작하며 연속된 값이어야 합니다.
+            - 모든 블록의 정보를 포함해야 합니다.
+            """
+	)
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "블록 순서 변경 성공"),
+			@ApiResponse(
+					responseCode = "400",
+					description = "순서 정보가 올바르지 않음",
+					content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+			),
+			@ApiResponse(
+					responseCode = "401",
+					description = "인증 실패",
+					content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+			),
+			@ApiResponse(
+					responseCode = "404",
+					description = "블록을 찾을 수 없음",
+					content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+			)
+	})
+	ResponseEntity<SuccessResponse<TemplateVlockReorderResponseDTO>> reorderVlocks(
+			@PathVariable Long templateId,
+			@PathVariable Integer dayNo,
+			@Valid @RequestBody TemplateVlockReorderRequestDTO request,
+			@AuthenticationPrincipal Long memberId
 	);
 
 	@Operation(

@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.umc.travlocksserver.domain.vlock.entity.Vlock;
 import org.umc.travlocksserver.global.entity.BaseEntity;
+import org.umc.travlocksserver.domain.template.enums.ConnectionPortType;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -36,7 +37,37 @@ public class TemplateVlock extends BaseEntity {
     @Column(name = "stay_hours", nullable = false)
     private Double stayHours;
 
-    public void updateOrderNo(int orderNo) {
+    // 레이아웃 정보
+    @Column(name = "canvas_x")
+    private Double canvasX;
+
+    @Column(name = "canvas_y")
+    private Double canvasY;
+
+    //  입력 포트 (이전 블록에서 받음)
+    @Enumerated(EnumType.STRING)
+    @Column(name = "input_port", length = 20)
+    private ConnectionPortType inputPort;
+
+    //  출력 포트 (다음 블록으로 보냄)
+    @Enumerated(EnumType.STRING)
+    @Column(name = "output_port", length = 20)
+    private ConnectionPortType outputPort;
+
+    // 메서드
+    public void updateOrderNo(Integer orderNo) {
         this.orderNo = orderNo;
+    }
+
+    public void updateLayout(
+            Double canvasX,
+            Double canvasY,
+            ConnectionPortType inputPort,
+            ConnectionPortType outputPort
+    ) {
+        this.canvasX = canvasX;
+        this.canvasY = canvasY;
+        this.inputPort = inputPort;
+        this.outputPort = outputPort;
     }
 }
