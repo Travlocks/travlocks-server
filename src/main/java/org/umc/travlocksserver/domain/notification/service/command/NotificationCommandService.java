@@ -24,7 +24,6 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class NotificationCommandService {
 
     @Value("${sse.timeout-ms}")
@@ -84,6 +83,7 @@ public class NotificationCommandService {
     /**
      * 사용자에게 읽지 않은 알림이 있음(SSE 이벤트)을 실시간으로 푸시
      * */
+    @Transactional
     public void signalHasUnread(Long receiverId, boolean hasUnread) {
         Map<String, SseEmitter> emitters = emitterRepository.getEmitters(receiverId);
         if (emitters.isEmpty())
