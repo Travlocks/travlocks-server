@@ -34,4 +34,6 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
         ORDER BY n.createdAt DESC, n.id DESC
     """)
     List<Notification> findNextPage(Long receiverId, LocalDateTime cursor, Pageable pageable);
+
+    long countByReceiverId(Long receiverId);
 }

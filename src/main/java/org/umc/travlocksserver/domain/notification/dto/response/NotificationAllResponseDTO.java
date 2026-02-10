@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public record NotificationAllResponseDTO(
-        Integer notificationCount,
+        int notificationCount,
         boolean hasNext,
         String nextCursor,
         List<NotificationDTO> notifications
@@ -36,6 +36,7 @@ public record NotificationAllResponseDTO(
     }
 
     public static NotificationAllResponseDTO from(
+            long notificationCount,
             boolean hasNext,
             String nextCursor,
             List<Notification> list,
@@ -45,6 +46,6 @@ public record NotificationAllResponseDTO(
                 .map(n -> NotificationDTO.from(n, timeAgoFormatter.format(n.getCreatedAt())))
                 .toList();
 
-        return new NotificationAllResponseDTO(list.size(), hasNext, nextCursor, responses);
+        return new NotificationAllResponseDTO((int) notificationCount, hasNext, nextCursor, responses);
     }
 }
