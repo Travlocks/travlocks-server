@@ -41,7 +41,8 @@ public interface VlockControllerDocs {
 	})
 	ResponseEntity<SuccessResponse<VlockResponseDTO>> createVlock(
 		@AuthenticationPrincipal Long memberId,
-		@Valid @RequestBody VlockRequestDTO request);
+		@Valid @RequestPart VlockRequestDTO request,
+		@RequestPart(required = false) MultipartFile coverImg);
 
 	@Operation(
 		summary = "인기 블록 조회",

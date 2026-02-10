@@ -12,7 +12,6 @@ public record VlockUpdateCommand(
 	String address,
 	String memo,
 	String coverImgUrl,
-	String linkUrl,
 	Boolean isPublic
 ) {
 }

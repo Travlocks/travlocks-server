@@ -47,13 +47,15 @@ public class VlockCommandService {
 	private final S3Provider s3Provider;
 	private final S3Properties s3Properties;
 
-	public VlockResponseDTO createVlock(Long memberId, VlockRequestDTO request) {
+	public VlockResponseDTO createVlock(Long memberId, VlockRequestDTO request, MultipartFile coverImg) {
+		String imageUrl = uploadImageIfPresent(coverImg);
+
 		VlockCreateCommand command = new VlockCreateCommand(
 			getCategory(request.categoryId()),
 			getCity(request.cityId()),
 			getMember(memberId),
 			request.name(), request.address(), request.memo(),
-			request.linkUrl(), request.latitude(), request.longitude()
+			imageUrl, request.latitude(), request.longitude()
 		);
 
 		Vlock savedVlock = vlockRepository.save(Vlock.create(command));
@@ -71,33 +73,21 @@ public class VlockCommandService {
 		Vlock vlock = getOwnedVlock(memberId, vlockId);
 
 		String oldImageUrl = vlock.getCoverImgUrl();
-		String newImageUrl = oldImageUrl;
-
-		boolean shouldDeleteOldFile = false;
-
-		if (Boolean.TRUE.equals(request.deleteCoverImg())) {
-			newImageUrl = null;
-			shouldDeleteOldFile = (oldImageUrl != null);
-		}
-
-		if (coverImg != null && !coverImg.isEmpty()) {
-			newImageUrl = s3Provider.uploadVlockFile(coverImg);
-			shouldDeleteOldFile = (oldImageUrl != null);
-		}
+		String newImageUrl = determineNewImageUrl(request, coverImg, oldImageUrl);
 
 		VlockUpdateCommand command = new VlockUpdateCommand(
 			getCategory(request.categoryId()),
 			getCity(request.cityId()),
 			request.name(), request.latitude(), request.longitude(),
-			request.address(), request.memo(), newImageUrl,
-			request.linkUrl(), request.isPublic()
+			request.address(), request.memo(),
+			newImageUrl, request.isPublic()
 		);
 
-		if (shouldDeleteOldFile) {
+		vlock.update(command);
+
+		if (shouldDeleteOldFile(request, coverImg, oldImageUrl)) {
 			s3Provider.deleteFile(oldImageUrl);
 		}
-
-		vlock.update(command);
 
 		return VlockResponseDTO.from(vlock, s3Properties.domain());
 	}
@@ -134,8 +124,7 @@ public class VlockCommandService {
                             place.name(),
                             place.latitude(),
                             place.longitude(),
-                            place.address(),
-                            place.placeUrl()
+                            place.address()
                     ));
 
             vlockRepository.save(vlock);
@@ -187,5 +176,32 @@ public class VlockCommandService {
 			throw new VlockException(VlockErrorCode.VLOCK_FORBIDDEN);
 		}
 		return vlock;
+	}
+
+	private String uploadImageIfPresent(MultipartFile coverImg) {
+		if (coverImg == null || coverImg.isEmpty()) {
+			return null;
+		}
+		return s3Provider.uploadVlockFile(coverImg);
+	}
+
+	private String determineNewImageUrl(VlockUpdateRequestDTO request, MultipartFile coverImg, String oldImageUrl) {
+		if (coverImg != null && !coverImg.isEmpty()) {
+			return s3Provider.uploadVlockFile(coverImg);
+		}
+
+		if (Boolean.TRUE.equals(request.deleteCoverImg())) {
+			return null;
+		}
+
+		return oldImageUrl;
+	}
+
+	private boolean shouldDeleteOldFile(VlockUpdateRequestDTO request, MultipartFile coverImg, String oldImageUrl) {
+		if (oldImageUrl == null) {
+			return false;
+		}
+
+		return (coverImg != null && !coverImg.isEmpty()) || Boolean.TRUE.equals(request.deleteCoverImg());
 	}
 }

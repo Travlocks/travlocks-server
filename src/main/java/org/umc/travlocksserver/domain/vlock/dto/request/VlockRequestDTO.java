@@ -17,7 +17,6 @@ public record VlockRequestDTO(
 	Long cityId,
 
 	String memo,
-	String linkUrl,
 
 	Double latitude,
 	Double longitude

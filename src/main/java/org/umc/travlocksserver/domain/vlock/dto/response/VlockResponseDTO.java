@@ -17,7 +17,6 @@ public record VlockResponseDTO(
 	String address,
 	String memo,
 	String coverImgUrl,
-	String linkUrl,
 
 	Double latitude,
 	Double longitude,
@@ -31,6 +30,7 @@ public record VlockResponseDTO(
 ) {
 	public static VlockResponseDTO from(Vlock vlock, String s3Domain) {
 		String coverImgUrl = vlock.getCoverImgUrl();
+
 		if (coverImgUrl == null || coverImgUrl.isBlank()) {
 			coverImgUrl = s3Domain + vlock.getVlockCategory().getDefaultCreationImageKey();
 		}
@@ -47,7 +47,6 @@ public record VlockResponseDTO(
 			vlock.getAddress(),
 			vlock.getMemo(),
 			coverImgUrl,
-			vlock.getLinkUrl(),
 
 			vlock.getLatitude(),
 			vlock.getLongitude(),

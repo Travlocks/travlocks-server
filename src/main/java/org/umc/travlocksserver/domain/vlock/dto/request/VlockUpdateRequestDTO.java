@@ -21,8 +21,6 @@ public record VlockUpdateRequestDTO(
 	Double latitude,
 	Double longitude,
 
-	String linkUrl,
-
 	Boolean isPublic,
 	Boolean deleteCoverImg
 ) {
