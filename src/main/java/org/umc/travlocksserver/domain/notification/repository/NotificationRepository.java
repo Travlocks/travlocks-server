@@ -22,7 +22,7 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
         SELECT n
         FROM Notification n
         WHERE n.receiverId = :receiverId
-        ORDER BY n.createdAt DESC
+        ORDER BY n.createdAt DESC, n.id DESC
     """)
     List<Notification> findFirstPage(Long receiverId, Pageable pageable);
 
@@ -31,7 +31,7 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
         FROM Notification n
         WHERE n.receiverId = :receiverId
           AND n.createdAt < :cursor
-        ORDER BY n.createdAt DESC
+        ORDER BY n.createdAt DESC, n.id DESC
     """)
     List<Notification> findNextPage(Long receiverId, LocalDateTime cursor, Pageable pageable);
 }
