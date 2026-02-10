@@ -47,8 +47,13 @@ jwt:
   access-ttl-seconds: ${JWT_ACCESS_TTL_SECONDS:3600} # 1시간
   refresh-ttl-seconds: ${JWT_REFRESH_TTL_SECONDS:1209600} # 14일
 
+oauth:
+  google:
+    client-id: ${GOOGLE_CLIENT_ID}
+    jwk-set-uri: https://www.googleapis.com/oauth2/v3/certs
+
 password-reset:
-  redirect-uri: ${PASSWORD_RESET_REDIRECT_URI:http://localhost:5173/password-reset}
+  redirect-uri: ${PASSWORD_RESET_REDIRECT_URI:https://www.travlocks.com/password-reset}
   ttl-minutes: ${PASSWORD_RESET_TTL_MINUTES:5}
 
 app:

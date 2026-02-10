@@ -67,10 +67,18 @@ public class SecurityConfig {
                                 "/api/v1/auth/refresh",
                                 "/api/v1/auth/logout",
 
+                                // OAuth 로그인
+                                "/api/v1/auth/oauth/**",
+
                                 // 중복/존재 여부 검사
                                 "/api/v1/members/email/exists",
                                 "/api/v1/members/nickname/exists"
                         ).permitAll()
+
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/v1/members/onboarding"
+                        ).authenticated()
 
                         // 나머지는 인증 필요
                         .anyRequest().authenticated()

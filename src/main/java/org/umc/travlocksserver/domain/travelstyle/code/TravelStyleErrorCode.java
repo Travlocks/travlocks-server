@@ -1,4 +1,4 @@
-package org.umc.travlocksserver.domain.travelstyle.exception.code;
+package org.umc.travlocksserver.domain.travelstyle.code;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

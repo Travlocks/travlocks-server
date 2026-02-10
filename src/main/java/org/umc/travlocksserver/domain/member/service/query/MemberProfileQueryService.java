@@ -7,7 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.umc.travlocksserver.domain.member.dto.response.MemberProfileResponseDTO;
 import org.umc.travlocksserver.domain.member.entity.Member;
 import org.umc.travlocksserver.domain.member.exception.MemberException;
-import org.umc.travlocksserver.domain.member.exception.code.MemberErrorCode;
+import org.umc.travlocksserver.domain.member.code.MemberErrorCode;
 import org.umc.travlocksserver.domain.member.repository.MemberRepository;
 import org.umc.travlocksserver.domain.template.dto.response.TemplateCardResponseDTO;
 import org.umc.travlocksserver.domain.template.repository.TemplateRepository;

@@ -9,15 +9,12 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.umc.travlocksserver.domain.member.dto.request.MemberPasswordUpdateRequestDTO;
-import org.umc.travlocksserver.domain.member.dto.request.MemberProfileUpdateRequestDTO;
-import org.umc.travlocksserver.domain.member.dto.request.MemberSignupRequestDTO;
+import org.umc.travlocksserver.domain.member.dto.request.*;
 import org.umc.travlocksserver.domain.member.dto.response.MemberEmailExistsResponseDTO;
 import org.umc.travlocksserver.domain.member.dto.response.MemberNicknameExistsResponseDTO;
 import org.umc.travlocksserver.domain.member.dto.response.MemberProfileResponseDTO;
 import org.umc.travlocksserver.domain.member.dto.response.MemberSignupResponseDTO;
 import org.umc.travlocksserver.domain.template.dto.response.TemplateCardResponseDTO;
-import org.umc.travlocksserver.domain.member.dto.request.MemberWithdrawRequestDTO;
 import org.umc.travlocksserver.domain.member.dto.response.*;
 import org.umc.travlocksserver.domain.member.entity.Member;
 import org.umc.travlocksserver.global.response.ErrorResponse;
@@ -33,7 +30,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
-@Tag(name = "회원 API", description = "회원 관련 API 입니다.")
+@Tag(name = "Member API", description = "회원 관련 API 입니다.")
 public interface MemberControllerDocs {
 
 	@Operation(
@@ -237,4 +234,26 @@ public interface MemberControllerDocs {
 			Long memberId,
 			Pageable pageable
 	);
+
+    @Operation(
+            summary = "OAuth2 온보딩 완료 API",
+            description = """
+                    OAuth 인증은 끝났지만 추가정보가 없는(ONBOARDING 상태) 사용자가
+                    약관/닉네임/선호 여행 스타일·테마를 입력하여 회원가입을 최종 완료합니다. (ACTIVE 전환)
+                    
+                    - Authorization 헤더의 accessToken이 필요합니다.
+                    - 성공 시 회원가입 API와 동일한 형태로 accessToken(바디) + refreshToken(Set-Cookie)이 발급됩니다.
+                    """
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OAuth 온보딩 완료 성공"),
+            @ApiResponse(responseCode = "400", description = "요청 값 검증 실패 / 약관 오류 / 스타일·테마 개수 초과 / 존재하지 않는 ID", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "401", description = "인증 실패(토큰 없음/만료/유효하지 않음)", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "409", description = "닉네임 중복", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    ResponseEntity<SuccessResponse<MemberSignupResponseDTO>> completeOAuthOnboarding(
+            @Parameter(hidden = true) Member member,
+            @Valid MemberOAuthOnboardingRequestDTO request,
+            @Parameter(hidden = true) HttpServletResponse response
+    );
 }

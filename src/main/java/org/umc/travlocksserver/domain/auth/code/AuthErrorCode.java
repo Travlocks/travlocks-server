@@ -1,4 +1,4 @@
-package org.umc.travlocksserver.domain.auth.exception.code;
+package org.umc.travlocksserver.domain.auth.code;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -20,7 +20,10 @@ public enum AuthErrorCode implements BaseCode {
     REFRESH_TOKEN_REQUIRED(HttpStatus.BAD_REQUEST, "리프레시 토큰이 필요합니다."),
     PASSWORD_RESET_TOKEN_INVALID(HttpStatus.BAD_REQUEST, "비밀번호 재설정 토큰이 올바르지 않거나 만료되었습니다."),
     PASSWORD_RESET_PASSWORD_MISMATCH(HttpStatus.BAD_REQUEST, "비밀번호와 비밀번호 확인이 일치하지 않습니다."),
-    PASSWORD_RESET_WEAK_PASSWORD(HttpStatus.BAD_REQUEST, "비밀번호는 최소 8자 이상이며 영문과 숫자를 포함해야 합니다.")
+    PASSWORD_RESET_WEAK_PASSWORD(HttpStatus.BAD_REQUEST, "비밀번호는 최소 8자 이상이며 영문과 숫자를 포함해야 합니다."),
+
+    OAUTH_PROVIDER_NOT_SUPPORTED(HttpStatus.BAD_REQUEST, "지원하지 않는 OAuth 제공자입니다."),
+    OAUTH_INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 OAuth 토큰입니다."),
     ;
 
     private final HttpStatus status;

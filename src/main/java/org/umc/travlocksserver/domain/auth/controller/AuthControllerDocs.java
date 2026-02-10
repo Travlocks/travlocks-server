@@ -11,13 +11,14 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.umc.travlocksserver.domain.auth.dto.request.*;
 import org.umc.travlocksserver.domain.auth.dto.response.*;
 import org.umc.travlocksserver.global.response.ErrorResponse;
 import org.umc.travlocksserver.global.response.SuccessResponse;
 
-@Tag(name = "Auth", description = "인증 관련 API")
+@Tag(name = "Auth API", description = "인증 관련 API 입니다.")
 public interface AuthControllerDocs {
 
     @Operation(
@@ -189,6 +190,29 @@ public interface AuthControllerDocs {
     })
     ResponseEntity<SuccessResponse<?>> confirmPasswordReset(
             @Valid AuthPasswordResetConfirmRequestDTO request
+    );
+
+    @Operation(
+            summary = "OAuth2 로그인 API",
+            description = """
+                    OAuth 로그인(현재 Google만 지원)을 수행합니다.
+                    
+                    - provider: google
+                    - 클라이언트에서 받은 idToken을 서버로 전달하면, 서버가 서명/issuer/audience 등을 검증합니다.
+                    - 기존 가입자면 로그인 처리, 신규면 ONBOARDING 상태 회원을 생성합니다.
+                    - 성공 시 accessToken은 응답 바디로, refreshToken은 HttpOnly 쿠키(Set-Cookie)로 발급됩니다.
+                    """
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OAuth 로그인 성공"),
+            @ApiResponse(responseCode = "400", description = "요청 값 검증 실패 / provider 미지원 / 토큰 검증 실패", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "409", description = "충돌(예: 이미 이메일로 일반 가입된 계정 존재 등)", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    ResponseEntity<SuccessResponse<AuthOAuthLoginResponseDTO>> oauthLogin(
+            @Parameter(description = "OAuth Provider", required = true, example = "google")
+            @PathVariable("provider") String provider,
+            @Valid AuthOAuthLoginRequestDTO request,
+            @Parameter(hidden = true) HttpServletResponse response
     );
 
 
