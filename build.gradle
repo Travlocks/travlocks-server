@@ -58,9 +58,11 @@ dependencies {
     implementation 'io.jsonwebtoken:jjwt-api:0.12.5'
     runtimeOnly   'io.jsonwebtoken:jjwt-impl:0.12.5'
     runtimeOnly   'io.jsonwebtoken:jjwt-jackson:0.12.5'
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
 
     // --- Infrastructure & External Services ---
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    implementation "software.amazon.awssdk:s3"
     implementation platform("software.amazon.awssdk:bom:2.25.61")
     implementation "software.amazon.awssdk:ses"
     implementation 'com.resend:resend-java:3.1.0'
@@ -76,7 +78,6 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-
 }
 
 tasks.named('test') {

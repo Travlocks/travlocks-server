@@ -8,21 +8,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.umc.travlocksserver.domain.member.dto.request.MemberPasswordUpdateRequestDTO;
-import org.umc.travlocksserver.domain.member.dto.request.MemberProfileUpdateRequestDTO;
-import org.umc.travlocksserver.domain.member.dto.request.MemberSignupRequestDTO;
-import org.umc.travlocksserver.domain.member.dto.request.MemberWithdrawRequestDTO;
+import org.umc.travlocksserver.domain.member.dto.request.*;
 import org.umc.travlocksserver.domain.member.dto.response.*;
 import org.umc.travlocksserver.domain.member.entity.Member;
-import org.umc.travlocksserver.domain.member.exception.code.MemberSuccessCode;
-import org.umc.travlocksserver.domain.member.service.command.MemberPasswordUpdateService;
-import org.umc.travlocksserver.domain.member.service.command.MemberProfileUpdateService;
-import org.umc.travlocksserver.domain.member.service.command.MemberSignupService;
-import org.umc.travlocksserver.domain.member.service.command.MemberWithdrawService;
+import org.umc.travlocksserver.domain.member.code.MemberSuccessCode;
+import org.umc.travlocksserver.domain.member.service.command.*;
 import org.umc.travlocksserver.domain.member.service.query.*;
 import org.umc.travlocksserver.domain.template.code.TemplateSuccessCode;
 import org.umc.travlocksserver.domain.template.dto.response.TemplateCardResponseDTO;
-import org.umc.travlocksserver.domain.template.dto.response.TemplateCursorResponseDTO;
 import org.umc.travlocksserver.global.annotation.LoginUser;
 import org.umc.travlocksserver.global.response.PageResponseDTO;
 import org.umc.travlocksserver.global.response.SuccessResponse;
@@ -42,11 +35,11 @@ public class MemberController implements MemberControllerDocs {
     private final MemberNicknameCheckService memberNicknameCheckService;
     private final MemberSignupService memberSignupService;
     private final MemberProfileQueryService memberProfileQueryService;
-    private final FavoriteTemplateQueryService favoriteTemplateQueryService;
     private final MemberPasswordUpdateService memberPasswordUpdateService;
     private final MemberProfileUpdateService memberProfileUpdateService;
     private final MemberWithdrawService memberWithdrawService;
     private final MemberMyPageQueryService memberMyPageQueryService;
+    private final MemberOAuthOnboardingService memberOAuthOnboardingService;
 
     @GetMapping("/email/exists")
     public ResponseEntity<SuccessResponse<MemberEmailExistsResponseDTO>> checkEmailExists(
@@ -88,28 +81,28 @@ public class MemberController implements MemberControllerDocs {
 
     @GetMapping("/{memberId}/profile")
     public ResponseEntity<SuccessResponse<MemberProfileResponseDTO>> getMemberProfile(
-            @PathVariable Long memberId,
-            @RequestParam(name = "cursor", required = false) Long cursor,
-            @RequestParam(name = "limit", defaultValue = "9") int limit
+        @PathVariable Long memberId,
+        @PageableDefault(size = 9)
+        Pageable pageable
     ) {
         MemberSuccessCode successCode = MemberSuccessCode.MEMBER_PROFILE_GET_SUCCESS;
 
-        MemberProfileResponseDTO data = memberProfileQueryService.getMemberProfile(memberId, cursor, limit);
+        MemberProfileResponseDTO data = memberProfileQueryService.getMemberProfile(memberId, pageable);
 
         return ResponseEntity
-                .status(successCode.getStatus())
-                .body(SuccessResponse.ok(successCode, data));
+            .status(successCode.getStatus())
+            .body(SuccessResponse.ok(successCode, data));
     }
 
     @GetMapping("/me/favorites")
-    public ResponseEntity<SuccessResponse<TemplateCursorResponseDTO>> getMyFavoriteTemplates(
-            @AuthenticationPrincipal Long memberId,
-            @RequestParam(name = "cursor", required = false) Long cursor,
-            @RequestParam(name = "limit", defaultValue = "9") int limit
+    public ResponseEntity<SuccessResponse<PageResponseDTO<TemplateCardResponseDTO>>> getMyFavoriteTemplates(
+        @AuthenticationPrincipal Long memberId,
+        @PageableDefault(size = 9)
+        Pageable pageable
     ) {
         MemberSuccessCode successCode = MemberSuccessCode.FAVORITE_TEMPLATE_LIST_GET_SUCCESS;
 
-        TemplateCursorResponseDTO data = favoriteTemplateQueryService.getMyFavoriteTemplates(memberId, cursor, limit);
+        PageResponseDTO<TemplateCardResponseDTO> data = memberMyPageQueryService.getMyFavoriteTemplates(memberId, pageable);
 
         return ResponseEntity
                 .status(successCode.getStatus())
@@ -188,4 +181,19 @@ public class MemberController implements MemberControllerDocs {
                 .status(TemplateSuccessCode.TEMPLATE_LIST_GET_SUCCESS.getStatus())
                 .body(SuccessResponse.ok(TemplateSuccessCode.TEMPLATE_LIST_GET_SUCCESS, response));
     }
+
+    @PostMapping("/onboarding")
+    public ResponseEntity<SuccessResponse<MemberSignupResponseDTO>> completeOAuthOnboarding(
+            @LoginUser Member member,
+            @Valid @RequestBody MemberOAuthOnboardingRequestDTO request,
+            HttpServletResponse response
+    ) {
+        MemberSuccessCode successCode = MemberSuccessCode.MEMBER_OAUTH_ONBOARDING_COMPLETED;
+        MemberSignupResponseDTO data = memberOAuthOnboardingService.completeOAuthOnboarding(member, request, response);
+
+        return ResponseEntity
+                .status(successCode.getStatus())
+                .body(SuccessResponse.ok(successCode, data));
+    }
+
 }

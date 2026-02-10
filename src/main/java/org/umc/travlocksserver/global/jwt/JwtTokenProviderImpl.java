@@ -19,7 +19,10 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
     private final SecretKey key;
     private final long accessTtlSeconds;
     private final long refreshTtlSeconds;
+
     private static final String JTI_CLAIM = "jti";
+    private static final String SCOPE_CLAIM = "scope";
+    private static final String SSE_SCOPE = "SSE";
 
     public JwtTokenProviderImpl(
             @Value("${jwt.secret}") String secret,
@@ -120,5 +123,34 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
+    }
+
+    /**
+     * SSE 구독 시 사용할 토큰 발급
+     * */
+    @Override
+    public String generateSseToken(Long memberId, long sseTtlSeconds) {
+        Instant now = Instant.now();
+        Instant exp = now.plusSeconds(sseTtlSeconds);
+
+        return Jwts.builder()
+                .subject(String.valueOf(memberId))
+                .claim(SCOPE_CLAIM, SSE_SCOPE)  // SSE 연결용 토큰임을 표시
+                .issuedAt(Date.from(now))
+                .expiration(Date.from(exp))
+                .signWith(key)
+                .compact();
+    }
+
+    @Override
+    public Long extractMemberIdFromSseToken(String sseToken) {
+        Claims claims = parseClaims(sseToken);
+
+        Object scope = claims.get(SCOPE_CLAIM);
+        if (!"SSE".equals(scope)) {
+            throw new RuntimeException("유효하지 않은 인증 토큰입니다.");
+        }
+
+        return Long.valueOf(claims.getSubject());
     }
 }

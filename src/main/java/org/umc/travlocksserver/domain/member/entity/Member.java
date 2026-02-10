@@ -20,7 +20,8 @@ import java.time.LocalDateTime;
         })
 public class Member extends SoftDeleteBaseEntity {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "member_id")
     private Long id;
 
@@ -37,8 +38,8 @@ public class Member extends SoftDeleteBaseEntity {
     @Column(name = "email", length = 255, nullable = false)
     private String email;
 
-	@Column(name = "profile_image_url", length = 255)
-	private String profileImageUrl;
+    @Column(name = "profile_image_url", length = 255)
+    private String profileImageUrl;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", length = 10, nullable = false)
@@ -79,6 +80,10 @@ public class Member extends SoftDeleteBaseEntity {
 
     public void changeIntroduction(String introduction) {
         this.introduction = introduction;
+    }
+
+    public void changeStatusActive() {
+        this.status = MemberStatus.ACTIVE;
     }
 
     public void withdrawAndAnonymize(String anonymizedEmail, String anonymizedNickname) {

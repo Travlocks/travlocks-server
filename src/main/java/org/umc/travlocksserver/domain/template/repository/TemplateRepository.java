@@ -12,7 +12,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.umc.travlocksserver.domain.location.entity.Region;
-import org.umc.travlocksserver.domain.member.dto.response.CreatedTemplateDTO;
+import org.umc.travlocksserver.domain.member.dto.response.MyPageRecentTemplateDTO;
 import org.umc.travlocksserver.domain.template.dto.response.TemplateCardResponseDTO;
 import org.umc.travlocksserver.domain.template.entity.Template;
 
@@ -114,16 +114,17 @@ public interface TemplateRepository extends JpaRepository<Template, Long>, Templ
 	List<Region> findRegionByTemplateId(Long templateId);
 
     @Query("""
-    select new org.umc.travlocksserver.domain.member.dto.response.CreatedTemplateDTO(
+    select new org.umc.travlocksserver.domain.member.dto.response.MyPageRecentTemplateDTO(
         t.id,
         t.title,
-        coalesce(min(c.name), ''),
+        min(r.id),
         t.createdAt,
         case when count(f.id) > 0 then true else false end
     )
     from Template t
     left join t.templateCities tc
     left join tc.city c
+    left join c.region r
     left join Favorite f
         on f.template.id = t.id
        and f.member.id = :memberId
@@ -132,13 +133,10 @@ public interface TemplateRepository extends JpaRepository<Template, Long>, Templ
     group by t.id, t.title, t.createdAt
     order by t.createdAt desc, t.id desc
     """)
-    List<CreatedTemplateDTO> findRecentCreatedTemplatesInternalwithFavorite(
-            @Param("memberId") Long memberId
+    List<MyPageRecentTemplateDTO> findRecentCreatedTemplatesWithFavorite(
+            @Param("memberId") Long memberId,
+            Pageable pageable
     );
-    default List<CreatedTemplateDTO> findRecentCreatedTemplates(Long memberId, int limit) {
-        List<CreatedTemplateDTO> all = findRecentCreatedTemplatesInternalwithFavorite(memberId);
-        return all.size() > limit ? all.subList(0, limit) : all;
-    }
 
 	@Query("""
 		SELECT new org.umc.travlocksserver.domain.template.dto.response.TemplateCardResponseDTO(
@@ -159,4 +157,25 @@ public interface TemplateRepository extends JpaRepository<Template, Long>, Templ
 		ORDER BY t.updatedAt DESC, t.id DESC
 	""")
 	Page<TemplateCardResponseDTO> findMyTemplates(Long memberId, Pageable pageable);
+
+	@Query("""
+		SELECT new org.umc.travlocksserver.domain.template.dto.response.TemplateCardResponseDTO(
+			t.id,
+			t.coverImageUrl,
+			t.title,
+			tt.id,
+			tt.content,
+			o.id,
+			o.nickname,
+			t.avgRating,
+			t.favoriteCount
+		)
+		FROM Template t
+			JOIN t.owner o
+			JOIN t.travelTheme tt
+		WHERE t.owner.id = :memberId
+		  AND t.isPublic = true
+		ORDER BY t.updatedAt DESC, t.id DESC
+	""")
+	Page<TemplateCardResponseDTO> findPublicTemplateCardsByOwnerId(@Param("memberId") Long memberId, Pageable pageable);
 }

@@ -5,12 +5,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.umc.travlocksserver.global.jwt.JwtAuthFilter;
+import org.umc.travlocksserver.global.jwt.SseCookieAuthFilter;
 import org.umc.travlocksserver.global.security.CustomAuthEntryPoint;
 
 import java.util.List;
@@ -23,7 +25,10 @@ public class SecurityConfig {
     private final CustomAuthEntryPoint customAuthEntryPoint;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(
+            HttpSecurity http,
+            SseCookieAuthFilter sseCookieAuthFilter
+    ) throws Exception {
         http
                 // CORS 활성화
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -34,6 +39,9 @@ public class SecurityConfig {
 
                 // CSRF 비활성화
                 .csrf(csrf -> csrf.disable())
+
+                // Session 생성 X
+                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
                 //  인증 실패(401) 응답을 커스터마이징
                 .exceptionHandling(e -> e.authenticationEntryPoint(customAuthEntryPoint))
@@ -67,16 +75,27 @@ public class SecurityConfig {
                                 "/api/v1/auth/refresh",
                                 "/api/v1/auth/logout",
 
+                                // OAuth 로그인
+                                "/api/v1/auth/oauth/**",
+
                                 // 중복/존재 여부 검사
                                 "/api/v1/members/email/exists",
                                 "/api/v1/members/nickname/exists"
                         ).permitAll()
 
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/v1/members/onboarding"
+                        ).authenticated()
+
                         // 나머지는 인증 필요
                         .anyRequest().authenticated()
                 )
                 // 액세스 토큰 검증 필터
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+
+                // SSE 구독용 쿠키 인증 필터
+                .addFilterBefore(sseCookieAuthFilter,  UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -88,6 +107,7 @@ public class SecurityConfig {
         config.setAllowCredentials(true);
         config.setAllowedOriginPatterns(List.of(
                 "http://localhost:5173",
+                "http://localhost:8080",
 
                 // legacy (.kro.kr)
                 "https://travlocks.kro.kr",

@@ -1,6 +1,7 @@
 package org.umc.travlocksserver.domain.favorite.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.umc.travlocksserver.domain.favorite.code.FavoriteErrorCode;
@@ -9,8 +10,10 @@ import org.umc.travlocksserver.domain.favorite.exception.FavoriteException;
 import org.umc.travlocksserver.domain.favorite.repository.FavoriteRepository;
 import org.umc.travlocksserver.domain.member.entity.Member;
 import org.umc.travlocksserver.domain.member.exception.MemberException;
-import org.umc.travlocksserver.domain.member.exception.code.MemberErrorCode;
+import org.umc.travlocksserver.domain.member.code.MemberErrorCode;
 import org.umc.travlocksserver.domain.member.repository.MemberRepository;
+import org.umc.travlocksserver.domain.notification.enums.NotificationType;
+import org.umc.travlocksserver.domain.notification.event.TemplateActivityEvent;
 import org.umc.travlocksserver.domain.template.code.TemplateErrorCode;
 import org.umc.travlocksserver.domain.template.entity.Template;
 import org.umc.travlocksserver.domain.template.repository.TemplateRepository;
@@ -23,6 +26,8 @@ public class FavoriteCommandService {
     private final FavoriteRepository favoriteRepository;
     private final TemplateRepository templateRepository;
     private final MemberRepository memberRepository;
+
+    private final ApplicationEventPublisher eventPublisher;
 
     /**
      * 즐겨찾기 추가
@@ -50,6 +55,14 @@ public class FavoriteCommandService {
 
         //템플릿 즐겨찾기 수 증가
         template.increaseFavoriteCount();
+
+        eventPublisher.publishEvent(new TemplateActivityEvent(
+                template.getOwner().getId(),
+                member.getId(),
+                member.getNickname(),
+                template.getId(),
+                NotificationType.TEMPLATE_FAVORITED
+        ));
     }
 
     /**

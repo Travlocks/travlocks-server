@@ -11,13 +11,14 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.umc.travlocksserver.domain.auth.dto.request.*;
 import org.umc.travlocksserver.domain.auth.dto.response.*;
 import org.umc.travlocksserver.global.response.ErrorResponse;
 import org.umc.travlocksserver.global.response.SuccessResponse;
 
-@Tag(name = "Auth", description = "인증 관련 API")
+@Tag(name = "Auth API", description = "인증 관련 API 입니다.")
 public interface AuthControllerDocs {
 
     @Operation(
@@ -139,7 +140,7 @@ public interface AuthControllerDocs {
               입력한 이메일이 서비스에 가입되지 않은 경우에도 동일한 성공 응답을 반환합니다.
             - 이 경우 실제 비밀번호 재설정 이메일은 발송되지 않습니다.
             - 메일에는 resetToken이 포함된 재설정 링크가 전달됩니다.
-              (예: https://travlocks.kro.kr/reset-password?token=...)
+              (예: https://www.travlocks.com/reset-password?token=...)
             """
     )
     @ApiResponses({
@@ -190,6 +191,61 @@ public interface AuthControllerDocs {
     ResponseEntity<SuccessResponse<?>> confirmPasswordReset(
             @Valid AuthPasswordResetConfirmRequestDTO request
     );
+
+    @Operation(
+            summary = "Google OAuth2 로그인 API",
+            description = """
+        Google OAuth2 로그인을 수행합니다.
+
+        - 클라이언트에서 Google 로그인 후 발급받은 idToken을 서버로 전달합니다.
+        - 서버는 idToken의 서명, issuer, audience(clientId) 등을 검증합니다.
+        - 기존 OAuth 가입자: 로그인 처리
+        - 신규 OAuth 사용자: 회원 생성 후 status를 ONBOARDING으로 설정
+        """
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Google OAuth 로그인 성공"),
+            @ApiResponse(responseCode = "400", description = "요청 값 검증 실패 / idToken 검증 실패", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "409", description = "이미 이메일로 가입된 계정 존재", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    ResponseEntity<SuccessResponse<AuthOAuthLoginResponseDTO>> googleLogin(
+            @Valid AuthOAuthGoogleLoginRequestDTO request,
+            @Parameter(hidden = true) HttpServletResponse response
+    );
+
+    @Operation(
+            summary = "Naver OAuth2 로그인 API",
+            description = """
+        Naver OAuth2 로그인을 수행합니다.
+
+        - 클라이언트에서 네이버 로그인 후 전달받은 authorization code와 state를 서버로 전달합니다.
+        - 서버는 다음 순서로 처리합니다.
+          1. code + state → 네이버 토큰 API 호출
+          2. 네이버 accessToken 발급
+          3. 네이버 accessToken으로 사용자 정보 API 호출
+        - 기존 OAuth 가입자: 로그인 처리
+        - 신규 OAuth 사용자: 회원 생성 후 status를 ONBOARDING으로 설정
+        """
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Naver OAuth 로그인 성공"),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "code/state 오류 / 토큰 발급 실패 / 사용자 정보 조회 실패",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "409",
+                    description = "이미 이메일로 가입된 계정 존재",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            )
+    })
+    ResponseEntity<SuccessResponse<AuthOAuthLoginResponseDTO>> naverLogin(
+            @Valid AuthOAuthNaverLoginRequestDTO request,
+            @Parameter(hidden = true) HttpServletResponse response
+    );
+
+
 
 
 }

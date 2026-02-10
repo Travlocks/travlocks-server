@@ -7,10 +7,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.umc.travlocksserver.domain.auth.dto.request.*;
 import org.umc.travlocksserver.domain.auth.dto.response.*;
-import org.umc.travlocksserver.domain.auth.exception.code.AuthSuccessCode;
-import org.umc.travlocksserver.domain.auth.service.command.AuthService;
-import org.umc.travlocksserver.domain.auth.service.command.EmailVerificationService;
-import org.umc.travlocksserver.domain.auth.service.command.PasswordResetService;
+import org.umc.travlocksserver.domain.auth.code.AuthSuccessCode;
+import org.umc.travlocksserver.domain.auth.service.command.*;
 import org.umc.travlocksserver.global.response.SuccessResponse;
 
 import jakarta.validation.Valid;
@@ -23,6 +21,8 @@ public class AuthController implements AuthControllerDocs {
 	private final EmailVerificationService emailVerificationService;
     private final AuthService authService;
     private final PasswordResetService passwordResetService;
+    private final OAuthGoogleLoginService oAuthGoogleLoginService;
+    private final OAuthNaverLoginService oAuthNaverLoginService;
 
 	@PostMapping("/email-verification")
 	public ResponseEntity<SuccessResponse<AuthSendEmailResponseDTO>> sendEmailVerificationCode(
@@ -130,5 +130,30 @@ public class AuthController implements AuthControllerDocs {
                 .status(successCode.getStatus())
                 .body(SuccessResponse.ok(successCode, null));
     }
+
+    @PostMapping("/oauth/google")
+    public ResponseEntity<SuccessResponse<AuthOAuthLoginResponseDTO>> googleLogin(
+            @Valid @RequestBody AuthOAuthGoogleLoginRequestDTO request,
+            HttpServletResponse response) {
+        AuthSuccessCode successCode = AuthSuccessCode.OAUTH_LOGIN_SUCCESS;
+        AuthOAuthLoginResponseDTO data = oAuthGoogleLoginService.login(request, response);
+
+        return ResponseEntity
+                .status(successCode.getStatus())
+                .body(SuccessResponse.ok(successCode, data));
+    }
+
+    @PostMapping("/oauth/naver")
+    public ResponseEntity<SuccessResponse<AuthOAuthLoginResponseDTO>> naverLogin(
+            @Valid @RequestBody AuthOAuthNaverLoginRequestDTO request,
+            HttpServletResponse response) {
+        AuthSuccessCode successCode = AuthSuccessCode.OAUTH_LOGIN_SUCCESS;
+        AuthOAuthLoginResponseDTO data = oAuthNaverLoginService.login(request, response);
+
+        return ResponseEntity
+                .status(successCode.getStatus())
+                .body(SuccessResponse.ok(successCode, data));
+    }
+
 
 }

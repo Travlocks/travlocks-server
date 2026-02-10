@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import org.umc.travlocksserver.domain.auth.dto.response.AuthSendEmailResponseDTO;
 import org.umc.travlocksserver.domain.auth.dto.response.AuthVerifyEmailResponseDTO;
 import org.umc.travlocksserver.domain.auth.exception.AuthException;
-import org.umc.travlocksserver.domain.auth.exception.code.AuthErrorCode;
+import org.umc.travlocksserver.domain.auth.code.AuthErrorCode;
 import org.umc.travlocksserver.domain.auth.repository.EmailVerificationRedisRepository;
 import org.umc.travlocksserver.domain.auth.repository.SignupTokenRedisRepository;
 import org.umc.travlocksserver.domain.member.repository.MemberRepository;
@@ -16,7 +16,7 @@ import java.security.SecureRandom;
 import java.time.Duration;
 import java.util.HexFormat;
 
-import static org.umc.travlocksserver.domain.auth.exception.code.AuthErrorCode.EMAIL_SEND_FAILED;
+import static org.umc.travlocksserver.domain.auth.code.AuthErrorCode.EMAIL_SEND_FAILED;
 
 @Service
 @RequiredArgsConstructor

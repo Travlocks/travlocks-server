@@ -13,7 +13,7 @@ import org.umc.travlocksserver.domain.auth.dto.request.AuthLoginRequestDTO;
 import org.umc.travlocksserver.domain.auth.dto.response.AuthLoginResponseDTO;
 import org.umc.travlocksserver.domain.auth.dto.response.AuthRefreshResponseDTO;
 import org.umc.travlocksserver.domain.auth.exception.AuthException;
-import org.umc.travlocksserver.domain.auth.exception.code.AuthErrorCode;
+import org.umc.travlocksserver.domain.auth.code.AuthErrorCode;
 import org.umc.travlocksserver.domain.auth.repository.RefreshTokenRedisRepository;
 import org.umc.travlocksserver.domain.member.entity.Member;
 import org.umc.travlocksserver.domain.member.repository.MemberRepository;

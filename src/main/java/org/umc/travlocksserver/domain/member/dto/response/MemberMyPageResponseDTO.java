@@ -6,6 +6,8 @@ public record MemberMyPageResponseDTO(
         Long memberId,
         String nickname,
         String introduction,
+        String profileImageUrl,
+        String email,
         List<Long> preferredTravelStyleIds,
         List<Long> preferredTravelThemeIds,
         Counts counts,
@@ -18,7 +20,7 @@ public record MemberMyPageResponseDTO(
     ) {}
 
     public record Recent(
-            List<CreatedVlockDTO> createdVlocks,
-            List<CreatedTemplateDTO> createdTemplates
+            List<MyPageRecentVlockDTO> myPageRecentVlocks,
+            List<MyPageRecentTemplateDTO> myPageRecentTemplates
     ) {}
 }

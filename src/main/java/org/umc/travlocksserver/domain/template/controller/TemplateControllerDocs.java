@@ -18,6 +18,7 @@ import org.umc.travlocksserver.domain.template.dto.response.TemplateCanvasRespon
 import org.umc.travlocksserver.domain.template.dto.response.TemplateRemixResponseDTO;
 import org.umc.travlocksserver.domain.template.enums.TransportType;
 import org.umc.travlocksserver.domain.template.dto.response.*;
+import org.umc.travlocksserver.domain.template.enums.TripDays;
 import org.umc.travlocksserver.global.response.ErrorResponse;
 import org.umc.travlocksserver.global.response.SuccessResponse;
 
@@ -28,7 +29,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 
 import org.umc.travlocksserver.domain.template.dto.response.TemplateRecommendationsDTO;
 import org.umc.travlocksserver.domain.member.entity.Member;
@@ -393,7 +393,7 @@ public interface TemplateControllerDocs {
 			@RequestParam(required = false) String keyword,
 			@RequestParam(required = false) List<String> cities,
 			@RequestParam(required = false) List<String> themes,
-			@RequestParam(required = false) List<String> tripDays,
+			@RequestParam(required = false) List<TripDays> tripDays,
 			@RequestParam(required = false) List<String> transportTypes,
 			@RequestParam(defaultValue = "별점순") String sort,
 			@RequestParam(defaultValue = "0") int page

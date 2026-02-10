@@ -8,18 +8,18 @@ import org.umc.travlocksserver.domain.member.dto.request.MemberProfileUpdateRequ
 import org.umc.travlocksserver.domain.member.dto.response.MemberProfileUpdateResponseDTO;
 import org.umc.travlocksserver.domain.member.entity.Member;
 import org.umc.travlocksserver.domain.member.exception.MemberException;
-import org.umc.travlocksserver.domain.member.exception.code.MemberErrorCode;
+import org.umc.travlocksserver.domain.member.code.MemberErrorCode;
 import org.umc.travlocksserver.domain.member.repository.MemberRepository;
 import org.umc.travlocksserver.domain.travelstyle.entity.PreferredTravelStyle;
 import org.umc.travlocksserver.domain.travelstyle.entity.TravelStyle;
 import org.umc.travlocksserver.domain.travelstyle.exception.TravelStyleException;
-import org.umc.travlocksserver.domain.travelstyle.exception.code.TravelStyleErrorCode;
+import org.umc.travlocksserver.domain.travelstyle.code.TravelStyleErrorCode;
 import org.umc.travlocksserver.domain.travelstyle.repository.PreferredTravelStyleRepository;
 import org.umc.travlocksserver.domain.travelstyle.repository.TravelStyleRepository;
 import org.umc.travlocksserver.domain.traveltheme.entity.PreferredTravelTheme;
 import org.umc.travlocksserver.domain.traveltheme.entity.TravelTheme;
 import org.umc.travlocksserver.domain.traveltheme.exception.TravelThemeException;
-import org.umc.travlocksserver.domain.traveltheme.exception.code.TravelThemeErrorCode;
+import org.umc.travlocksserver.domain.traveltheme.code.TravelThemeErrorCode;
 import org.umc.travlocksserver.domain.traveltheme.repository.PreferredTravelThemeRepository;
 import org.umc.travlocksserver.domain.traveltheme.repository.TravelThemeRepository;
 
