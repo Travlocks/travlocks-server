@@ -1,4 +1,4 @@
-package org.umc.travlocksserver.domain.region.controller;
+package org.umc.travlocksserver.domain.location.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
