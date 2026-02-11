@@ -5,11 +5,14 @@ import java.util.List;
 
 import org.umc.travlocksserver.domain.template.entity.Template;
 import org.umc.travlocksserver.domain.template.entity.TemplateDay;
+import org.umc.travlocksserver.domain.template.enums.TripDays;
 
 public record TemplateCanvasResponseDTO(
 	Long templateId,
 	String title,
 	Integer dayNo,
+	TripDays tripDays,
+	Boolean isPublic,
 	Integer vlockCount,
 	Double totalHours,
 	Double totalMoveHours,
@@ -32,6 +35,8 @@ public record TemplateCanvasResponseDTO(
 			template.getId(),
 			template.getTitle(),
 			dayNo,
+			template.getTripDays(),
+			template.getIsPublic(),
 			day.getVlockCount(),
 			totalHours,
 			totalMoveHours,
