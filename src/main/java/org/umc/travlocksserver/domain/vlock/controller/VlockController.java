@@ -42,8 +42,8 @@ public class VlockController implements VlockControllerDocs {
 	)
 	public ResponseEntity<SuccessResponse<VlockResponseDTO>> createVlock(
 		@AuthenticationPrincipal Long memberId,
-		@Valid @RequestPart VlockRequestDTO request,
-		@RequestPart(required = false) MultipartFile coverImg) {
+		@Valid @RequestPart("request") VlockRequestDTO request,
+		@RequestPart(value = "coverImg", required = false) MultipartFile coverImg) {
 		VlockResponseDTO response = vlockCommandService.createVlock(memberId, request, coverImg);
 
 		return ResponseEntity
@@ -97,8 +97,8 @@ public class VlockController implements VlockControllerDocs {
 	public ResponseEntity<SuccessResponse<VlockResponseDTO>> updateVlock(
 		@AuthenticationPrincipal Long memberId,
 		@PathVariable Long vlockId,
-		@Valid @RequestPart VlockUpdateRequestDTO request,
-		@RequestPart(required = false) MultipartFile coverImg) {
+		@Valid @RequestPart("request") VlockUpdateRequestDTO request,
+		@RequestPart(value = "coverImg", required = false) MultipartFile coverImg) {
 		VlockResponseDTO response = vlockCommandService.updateVlock(memberId, vlockId, request, coverImg);
 
 		return ResponseEntity
