@@ -16,22 +16,6 @@ public interface TemplateVlockRepository extends JpaRepository<TemplateVlock, Lo
 
 	List<TemplateVlock> findByTemplateDayIdOrderByOrderNo(Long templateDayId);
 
-    @Query("""
-        SELECT DISTINCT v
-        FROM TemplateVlock tv
-            JOIN tv.vlock v
-            JOIN FETCH v.vlockCategory
-        WHERE tv.templateDay.id = :templateDayId
-    """)
-    List<Vlock> findDistinctVlocksByTemplateDayId(@Param("templateDayId") Long templateDayId);
-
-	@Query("""
-    	SELECT tv.vlock.id
-    	FROM TemplateVlock tv
-   		WHERE tv.templateDay.template.id = :templateId
-    """)
-    List<Long> findAllVlockIdsByTemplateDayTemplateId(Long templateId);
-
 	@Query("""
 			select tv
 			from TemplateVlock tv
@@ -42,11 +26,11 @@ public interface TemplateVlockRepository extends JpaRepository<TemplateVlock, Lo
 	List<TemplateVlock> findAllByTemplateDayIdFetchVlock(Long templateDayId);
 
 	@Query("""
-		SELECT tv.vlock
+		SELECT DISTINCT tv.vlock
 		FROM TemplateVlock tv
 		WHERE tv.templateDay.template.id = :templateId
 	""")
-    List<Vlock> findVlocksByTemplateId(Long templateId);
+    List<Vlock> findDistinctVlocksByTemplateId(Long templateId);
 
     List<TemplateVlock> findAllByTemplateDayIdOrderByOrderNo(Long templateDayId);
 }

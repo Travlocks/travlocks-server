@@ -15,9 +15,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import jakarta.validation.Valid;
-import io.swagger.v3.oas.annotations.Operation;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.umc.travlocksserver.domain.template.dto.request.TemplatePreInputRequestDTO;
 import org.umc.travlocksserver.domain.template.dto.response.TemplatePreInputResponseDTO;
 import org.umc.travlocksserver.domain.template.enums.TripDays;
@@ -203,13 +200,12 @@ public class TemplateController implements TemplateControllerDocs {
         );
     }
 
-	@GetMapping("/{templateId}/days/{dayNo}/vlocks/suggestions")
+	@GetMapping("/{templateId}/vlocks/suggestions")
 	public ResponseEntity<SuccessResponse<VlockSuggestionsResponseDTO>> suggestions(
 			@AuthenticationPrincipal Long memberId,
-			@PathVariable Long templateId,
-			@PathVariable Integer dayNo
+			@PathVariable Long templateId
 	){
-		VlockSuggestionsResponseDTO response = templateDayCommandService.suggestVlocks(memberId, templateId, dayNo);
+		VlockSuggestionsResponseDTO response = templateDayCommandService.suggestVlocks(memberId, templateId);
 		return ResponseEntity.ok(
 				SuccessResponse.ok(TemplateDaySuccessCode.VLOCK_SUGGESTION_SUCCESS, response));
 	}

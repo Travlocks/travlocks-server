@@ -9,7 +9,6 @@ import org.umc.travlocksserver.domain.template.dto.response.TemplatePreInputResp
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.umc.travlocksserver.domain.template.dto.request.TemplateRatingCreateRequestDTO;
 import org.umc.travlocksserver.domain.template.dto.response.BatchRouteResponseDTO;
@@ -297,14 +296,8 @@ public interface TemplateControllerDocs {
 	ResponseEntity<SuccessResponse<TemplateDetailResponseDTO>> getTemplateDetail(@PathVariable Long templateId,
 		@Parameter(hidden = true) Member member);
 
-	@Operation(
-		summary = "AI 블록 추천 조회 API",
-		description = "AI 기반으로 추천된 블록을 조회하는 API 입니다."
-	)
-	@ApiResponse(
-		responseCode = "200",
-		description = "AI 블록 추천이 완료되었습니다."
-	)
+	@Operation(summary = "AI 블록 추천 조회 API", description = "AI 기반으로 추천된 블록을 조회하는 API 입니다.")
+	@ApiResponse(responseCode = "200", description = "AI 블록 추천이 완료되었습니다.")
 	@ApiResponse(
 		responseCode = "404",
 		description = "존재하지 않는 템플릿 Day 입니다.",
@@ -328,8 +321,7 @@ public interface TemplateControllerDocs {
 	)
 	ResponseEntity<SuccessResponse<VlockSuggestionsResponseDTO>> suggestions(
 		@AuthenticationPrincipal Long memberId,
-		@PathVariable Long templateDayId,
-		@PathVariable Integer dayNo
+		@PathVariable Long templateId
 	);
 
 	@Operation(

@@ -205,4 +205,9 @@ public class TemplateQueryService {
 
         return dtos;
     }
+
+    public Template getTemplateByIdAndOwnerId(Long templateId, Long memberId) {
+        return templateRepository.findByIdAndOwnerId(templateId, memberId)
+                .orElseThrow(() -> new TemplateException(TemplateErrorCode.TEMPLATE_NOT_FOUND));
+    }
 }

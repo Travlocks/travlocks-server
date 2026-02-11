@@ -16,15 +16,11 @@ public class TemplateVlockQueryService {
 
     private final TemplateVlockRepository templateVlockRepository;
 
-    public List<Vlock> getDistinctVlocksByTemplateDayId(Long templateDayId) {
-        return templateVlockRepository.findDistinctVlocksByTemplateDayId(templateDayId);
-    }
-
-    public List<Long> getAllVlockIdsByTemplateDayTemplateId(Long templateId) {
-        return templateVlockRepository.findAllVlockIdsByTemplateDayTemplateId(templateId);
-    }
-
     public List<TemplateVlock> getAllByTemplateDayIdOrderByOrderNo(Long templateDayId) {
         return templateVlockRepository.findAllByTemplateDayIdOrderByOrderNo(templateDayId);
+    }
+
+    public List<Vlock> getDistinctVlocksByTemplateId(Long templateId) {
+        return templateVlockRepository.findDistinctVlocksByTemplateId(templateId);
     }
 }
