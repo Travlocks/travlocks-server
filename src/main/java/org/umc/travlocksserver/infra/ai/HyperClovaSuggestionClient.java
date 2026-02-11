@@ -40,8 +40,8 @@ public class HyperClovaSuggestionClient implements AiSuggestionClient {
     @Value("${hyperclova.retry.backoff-ms}")
     private int retryBackoffMs;
 
-    public Map<Long, Double> requestToAi(Long templateDayId, List<Vlock> usedVlocksInDay, List<Vlock> candidates) {
-        String prompt = buildJsonPrompt(usedVlocksInDay, candidates);
+    public Map<Long, Double> requestToAi(Long templateId, List<Vlock> usedVlocksInTemplate, List<Vlock> candidates) {
+        String prompt = buildJsonPrompt(usedVlocksInTemplate, candidates);
         AiRequestDTO request = AiRequestDTO.score(prompt);
 
         Retry retry = Retry.backoff(retryMax, Duration.ofMillis(retryBackoffMs))
@@ -79,10 +79,10 @@ public class HyperClovaSuggestionClient implements AiSuggestionClient {
         return msg != null && msg.contains("5xx");
     }
 
-    private String buildJsonPrompt(List<Vlock> usedVlocksInDay, List<Vlock> candidates) {
+    private String buildJsonPrompt(List<Vlock> usedVlocksInTemplate, List<Vlock> candidates) {
         Map<String, Object> payload = new LinkedHashMap<>();
 
-        payload.put("used", usedVlocksInDay.stream()
+        payload.put("used", usedVlocksInTemplate.stream()
                 .map(v -> Map.of(
                         "name", v.getName(),
                         "category", v.getVlockCategory().getName(),

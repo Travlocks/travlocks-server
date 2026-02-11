@@ -18,23 +18,23 @@ public class VlockSuggestionCache {
     @Value("${cache.recommendation.vlocks.cache-ttl-minutes}")
     private long ttlMinutes;
 
-    public CachedVlockSuggestions get(Long templateDayId) {
-        Object object =  redis.opsForValue().get(key(templateDayId));
+    public CachedVlockSuggestions get(Long templateId) {
+        Object object =  redis.opsForValue().get(key(templateId));
         if (object == null) {
             return null;
         }
         return objectMapper.convertValue(object, CachedVlockSuggestions.class);
     }
 
-    public void set(Long templateDayId, CachedVlockSuggestions value) {
-        redis.opsForValue().set(key(templateDayId), value, Duration.ofMinutes(ttlMinutes));
+    public void set(Long templateId, CachedVlockSuggestions value) {
+        redis.opsForValue().set(key(templateId), value, Duration.ofMinutes(ttlMinutes));
     }
 
-    public void evict(Long templateDayId) {
-        redis.delete(key(templateDayId));
+    public void evict(Long templateId) {
+        redis.delete(key(templateId));
     }
 
-    private String key(Long templateDayId) {
-        return "suggestion:vlocks:v1:templateDay:" + templateDayId;
+    private String key(Long templateId) {
+        return "suggestion:vlocks:v1:template:" + templateId;
     }
 }

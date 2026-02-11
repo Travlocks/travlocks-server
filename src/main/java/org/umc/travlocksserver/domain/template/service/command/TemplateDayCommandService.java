@@ -1,6 +1,7 @@
 package org.umc.travlocksserver.domain.template.service.command;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,7 @@ import org.umc.travlocksserver.domain.template.code.TemplateDayErrorCode;
 import org.umc.travlocksserver.domain.template.projection.CityProjectionDTO;
 import org.umc.travlocksserver.domain.template.repository.TemplateDayRepository;
 import org.umc.travlocksserver.domain.template.service.query.TemplateCityQueryService;
+import org.umc.travlocksserver.domain.template.service.query.TemplateQueryService;
 import org.umc.travlocksserver.domain.template.service.query.TemplateVlockQueryService;
 import org.umc.travlocksserver.domain.vlock.entity.Vlock;
 import org.umc.travlocksserver.domain.vlock.service.command.VlockCommandService;
@@ -44,6 +46,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class TemplateDayCommandService {
 
     private final TemplateDayRepository templateDayRepository;
@@ -54,6 +57,7 @@ public class TemplateDayCommandService {
     private final VlockCommandService vlockCommandService;
     private final TemplateVlockQueryService templateVlockQueryService;
     private final VlockQueryService vlockQueryService;
+    private final TemplateQueryService templateQueryService;
 
     private final VlockSuggestionCache vlockSuggestionCache;
 
@@ -248,93 +252,75 @@ public class TemplateDayCommandService {
         );
     }
 
-    public VlockSuggestionsResponseDTO suggestVlocks(Long memberId, Long templateId, Integer dayNo) {
+    public VlockSuggestionsResponseDTO suggestVlocks(Long memberId, Long templateId) {
         long seed = System.currentTimeMillis();
 
-        // TemplateDay 존재 및 권한검증
-        TemplateDay templateDay = templateDayRepository.findTemplateDayAccesible(memberId, templateId, dayNo)
-                .orElseThrow(() -> new TemplateDayException(TemplateDayErrorCode.TEMPLATE_DAY_NOT_FOUND));
-
-        Long templateDayId = templateDay.getId();
+        // Template 존재 및 권한 검증
+        Template template = templateQueryService.getTemplateByIdAndOwnerId(templateId, memberId);
 
         // 캐시 hit
-        CachedVlockSuggestions cached = vlockSuggestionCache.get(templateDayId);
+        CachedVlockSuggestions cached = vlockSuggestionCache.get(templateId);
         if (cached != null && cached.vlockIds() != null && cached.vlockIds().size() >= 3) {
-            List<VlockSuggestionsResponseDTO.VlockSuggestionCardDTO> cards = pick3FromPoolAndUpdateRecent(templateDayId, cached, seed);
-            return VlockSuggestionsResponseDTO.from(templateDayId, cards, seed, true);
+            List<VlockSuggestionsResponseDTO.VlockSuggestionCardDTO> cards = pick3FromPoolAndUpdateRecent(templateId, cached, seed);
+            return VlockSuggestionsResponseDTO.from(cards, seed);
         }
 
         // 캐시 miss
-        CachedVlockSuggestions newCached = buildSuggestion(templateDay);
+        CachedVlockSuggestions newCached = buildSuggestion(template);
         if (newCached.vlockIds() == null || newCached.vlockIds().size() < 3) {
-            return VlockSuggestionsResponseDTO.from(templateDayId, List.of(), seed, false);
+            return VlockSuggestionsResponseDTO.from(List.of(), seed);
         }
 
-        vlockSuggestionCache.set(templateDayId, newCached);
+        vlockSuggestionCache.set(templateId, newCached);
 
-        List<VlockSuggestionsResponseDTO.VlockSuggestionCardDTO> cards = pick3FromPoolAndUpdateRecent(templateDayId, newCached, seed);
-        return VlockSuggestionsResponseDTO.from(templateDayId, cards, seed, false);
+        List<VlockSuggestionsResponseDTO.VlockSuggestionCardDTO> cards = pick3FromPoolAndUpdateRecent(templateId, newCached, seed);
+        return VlockSuggestionsResponseDTO.from(cards, seed);
     }
 
     /**
      * Redis에 저장할 추천 블록을 만드는 메서드
      */
-    private CachedVlockSuggestions buildSuggestion(TemplateDay templateDay) {
-        Template template = templateDay.getTemplate();
+    private CachedVlockSuggestions buildSuggestion(Template template) {
         Long templateId = template.getId();
         TransportType transportType = template.getTransportType();
         List<Long> cityIdsOfTemplate = templateCityQueryService.getCityIdsByTemplateId(templateId);
 
         // 해당 템플릿에서 사용중인 블록 조회 (중복 제외)
-        Set<Long> usedVlockIdsInTemplate = new HashSet<>(templateVlockQueryService.getAllVlockIdsByTemplateDayTemplateId(templateId));
+        List<Vlock> usedVlocksInTemplate = templateVlockQueryService.getDistinctVlocksByTemplateId(templateId);
 
-        // 해당 템플릿 데이에 사용중인 블록 조회
-        List<Vlock> usedVlocksInDay = templateVlockQueryService.getDistinctVlocksByTemplateDayId(templateDay.getId());
+        // 해당 템플릿에서 사용중인 블록 ID 조회 (중복 제외)
+        Set<Long> usedVlockIdsInTemplate = usedVlocksInTemplate.stream()
+                .map(Vlock::getId)
+                .collect(Collectors.toSet());
 
         // 추천 블록 후보
         List<Vlock> candidates;
 
-        // 이동반경
-        double radiusKm = radiusKm(transportType);
-
-        // 현재 TemplateDay에 들어간 블록들의 중심 좌표
-        LatLng center = usedVlocksInDay.isEmpty() ? null : LatLng.averageFrom(usedVlocksInDay);
+        // 현재 Template에 들어간 블록들의 중심 좌표
+        LatLng center = usedVlocksInTemplate.isEmpty() ? null : LatLng.averageFrom(usedVlocksInTemplate);
 
         // 추천 블록 후보 조회 또는 추가
-        if (usedVlocksInDay.isEmpty()) {
-            // 템플릿에 해당 day 블록이 0개면 지역 인기 추천
+        candidates = vlockQueryService.getPopularByCityIds(cityIdsOfTemplate, PageRequest.of(0, popularPool));
+
+        // 블록 추천 후보 수가 minPool 이하면 외부 API(카카오맵)에서 가져와서 저장
+        if (candidates.size() < minPool) {
+            fetchFromExternal(templateId, null, null);
             candidates = vlockQueryService.getPopularByCityIds(cityIdsOfTemplate, PageRequest.of(0, popularPool));
-
-            // 블록 추천 후보 수가 minPool 이하면 외부 API(카카오맵)에서 가져와서 저장
-            if (candidates.size() < minPool) {
-                fetchFromExternal(templateId, null, null);
-                candidates = vlockQueryService.getPopularByCityIds(cityIdsOfTemplate, PageRequest.of(0, popularPool));
-            }
-
-        } else {
-            // 템플릿에 해당 day 블록이 존재하면 블록들 위치 기반 추천
-            candidates = findNearVlocksByCenter(cityIdsOfTemplate, usedVlockIdsInTemplate, center, radiusKm);
-
-            if (candidates.size() < minPool) {
-                fetchFromExternal(templateId, center, (int) (radiusKm));
-                candidates = findNearVlocksByCenter(cityIdsOfTemplate, usedVlockIdsInTemplate, center, radiusKm);
-            }
         }
 
-        // 템플릿 내에 이미 존재하는 장소나 숙소는 추천 후보에서 제거
+        // 템플릿 내에 이미 존재하는 블록은 추천 후보에서 제거
         List<Vlock> filtered = candidates.stream()
                 .filter(v -> !usedVlockIdsInTemplate.contains(v.getId()))
-                .filter(v -> !"숙소".equals(v.getVlockCategory().getName()))
                 .toList();
 
         // 후보 선정
-        List<Vlock> aiCandidates = pickAiCandidates(filtered, usedVlocksInDay, center);
+        List<Vlock> aiCandidates = pickAiCandidates(filtered, usedVlocksInTemplate, center);
 
         // AI 적합도 점수
-        Map<Long, Double> aiScores = aiClient.requestToAi(templateDay.getId(), usedVlocksInDay, aiCandidates);
+        Map<Long, Double> aiScores = aiClient.requestToAi(templateId, usedVlocksInTemplate, aiCandidates);
 
-        // TemplateDay에 들어간 vlock들의 카테고리 종류 목록
-        Set<String> categoriesInDay = usedVlocksInDay.stream()
+        // Template에 들어간 vlock들의 카테고리 종류 목록
+        Set<String> categoriesInTemplate = usedVlocksInTemplate.stream()
                 .map(v -> v.getVlockCategory().getName())
                 .collect(Collectors.toSet());
 
@@ -346,20 +332,20 @@ public class TemplateDayCommandService {
 
             // 이동 시간 적합도
             double moveScore = (center == null)
-                    ? 1.0
+                    ? 0.6
                     : travelTimeScoreFromDistance(
                     GeoUtil.haversineKm(center, new LatLng(v.getLatitude(), v.getLongitude())),
                     transportType
             );
 
             // 체류 적합도
-            double stayScore = calculateStayScore(usedVlocksInDay, v);
+            double stayScore = calculateStayScore(usedVlocksInTemplate, v);
 
             // 장소 신뢰도
             double reliableScore = calculateReliableScore(v.getUsageCount());
 
             // 다양성 보정
-            double diversityScore = calculateDiversityScore(categoriesInDay, v.getVlockCategory().getName());
+            double diversityScore = calculateDiversityScore(categoriesInTemplate, v.getVlockCategory().getName());
 
             double finalScore =
                     aiScore * 0.35 + moveScore * 0.30 + stayScore * 0.20 + reliableScore + 0.10 + diversityScore * 0.05;
@@ -408,7 +394,7 @@ public class TemplateDayCommandService {
 
     /**
      * 다양성 적합도 점수를 계산하는 메서드
-     * 현재 day에 없는 카테고리면 1.0, 있으면 0.3
+     * 현재 템플릿에 없는 카테고리면 1.0, 있으면 0.3
      */
     private double calculateDiversityScore(Set<String> categoriesInDay, String candidateCategory) {
         return categoriesInDay.contains(candidateCategory) ? 0.3 : 1.0;
@@ -432,11 +418,11 @@ public class TemplateDayCommandService {
      * 체류 적합도 점수를 계산하는 메서드 (기존 블록수 및 후보 체류시간 기반)
      *
      * - 0~1개: 1~2시간 1.0, 그 외 0.7
-     * - 2~3개: 1~2시간 1.0, 120~180 => 0.7, 그 외 0.4
+     * - 2~3개: 1~2시간 1.0, 2~3시간=> 0.7, 그 외 0.4
      * - 4개 이상: ~1시간 1.0, 1.5~2시간 => 0.7, 그 외 0.4
      */
-    private double calculateStayScore(List<Vlock> usedVlocksInDay, Vlock candidate) {
-        int usedCount = usedVlocksInDay.size();
+    private double calculateStayScore(List<Vlock> usedVlocksInTemplate, Vlock candidate) {
+        int usedCount = usedVlocksInTemplate.size();
         double stayHour = candidate.getVlockCategory().getStayHours();
 
         if (usedCount <= 1) {
@@ -476,16 +462,17 @@ public class TemplateDayCommandService {
         };
         double minutes = (km / kmPerHour) * 60.0;
 
-        if (minutes <= 10) return 1.0;
-        if (minutes <= 20) return 0.8;
+        if (minutes <= 15) return 1.0;
+        if (minutes <= 25) return 0.8;
         if (minutes <= 35) return 0.5;
-        return 0.2;
+        if (minutes <= 45) return 0.3;
+        return 0.1;
     }
 
     /**
      *  랜덤 3개의 추천 Vlock 선택 및 반복 방지를 위해 recent를 갱신하는 메서드
      */
-    private List<VlockSuggestionsResponseDTO.VlockSuggestionCardDTO> pick3FromPoolAndUpdateRecent(Long templateDayId, CachedVlockSuggestions cached, long seed) {
+    private List<VlockSuggestionsResponseDTO.VlockSuggestionCardDTO> pick3FromPoolAndUpdateRecent(Long templateId, CachedVlockSuggestions cached, long seed) {
         Random random = new Random(seed);
 
         List<Long> vlockIds = new ArrayList<>(cached.vlockIds());
@@ -514,7 +501,7 @@ public class TemplateDayCommandService {
         // recent 갱신
         recent.clear();
         recent.addAll(pickedVlockIds);
-        vlockSuggestionCache.set(templateDayId, cached.withRecentPickedIds(recent));
+        vlockSuggestionCache.set(templateId, cached.withRecentPickedIds(recent));
 
         List<Vlock> vlocks = vlockQueryService.getAllById(pickedVlockIds);
         Map<Long, Vlock> map = vlocks.stream().collect(Collectors.toMap(Vlock::getId, v -> v));
@@ -533,9 +520,9 @@ public class TemplateDayCommandService {
      */
     private double radiusKm(TransportType type) {
         return switch (type) {
-            case WALK -> 2.0;
-            case TRANSIT -> 5.0;
-            case CAR -> 10.0;
+            case WALK -> 10.0;
+            case TRANSIT -> 15.0;
+            case CAR -> 20.0;
         };
     }
 
@@ -565,6 +552,7 @@ public class TemplateDayCommandService {
      */
     private void fetchFromExternal(Long templateId, LatLng center, Integer radiusKm) {
         List<CityProjectionDTO> cities = templateCityQueryService.getCitiesByTemplateId(templateId);
+        log.info("템플릿 도시 추천 = {}", cities.get(0).cityName());
         if (cities.isEmpty()) return;
 
         Double x = (center == null) ? null : center.lng();
@@ -573,10 +561,12 @@ public class TemplateDayCommandService {
 
         for (CityProjectionDTO city : cities) {
             List<KakaoPlace> results = new ArrayList<>();
-            results.addAll(fetchKakaoPlaces(city.cityName() + "관광지", x, y, radiusM));
-            results.addAll(fetchKakaoPlaces(city.cityName() + "맛집", x, y, radiusM));
-            results.addAll(fetchKakaoPlaces(city.cityName() + "카페", x, y, radiusM));
+            results.addAll(fetchKakaoPlaces(city.cityName() + " 관광지", x, y, radiusM));
+            results.addAll(fetchKakaoPlaces(city.cityName() + " 맛집", x, y, radiusM));
+            results.addAll(fetchKakaoPlaces(city.cityName() + " 카페", x, y, radiusM));
+
             List<KakaoPlace> deduplicated = deduplicateByPlaceId(results);
+
             vlockCommandService.upsertVlocksFromExternal(city.cityId(), deduplicated);
         }
     }
@@ -602,15 +592,15 @@ public class TemplateDayCommandService {
 
     /**
      * 추천 후보들을 뽑는 메서드
-     * - 해당 templateDay에 블록이 없는 경우 Vlock 사용수로, 있는 경우 거리 및 Vlock 사용수로 선별
+     * - 해당 template에 블록이 없는 경우 Vlock 사용수로, 있는 경우 거리 및 Vlock 사용수로 선별
      */
-    private List<Vlock> pickAiCandidates(List<Vlock> filtered, List<Vlock> usedVlocksInDay, LatLng center) {
+    private List<Vlock> pickAiCandidates(List<Vlock> filtered, List<Vlock> usedVlocksInTemplate, LatLng center) {
         if (filtered.size() <= aiCandidatePool) {
             return filtered;
         }
 
-        // 해당 day에 블록이 없는 경우
-        if (usedVlocksInDay.isEmpty() || center == null) {
+        // 해당 template에 블록이 없는 경우
+        if (usedVlocksInTemplate.isEmpty() || center == null) {
             boolean allZero = filtered.stream()
                     .allMatch(v -> Optional.ofNullable(v.getUsageCount()).orElse(0) == 0);
 

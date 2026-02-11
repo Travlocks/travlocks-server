@@ -2,6 +2,7 @@ package org.umc.travlocksserver.domain.template.repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -178,4 +179,6 @@ public interface TemplateRepository extends JpaRepository<Template, Long>, Templ
 		ORDER BY t.updatedAt DESC, t.id DESC
 	""")
 	Page<TemplateCardResponseDTO> findPublicTemplateCardsByOwnerId(@Param("memberId") Long memberId, Pageable pageable);
+
+    Optional<Template> findByIdAndOwnerId(Long id, Long ownerId);
 }

@@ -5,10 +5,8 @@ import org.umc.travlocksserver.domain.vlock.entity.Vlock;
 import java.util.List;
 
 public record VlockSuggestionsResponseDTO(
-        Long templateDayId,
         List<VlockSuggestionCardDTO> vlocks,
-        long seed,
-        boolean fromCached
+        long seed
 ) {
     public record VlockSuggestionCardDTO(
             Long vlockId,
@@ -28,12 +26,10 @@ public record VlockSuggestionsResponseDTO(
         }
     }
 
-    public static VlockSuggestionsResponseDTO from(Long templateDayId, List<VlockSuggestionCardDTO> vlocks, long seed, Boolean fromCached) {
+    public static VlockSuggestionsResponseDTO from(List<VlockSuggestionCardDTO> vlocks, long seed) {
         return new VlockSuggestionsResponseDTO(
-                templateDayId,
                 vlocks,
-                seed,
-                fromCached
+                seed
         );
     }
 }

@@ -38,7 +38,7 @@ public class TemplateTagService {
         Template template = templateRepository.findById(templateId)
                 .orElseThrow(() -> new TemplateException(TemplateErrorCode.TEMPLATE_NOT_FOUND));
 
-        List<Vlock> vlocks = templateVlockRepository.findVlocksByTemplateId(templateId);
+        List<Vlock> vlocks = templateVlockRepository.findDistinctVlocksByTemplateId(templateId);
 
         Region region = templateRepository.findRegionByTemplateId(templateId).get(0);
         String travelTheme = String.valueOf(template.getTravelTheme().getContent());
