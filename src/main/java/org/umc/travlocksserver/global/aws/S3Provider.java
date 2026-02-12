@@ -69,4 +69,29 @@ public class S3Provider {
 			throw new S3ExceptionHandler(ErrorCode.S3_DELETE_FAIL);
 		}
 	}
+
+	public String uploadTemplateFile(MultipartFile file) {
+		if (file == null || file.isEmpty()) {
+			return null;
+		}
+
+		String fileName = "templates/" + UUID.randomUUID() + "_" + file.getOriginalFilename();
+
+		try {
+			PutObjectRequest putObjectRequest = PutObjectRequest.builder()
+					.bucket(bucket)
+					.key(fileName)
+					.contentType(file.getContentType())
+					.build();
+
+			s3Client.putObject(putObjectRequest,
+					RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
+		} catch (IOException e) {
+			throw new S3ExceptionHandler(ErrorCode.FILE_READ_ERROR);
+		} catch (S3Exception e) {
+			throw new S3ExceptionHandler(ErrorCode.S3_UPLOAD_FAIL);
+		}
+
+		return String.format(s3Properties.domain() + "%s", fileName);
+	}
 }
