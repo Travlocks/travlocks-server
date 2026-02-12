@@ -18,7 +18,8 @@ public enum TemplateErrorCode implements BaseCode {
 	TEMPLATE_NO_MATCH(HttpStatus.NOT_FOUND, "조건에 맞는 템플릿이 없어요."),
 	TEMPLATE_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "일시적인 오류가 발생했습니다. 다시 시도해주세요."),
 	TEMPLATE_RECENT_NOT_FOUND(HttpStatus.NOT_FOUND, "최근 편집된 템플릿이 존재하지 않습니다."),
-	TEMPLATE_RATING_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 해당 템플릿에 평점을 등록했습니다.");
+	TEMPLATE_RATING_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 해당 템플릿에 평점을 등록했습니다."),
+	TEMPLATE_FORBIDDEN(HttpStatus.FORBIDDEN, "템플릿 수정 권한이 없습니다.");
 
 	private final HttpStatus status;
 	private final String message;

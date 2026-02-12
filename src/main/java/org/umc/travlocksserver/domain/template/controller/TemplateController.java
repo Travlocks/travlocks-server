@@ -43,6 +43,12 @@ import org.umc.travlocksserver.domain.template.dto.request.TemplateVlockReorderR
 import org.umc.travlocksserver.domain.template.dto.response.TemplateVlockAddResponseDTO;
 import org.umc.travlocksserver.domain.template.dto.response.TemplateVlockDeleteResponseDTO;
 import org.umc.travlocksserver.domain.template.dto.response.TemplateVlockReorderResponseDTO;
+import org.umc.travlocksserver.domain.template.service.command.TemplateCommandService;
+import org.umc.travlocksserver.domain.template.dto.request.TemplateSaveRequestDTO;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.multipart.MultipartFile;
+import org.umc.travlocksserver.domain.template.dto.response.TemplateSaveResponseDTO;
 
 import java.util.List;
 
@@ -95,6 +101,29 @@ public class TemplateController implements TemplateControllerDocs {
 		return ResponseEntity
 			.status(successCode.getStatus())
 			.body(SuccessResponse.ok(successCode, data));
+	}
+
+	@PatchMapping(
+			value = "/{templateId}",
+			consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+			produces = MediaType.APPLICATION_JSON_VALUE
+	)
+	public ResponseEntity<SuccessResponse<TemplateSaveResponseDTO>> saveTemplate(
+			@PathVariable Long templateId,
+			@Valid @RequestPart TemplateSaveRequestDTO request,
+			@RequestPart(required = false) MultipartFile coverImage,
+			@AuthenticationPrincipal Long memberId
+	) {
+		TemplateSaveResponseDTO response = templateCommandService.saveTemplate(
+				memberId,
+				templateId,
+				request,
+				coverImage
+		);
+
+		return ResponseEntity.ok(
+				SuccessResponse.ok(TemplateSuccessCode.TEMPLATE_SAVE_SUCCESS, response)
+		);
 	}
 
 	@PostMapping("/{templateId}/days/{dayNo}/vlocks")
