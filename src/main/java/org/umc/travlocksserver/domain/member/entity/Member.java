@@ -4,9 +4,9 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.umc.travlocksserver.domain.member.enums.MemberStatus;
+import org.umc.travlocksserver.domain.template.code.TemplateErrorCode;
+import org.umc.travlocksserver.domain.template.exception.TemplateException;
 import org.umc.travlocksserver.global.entity.SoftDeleteBaseEntity;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -99,6 +99,9 @@ public class Member extends SoftDeleteBaseEntity {
     }
 
     public void decreaseTemplateCount() {
+        if (this.templateCount <= 0) {
+            throw new TemplateException(TemplateErrorCode.TEMPLATE_COUNT_BELOW_ZERO);
+        }
         this.templateCount = this.templateCount - 1;
     }
 }
