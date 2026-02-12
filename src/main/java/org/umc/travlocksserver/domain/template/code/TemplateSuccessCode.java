@@ -24,7 +24,6 @@ public enum TemplateSuccessCode implements BaseCode {
 	TEMPLATE_RECENT_GET_SUCCESS(HttpStatus.OK, "최근 편집 템플릿 조회에 성공했습니다."),
 	TEMPLATE_RATING_CREATE_SUCCESS(HttpStatus.CREATED, "템플릿 평점 등록에 성공했습니다."),
 	TEMPLATE_SAVE_SUCCESS(HttpStatus.OK, "템플릿이 저장되었습니다."),
-	TEMPLATE_LIST_GET_SUCCESS(HttpStatus.OK, "템플릿 리스트 조회에 성공했습니다.")
 	TEMPLATE_LIST_GET_SUCCESS(HttpStatus.OK, "템플릿 리스트 조회에 성공했습니다."),
 	TEMPLATE_DELETED_SUCCESS(HttpStatus.OK, "템플릿이 삭제되었습니다.")
 	;
