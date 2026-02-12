@@ -3,6 +3,14 @@ package org.umc.travlocksserver.domain.template.service.command;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+import org.umc.travlocksserver.domain.template.code.TemplateErrorCode;
+import org.umc.travlocksserver.domain.template.dto.request.TemplateSaveRequestDTO;
+import org.umc.travlocksserver.domain.template.dto.response.TemplateSaveResponseDTO;
+import org.umc.travlocksserver.domain.template.entity.Template;
+import org.umc.travlocksserver.domain.template.exception.TemplateException;
+import org.umc.travlocksserver.domain.template.repository.TemplateRepository;
+import org.umc.travlocksserver.global.aws.S3Provider;
 import org.umc.travlocksserver.domain.member.entity.Member;
 import org.umc.travlocksserver.domain.member.service.query.MemberQueryService;
 import org.umc.travlocksserver.domain.template.entity.Template;
@@ -13,6 +21,44 @@ import org.umc.travlocksserver.domain.template.service.query.TemplateQueryServic
 @Transactional
 public class TemplateCommandService {
 
+    private final TemplateRepository templateRepository;
+    private final S3Provider s3Provider;
+
+    public TemplateSaveResponseDTO saveTemplate(
+            Long memberId,
+            Long templateId,
+            TemplateSaveRequestDTO request,
+            MultipartFile coverImage
+    ) {
+
+        // 1. 템플릿 조회
+        Template template = templateRepository.findById(templateId)
+                .orElseThrow(() -> new TemplateException(TemplateErrorCode.TEMPLATE_NOT_FOUND));
+
+        // 2. 권한 검증
+        if (!template.getOwner().getId().equals(memberId)) {
+            throw new TemplateException(TemplateErrorCode.TEMPLATE_FORBIDDEN);
+        }
+
+        // 3. 커버 이미지 업로드
+        String newImageUrl = null;
+        if (coverImage != null && !coverImage.isEmpty()) {
+            newImageUrl = s3Provider.uploadTemplateFile(coverImage);
+
+            if (template.getCoverImageUrl() != null) {
+                s3Provider.deleteFile(template.getCoverImageUrl());
+            }
+        }
+
+        // 4. 메타데이터 업데이트
+        template.updateMetadata(
+                request.title(),
+                request.description(),
+                newImageUrl,
+                request.isPublic()
+        );
+
+        return TemplateSaveResponseDTO.from(template);
     private final TemplateQueryService templateQueryService;
     private final MemberQueryService memberQueryService;
 
