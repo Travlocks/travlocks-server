@@ -98,4 +98,7 @@ public class Member extends SoftDeleteBaseEntity {
         this.starCount = 0;
     }
 
+    public void decreaseTemplateCount() {
+        this.templateCount = this.templateCount - 1;
+    }
 }
