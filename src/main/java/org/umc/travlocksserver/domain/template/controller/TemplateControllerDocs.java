@@ -458,4 +458,34 @@ public interface TemplateControllerDocs {
 		@AuthenticationPrincipal Long memberId,
 		@Valid @RequestBody TemplateRatingCreateRequestDTO request
 	);
+
+	@Operation(
+			summary = "템플릿 삭제 API",
+			description = """
+			특정 템플릿을 삭제합니다.
+	
+			[Path Variable]
+			- templateId: 삭제할 템플릿 ID
+			"""
+	)
+	@ApiResponse(responseCode = "200", description = "템플릿이 삭제되었습니다.")
+	@ApiResponse(
+			responseCode = "404",
+			description = "존재하지 않는 회원입니다.",
+			content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+	)
+	@ApiResponse(
+			responseCode = "404",
+			description = "존재하지 않는 템플릿입니다.",
+			content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+	)
+	@ApiResponse(
+			responseCode = "409",
+			description = "템플릿 개수는 0 이하로 내려갈 수 없습니다.",
+			content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+	)
+	public ResponseEntity<SuccessResponse<Void>> deleteTemplate(
+			@AuthenticationPrincipal Long memberId,
+			@PathVariable Long templateId
+	);
 }
