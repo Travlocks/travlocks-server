@@ -80,6 +80,14 @@ public class VlockQueryService {
                 .toList();
     }
 
+    /** 블록 검색 */
+    public List<VlockResponseDTO> searchVlocks(String keyword, Pageable pageable) {
+        return vlockRepository.searchByKeyword(keyword, pageable)
+                .stream()
+                .map(vlock -> VlockResponseDTO.from(vlock, s3Properties.domain()))
+                .toList();
+    }
+
     private void validateMemberExists(Long memberId) {
         if (!memberRepository.existsById(memberId)) {
             throw new MemberException(MemberErrorCode.MEMBER_NOT_FOUND);

@@ -2,6 +2,8 @@ package org.umc.travlocksserver.domain.vlock.controller;
 
 import java.util.List;
 
+import io.swagger.v3.oas.annotations.Parameter;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,6 +24,23 @@ import jakarta.validation.Valid;
 
 @Tag(name = "Vlock API", description = "블록 관련 API 입니다.")
 public interface VlockControllerDocs {
+
+	@Operation(
+		summary = "블록 검색",
+		description = """
+		키워드를 사용하여 블록을 검색합니다.
+		
+		- 블록 이름, 주소, 메모 중 하나라도 키워드를 포함하면 검색됩니다.
+		- 공개된 블록만 검색됩니다.
+		- 최신 생성순으로 정렬됩니다.
+		"""
+	)
+	@ApiResponses({
+		@ApiResponse(responseCode = "200", description = "Vlocks searched successfully")
+	})
+	ResponseEntity<SuccessResponse<List<VlockResponseDTO>>> searchVlocks(
+		@RequestParam String query,
+		@Parameter(hidden = true) Pageable pageable);
 
 	@Operation(
 		summary = "블록 생성",
