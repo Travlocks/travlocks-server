@@ -83,7 +83,7 @@ public interface VlockRepository extends JpaRepository<Vlock,Long>, VlockReposit
     @Query("""
         SELECT v
         FROM Vlock v
-        WHERE (v.name LIKE %:keyword% OR v.address LIKE %:keyword% OR v.memo LIKE %:keyword%)
+        WHERE (v.name LIKE %:keyword% OR v.address LIKE %:keyword%)
           AND v.isPublic = true
           AND v.deletedAt IS NULL
     """)
