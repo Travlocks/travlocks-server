@@ -20,8 +20,13 @@ import org.umc.travlocksserver.domain.template.dto.response.*;
 import org.umc.travlocksserver.domain.template.enums.TripDays;
 import org.umc.travlocksserver.global.response.ErrorResponse;
 import org.umc.travlocksserver.global.response.SuccessResponse;
-
 import io.swagger.v3.oas.annotations.Operation;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.multipart.MultipartFile;
+import org.umc.travlocksserver.domain.template.dto.request.TemplateSaveRequestDTO;
+import org.umc.travlocksserver.domain.template.dto.response.TemplateSaveResponseDTO;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -58,6 +63,26 @@ public interface TemplateControllerDocs {
 	ResponseEntity<SuccessResponse<TemplatePreInputResponseDTO>> createPreInput(
 		@Valid @RequestBody TemplatePreInputRequestDTO request,
 		@AuthenticationPrincipal Long memberId
+	);
+
+	@Operation(
+			summary = "템플릿 저장 API",
+			description = """
+        저장 모달에서 템플릿 메타데이터를 저장합니다.
+        - 제목, 설명, 커버 이미지, 공개 설정을 한 번에 수정
+        - null인 필드는 기존값 유지
+        - 기본 공개 설정: 전체공개 (isPublic=true)
+        """
+	)
+	@PatchMapping(
+			value = "/{templateId}",
+			consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+	)
+	ResponseEntity<SuccessResponse<TemplateSaveResponseDTO>> saveTemplate(
+			@PathVariable Long templateId,
+			@RequestPart TemplateSaveRequestDTO request,
+			@RequestPart(required = false) MultipartFile coverImage,
+			@AuthenticationPrincipal Long memberId
 	);
 
 	@Operation(
