@@ -80,7 +80,7 @@ public interface TemplateControllerDocs {
 	)
 	ResponseEntity<SuccessResponse<TemplateSaveResponseDTO>> saveTemplate(
 			@PathVariable Long templateId,
-			@RequestPart TemplateSaveRequestDTO request,
+			@Valid @RequestPart TemplateSaveRequestDTO request,
 			@RequestPart(required = false) MultipartFile coverImage,
 			@AuthenticationPrincipal Long memberId
 	);

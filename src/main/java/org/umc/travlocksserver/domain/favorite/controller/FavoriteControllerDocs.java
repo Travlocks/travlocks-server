@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.umc.travlocksserver.domain.member.entity.Member;
 import org.umc.travlocksserver.global.response.SuccessResponse;
 
-@Tag(name = "Favorite", description = "템플릿 즐겨찾기 API")
+@Tag(name = "Favorite API", description = "템플릿 즐겨찾기 API")
 public interface FavoriteControllerDocs {
 
     @Operation(

@@ -62,7 +62,6 @@ public class TemplateCommandService {
         return TemplateSaveResponseDTO.from(template);
     }
 
-
     public void deleteById(Long memberId, Long templateId) {
         Member member = memberQueryService.getById(memberId);
         Template template = templateQueryService.getTemplateByIdAndOwnerId(templateId, memberId);
