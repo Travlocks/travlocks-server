@@ -513,4 +513,35 @@ public interface TemplateControllerDocs {
 			@AuthenticationPrincipal Long memberId,
 			@PathVariable Long templateId
 	);
+
+	@Operation(
+			summary = "일정 요약 조회 API",
+			description = """
+        템플릿의 일정 요약 정보를 조회합니다.
+        
+        [Path Variable]
+        - templateId: 조회할 템플릿 ID
+        
+        [Response]
+        - totalVlocks: 총 블록 수
+        - totalStayHours: 예상 총 소요 시간 (시간)
+        - totalMoveMinutes: 이동 시간 합계 (분)
+        - daysSummary: 일차별 상세 요약
+        
+        [참고]
+        - 이동 시간은 사전 정보 입력 시 선택한 교통수단을 기준으로 계산됩니다.
+        - 이동 경로가 아직 생성되지 않은 구간은 0분으로 처리됩니다.
+        """
+	)
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "일정 요약 조회 성공"),
+			@ApiResponse(
+					responseCode = "404",
+					description = "존재하지 않는 템플릿",
+					content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+			)
+	})
+	ResponseEntity<SuccessResponse<TemplateSummaryResponseDTO>> getTemplateSummary(
+			@PathVariable Long templateId
+	);
 }

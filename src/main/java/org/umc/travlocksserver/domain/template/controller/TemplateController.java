@@ -49,7 +49,8 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 import org.umc.travlocksserver.domain.template.dto.response.TemplateSaveResponseDTO;
-
+import org.umc.travlocksserver.domain.template.service.query.TemplateSummaryQueryService;
+import org.umc.travlocksserver.domain.template.dto.response.TemplateSummaryResponseDTO;
 import java.util.List;
 
 @Validated
@@ -67,8 +68,9 @@ public class TemplateController implements TemplateControllerDocs {
 	private final TemplateRouteQueryService templateRouteQueryService;
 	private final TemplateRatingCommandService templateRatingCommandService;
 	private final TemplateCommandService templateCommandService;
+	private final TemplateSummaryQueryService templateSummaryQueryService;
 
-    @GetMapping("/recommendations")
+	@GetMapping("/recommendations")
     public ResponseEntity<SuccessResponse<TemplateRecommendationsDTO>> getRecommendedTemplates(
             @AuthenticationPrincipal Long memberId
     ) {
@@ -321,6 +323,16 @@ public class TemplateController implements TemplateControllerDocs {
 		templateCommandService.deleteById(memberId, templateId);
 		return ResponseEntity.ok(
 				SuccessResponse.ok(TemplateSuccessCode.TEMPLATE_DELETED_SUCCESS)
+		);
+	}
+
+	@GetMapping("/{templateId}/summary")
+	public ResponseEntity<SuccessResponse<TemplateSummaryResponseDTO>> getTemplateSummary(
+			@PathVariable Long templateId
+	) {
+		TemplateSummaryResponseDTO response = templateSummaryQueryService.getSummary(templateId);
+		return ResponseEntity.ok(
+				SuccessResponse.ok(TemplateSuccessCode.TEMPLATE_SUMMARY_SUCCESS, response)
 		);
 	}
 }
