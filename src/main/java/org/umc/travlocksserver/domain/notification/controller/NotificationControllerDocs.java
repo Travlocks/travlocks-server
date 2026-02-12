@@ -11,7 +11,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import org.umc.travlocksserver.domain.notification.dto.response.NotificationAllResponseDTO;
 import org.umc.travlocksserver.global.response.SuccessResponse;
 
-@Tag(name = "알림 API", description = "알림 관련 API 입니다.")
+@Tag(name = "Notification API", description = "알림 관련 API 입니다.")
 public interface NotificationControllerDocs {
 
     @Operation(
