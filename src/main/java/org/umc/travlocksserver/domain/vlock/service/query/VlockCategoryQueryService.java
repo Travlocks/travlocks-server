@@ -21,12 +21,12 @@ import java.util.Optional;
 @Transactional(readOnly = true)
 public class VlockCategoryQueryService {
 
-    private final VlockCategoryRepository vlockCategoryRepository;
+	private final VlockCategoryRepository vlockCategoryRepository;
 	private final VlockCategoryCache vlockCategoryCache;
 
-    public Optional<VlockCategory> getByName(String name) {
-        return vlockCategoryRepository.findByName(name);
-    }
+	public Optional<VlockCategory> getByName(String name) {
+		return vlockCategoryRepository.findByName(name);
+	}
 
 	public VlockCategoriesDTO getAllCategories() {
 		CachedVlockCategoryList cachedList = vlockCategoryCache.getAll();
@@ -35,7 +35,7 @@ public class VlockCategoryQueryService {
 			return VlockCategoriesDTO.fromCache(cachedList);
 		}
 
-		List<VlockCategoryDTO> categories =  vlockCategoryRepository.findAll().stream()
+		List<VlockCategoryDTO> categories = vlockCategoryRepository.findAll().stream()
 			.map(VlockCategoryDTO::from)
 			.toList();
 

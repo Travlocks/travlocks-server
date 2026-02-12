@@ -4,10 +4,10 @@ import jakarta.validation.constraints.Size;
 
 public record TemplateSaveRequestDTO(
 
-        @Size(max = 30, message = "제목은 30자 이내로 입력해주세요.")
-        String title,
+	@Size(max = 30, message = "제목은 30자 이내로 입력해주세요.")
+	String title,
 
-        String description,
+	String description,
 
-        Boolean isPublic
-) {}
+	Boolean isPublic) {
+}

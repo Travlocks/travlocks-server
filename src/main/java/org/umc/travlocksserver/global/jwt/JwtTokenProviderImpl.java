@@ -16,141 +16,145 @@ import java.util.Date;
 @Component
 public class JwtTokenProviderImpl implements JwtTokenProvider {
 
-    private final SecretKey key;
-    private final long accessTtlSeconds;
-    private final long refreshTtlSeconds;
+	private final SecretKey key;
+	private final long accessTtlSeconds;
+	private final long refreshTtlSeconds;
 
-    private static final String JTI_CLAIM = "jti";
-    private static final String SCOPE_CLAIM = "scope";
-    private static final String SSE_SCOPE = "SSE";
+	private static final String JTI_CLAIM = "jti";
+	private static final String SCOPE_CLAIM = "scope";
+	private static final String SSE_SCOPE = "SSE";
 
-    public JwtTokenProviderImpl(
-            @Value("${jwt.secret}") String secret,
-            @Value("${jwt.access-ttl-seconds:3600}") long accessTtlSeconds,
-            @Value("${jwt.refresh-ttl-seconds:1209600}") long refreshTtlSeconds
-    ) {
-        this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
-        this.accessTtlSeconds = accessTtlSeconds;
-        this.refreshTtlSeconds = refreshTtlSeconds;
-    }
+	public JwtTokenProviderImpl(
+		@Value("${jwt.secret}")
+		String secret,
+		@Value("${jwt.access-ttl-seconds:3600}")
+		long accessTtlSeconds,
+		@Value("${jwt.refresh-ttl-seconds:1209600}")
+		long refreshTtlSeconds) {
+		this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+		this.accessTtlSeconds = accessTtlSeconds;
+		this.refreshTtlSeconds = refreshTtlSeconds;
+	}
 
-    @Override
-    public String generateAccessToken(Long memberId) {
-        Instant now = Instant.now();
-        Instant exp = now.plusSeconds(accessTtlSeconds);
+	@Override
+	public String generateAccessToken(Long memberId) {
+		Instant now = Instant.now();
+		Instant exp = now.plusSeconds(accessTtlSeconds);
 
-        return Jwts.builder()
-                .subject(String.valueOf(memberId))
-                .issuedAt(Date.from(now))
-                .expiration(Date.from(exp))
-                .signWith(key)
-                .compact();
-    }
+		return Jwts.builder()
+			.subject(String.valueOf(memberId))
+			.issuedAt(Date.from(now))
+			.expiration(Date.from(exp))
+			.signWith(key)
+			.compact();
+	}
 
-    @Override
-    public String generateRefreshToken(Long memberId, String jti) {
-        Instant now = Instant.now();
-        Instant exp = now.plusSeconds(refreshTtlSeconds);
+	@Override
+	public String generateRefreshToken(Long memberId, String jti) {
+		Instant now = Instant.now();
+		Instant exp = now.plusSeconds(refreshTtlSeconds);
 
-        return Jwts.builder()
-                .subject(String.valueOf(memberId))
-                .claim(JTI_CLAIM, jti)
-                .issuedAt(Date.from(now))
-                .expiration(Date.from(exp))
-                .signWith(key)
-                .compact();
-    }
+		return Jwts.builder()
+			.subject(String.valueOf(memberId))
+			.claim(JTI_CLAIM, jti)
+			.issuedAt(Date.from(now))
+			.expiration(Date.from(exp))
+			.signWith(key)
+			.compact();
+	}
 
-    @Override
-    public long getAccessTokenExpiresInSeconds() {
-        return accessTtlSeconds;
-    }
+	@Override
+	public long getAccessTokenExpiresInSeconds() {
+		return accessTtlSeconds;
+	}
 
-    @Override
-    public String extractJti(String refreshToken) {
-        Claims claims = parseClaims(refreshToken);
-        Object jti = claims.get(JTI_CLAIM);
-        return jti == null ? null : jti.toString();
-    }
+	@Override
+	public String extractJti(String refreshToken) {
+		Claims claims = parseClaims(refreshToken);
+		Object jti = claims.get(JTI_CLAIM);
+		return jti == null ? null : jti.toString();
+	}
 
-    @Override
-    public Long extractMemberId(String refreshToken) {
-        Claims claims = parseClaims(refreshToken);
-        String sub = claims.getSubject();
-        if (sub == null || sub.isBlank()) return null;
-        try {
-            return Long.valueOf(sub);
-        } catch (NumberFormatException e) {
-            return null;
-        }
-    }
+	@Override
+	public Long extractMemberId(String refreshToken) {
+		Claims claims = parseClaims(refreshToken);
+		String sub = claims.getSubject();
+		if (sub == null || sub.isBlank())
+			return null;
+		try {
+			return Long.valueOf(sub);
+		} catch (NumberFormatException e) {
+			return null;
+		}
+	}
 
-    @Override
-    public boolean validateRefreshToken(String refreshToken) {
-        try {
-            parseClaims(refreshToken);
-            return true;
-        } catch (JwtException | IllegalArgumentException e) {
-            return false;
-        }
-    }
+	@Override
+	public boolean validateRefreshToken(String refreshToken) {
+		try {
+			parseClaims(refreshToken);
+			return true;
+		} catch (JwtException | IllegalArgumentException e) {
+			return false;
+		}
+	}
 
-    // AccessToken 검증 + 예외로 만료/무효 구분
-    @Override
-    public void validateAccessTokenOrThrow(String accessToken) throws ExpiredJwtException, JwtException {
-        Jwts.parser()
-                .verifyWith(key)
-                .build()
-                .parseSignedClaims(accessToken);
-    }
+	// AccessToken 검증 + 예외로 만료/무효 구분
+	@Override
+	public void validateAccessTokenOrThrow(String accessToken) throws ExpiredJwtException, JwtException {
+		Jwts.parser()
+			.verifyWith(key)
+			.build()
+			.parseSignedClaims(accessToken);
+	}
 
-    @Override
-    public Long extractMemberIdFromAccessToken(String accessToken) {
-        Claims claims = parseClaims(accessToken);
-        String sub = claims.getSubject();
-        if (sub == null || sub.isBlank()) return null;
-        try {
-            return Long.valueOf(sub);
-        } catch (NumberFormatException e) {
-            return null;
-        }
-    }
+	@Override
+	public Long extractMemberIdFromAccessToken(String accessToken) {
+		Claims claims = parseClaims(accessToken);
+		String sub = claims.getSubject();
+		if (sub == null || sub.isBlank())
+			return null;
+		try {
+			return Long.valueOf(sub);
+		} catch (NumberFormatException e) {
+			return null;
+		}
+	}
 
-    // JWT의 서명과 만료(exp) 여부를 검증한 뒤, payload에 담긴 Claims를 반환
-    private Claims parseClaims(String token) {
-        return Jwts.parser()
-                .verifyWith(key)
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
-    }
+	// JWT의 서명과 만료(exp) 여부를 검증한 뒤, payload에 담긴 Claims를 반환
+	private Claims parseClaims(String token) {
+		return Jwts.parser()
+			.verifyWith(key)
+			.build()
+			.parseSignedClaims(token)
+			.getPayload();
+	}
 
-    /**
-     * SSE 구독 시 사용할 토큰 발급
-     * */
-    @Override
-    public String generateSseToken(Long memberId, long sseTtlSeconds) {
-        Instant now = Instant.now();
-        Instant exp = now.plusSeconds(sseTtlSeconds);
+	/**
+	 * SSE 구독 시 사용할 토큰 발급
+	 * */
+	@Override
+	public String generateSseToken(Long memberId, long sseTtlSeconds) {
+		Instant now = Instant.now();
+		Instant exp = now.plusSeconds(sseTtlSeconds);
 
-        return Jwts.builder()
-                .subject(String.valueOf(memberId))
-                .claim(SCOPE_CLAIM, SSE_SCOPE)  // SSE 연결용 토큰임을 표시
-                .issuedAt(Date.from(now))
-                .expiration(Date.from(exp))
-                .signWith(key)
-                .compact();
-    }
+		return Jwts.builder()
+			.subject(String.valueOf(memberId))
+			.claim(SCOPE_CLAIM, SSE_SCOPE) // SSE 연결용 토큰임을 표시
+			.issuedAt(Date.from(now))
+			.expiration(Date.from(exp))
+			.signWith(key)
+			.compact();
+	}
 
-    @Override
-    public Long extractMemberIdFromSseToken(String sseToken) {
-        Claims claims = parseClaims(sseToken);
+	@Override
+	public Long extractMemberIdFromSseToken(String sseToken) {
+		Claims claims = parseClaims(sseToken);
 
-        Object scope = claims.get(SCOPE_CLAIM);
-        if (!"SSE".equals(scope)) {
-            throw new RuntimeException("유효하지 않은 인증 토큰입니다.");
-        }
+		Object scope = claims.get(SCOPE_CLAIM);
+		if (!"SSE".equals(scope)) {
+			throw new RuntimeException("유효하지 않은 인증 토큰입니다.");
+		}
 
-        return Long.valueOf(claims.getSubject());
-    }
+		return Long.valueOf(claims.getSubject());
+	}
 }

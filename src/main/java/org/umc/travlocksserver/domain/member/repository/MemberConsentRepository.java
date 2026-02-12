@@ -7,8 +7,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.umc.travlocksserver.domain.member.entity.MemberConsent;
 
 public interface MemberConsentRepository extends JpaRepository<MemberConsent, Long> {
-    @Modifying(clearAutomatically = true, flushAutomatically = true)
-    @Query("delete from MemberConsent mc where mc.member.id = :memberId")
-    void deleteByMemberId(@Param("memberId") Long memberId);
+	@Modifying(clearAutomatically = true, flushAutomatically = true)
+	@Query("delete from MemberConsent mc where mc.member.id = :memberId")
+	void deleteByMemberId(@Param("memberId")
+	Long memberId);
 
 }

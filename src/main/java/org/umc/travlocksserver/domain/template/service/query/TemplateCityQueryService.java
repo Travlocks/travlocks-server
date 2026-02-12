@@ -13,13 +13,13 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class TemplateCityQueryService {
 
-    private final TemplateCityRepository templateCityRepository;
+	private final TemplateCityRepository templateCityRepository;
 
-    public List<Long> getCityIdsByTemplateId(Long templateId) {
-        return templateCityRepository.findCityIdsByTemplateId(templateId);
-    }
+	public List<Long> getCityIdsByTemplateId(Long templateId) {
+		return templateCityRepository.findCityIdsByTemplateId(templateId);
+	}
 
-    public List<CityProjectionDTO> getCitiesByTemplateId(Long templateId) {
-        return templateCityRepository.findCitiesByTemplateId(templateId);
-    }
+	public List<CityProjectionDTO> getCitiesByTemplateId(Long templateId) {
+		return templateCityRepository.findCitiesByTemplateId(templateId);
+	}
 }

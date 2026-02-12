@@ -3,5 +3,4 @@ package org.umc.travlocksserver.domain.member.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.umc.travlocksserver.domain.member.entity.MemberDeletionLog;
 
-public interface MemberDeletionLogRepository extends JpaRepository<MemberDeletionLog, Long> {
-}
+public interface MemberDeletionLogRepository extends JpaRepository<MemberDeletionLog, Long> {}

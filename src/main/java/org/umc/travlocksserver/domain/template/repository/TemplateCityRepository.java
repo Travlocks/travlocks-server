@@ -13,18 +13,20 @@ import org.umc.travlocksserver.domain.template.projection.CityProjectionDTO;
 public interface TemplateCityRepository extends JpaRepository<TemplateCity, Long> {
 	List<TemplateCity> findByTemplateId(Long templateId);
 
-    @Query("""
-        SELECT tc.city.id
-        FROM TemplateCity tc
-        WHERE tc.template.id = :templateId
-    """)
-    List<Long> findCityIdsByTemplateId(@Param("templateId") Long templateId);
+	@Query("""
+		    SELECT tc.city.id
+		    FROM TemplateCity tc
+		    WHERE tc.template.id = :templateId
+		""")
+	List<Long> findCityIdsByTemplateId(@Param("templateId")
+	Long templateId);
 
-    @Query("""
-        SELECT new org.umc.travlocksserver.domain.template.projection.CityProjectionDTO(c.id, c.name)
-        FROM TemplateCity tc
-            JOIN tc.city c
-        WHERE tc.template.id = :templateId
-    """)
-    List<CityProjectionDTO> findCitiesByTemplateId(@Param("templateId") Long templateId);
+	@Query("""
+		    SELECT new org.umc.travlocksserver.domain.template.projection.CityProjectionDTO(c.id, c.name)
+		    FROM TemplateCity tc
+		        JOIN tc.city c
+		    WHERE tc.template.id = :templateId
+		""")
+	List<CityProjectionDTO> findCitiesByTemplateId(@Param("templateId")
+	Long templateId);
 }

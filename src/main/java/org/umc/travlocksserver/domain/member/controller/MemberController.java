@@ -31,169 +31,174 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/v1/members")
 public class MemberController implements MemberControllerDocs {
 
-    private final MemberEmailCheckService memberEmailCheckService;
-    private final MemberNicknameCheckService memberNicknameCheckService;
-    private final MemberSignupService memberSignupService;
-    private final MemberProfileQueryService memberProfileQueryService;
-    private final MemberPasswordUpdateService memberPasswordUpdateService;
-    private final MemberProfileUpdateService memberProfileUpdateService;
-    private final MemberWithdrawService memberWithdrawService;
-    private final MemberMyPageQueryService memberMyPageQueryService;
-    private final MemberOAuthOnboardingService memberOAuthOnboardingService;
+	private final MemberEmailCheckService memberEmailCheckService;
+	private final MemberNicknameCheckService memberNicknameCheckService;
+	private final MemberSignupService memberSignupService;
+	private final MemberProfileQueryService memberProfileQueryService;
+	private final MemberPasswordUpdateService memberPasswordUpdateService;
+	private final MemberProfileUpdateService memberProfileUpdateService;
+	private final MemberWithdrawService memberWithdrawService;
+	private final MemberMyPageQueryService memberMyPageQueryService;
+	private final MemberOAuthOnboardingService memberOAuthOnboardingService;
 
-    @GetMapping("/email/exists")
-    public ResponseEntity<SuccessResponse<MemberEmailExistsResponseDTO>> checkEmailExists(
-            @RequestParam
-            @NotBlank(message = "이메일은 필수입니다.") @Email(message = "올바르지 않은 이메일 형식입니다.")
-            String email) {
-        MemberSuccessCode successCode = MemberSuccessCode.EMAIL_EXISTS_CHECK_SUCCESS;
-        MemberEmailExistsResponseDTO data = memberEmailCheckService.checkEmailExists(email);
+	@GetMapping("/email/exists")
+	public ResponseEntity<SuccessResponse<MemberEmailExistsResponseDTO>> checkEmailExists(
+		@RequestParam @NotBlank(message = "이메일은 필수입니다.") @Email(message = "올바르지 않은 이메일 형식입니다.")
+		String email) {
+		MemberSuccessCode successCode = MemberSuccessCode.EMAIL_EXISTS_CHECK_SUCCESS;
+		MemberEmailExistsResponseDTO data = memberEmailCheckService.checkEmailExists(email);
 
-        return ResponseEntity
-                .status(successCode.getStatus())
-                .body(SuccessResponse.ok(successCode, data));
-    }
+		return ResponseEntity
+			.status(successCode.getStatus())
+			.body(SuccessResponse.ok(successCode, data));
+	}
 
-    @GetMapping("/nickname/exists")
-    public ResponseEntity<SuccessResponse<MemberNicknameExistsResponseDTO>> checkNicknameExists(
-            @RequestParam
-            @NotBlank(message = "닉네임은 필수입니다.")
-            String nickname) {
-        MemberSuccessCode successCode = MemberSuccessCode.NICKNAME_EXISTS_CHECK_SUCCESS;
-        MemberNicknameExistsResponseDTO data = memberNicknameCheckService.checkNicknameExists(nickname);
+	@GetMapping("/nickname/exists")
+	public ResponseEntity<SuccessResponse<MemberNicknameExistsResponseDTO>> checkNicknameExists(
+		@RequestParam @NotBlank(message = "닉네임은 필수입니다.")
+		String nickname) {
+		MemberSuccessCode successCode = MemberSuccessCode.NICKNAME_EXISTS_CHECK_SUCCESS;
+		MemberNicknameExistsResponseDTO data = memberNicknameCheckService.checkNicknameExists(nickname);
 
-        return ResponseEntity
-                .status(successCode.getStatus())
-                .body(SuccessResponse.ok(successCode, data));
-    }
+		return ResponseEntity
+			.status(successCode.getStatus())
+			.body(SuccessResponse.ok(successCode, data));
+	}
 
-    @PostMapping("/signup")
-    public ResponseEntity<SuccessResponse<MemberSignupResponseDTO>> signup(
-            @Valid @RequestBody MemberSignupRequestDTO request,
-            HttpServletResponse response) {
-        MemberSuccessCode successCode = MemberSuccessCode.MEMBER_SIGNUP_SUCCESS;
-        MemberSignupResponseDTO data = memberSignupService.signup(request, response);
+	@PostMapping("/signup")
+	public ResponseEntity<SuccessResponse<MemberSignupResponseDTO>> signup(
+		@Valid @RequestBody
+		MemberSignupRequestDTO request,
+		HttpServletResponse response) {
+		MemberSuccessCode successCode = MemberSuccessCode.MEMBER_SIGNUP_SUCCESS;
+		MemberSignupResponseDTO data = memberSignupService.signup(request, response);
 
-        return ResponseEntity
-                .status(successCode.getStatus())
-                .body(SuccessResponse.ok(successCode, data));
-    }
+		return ResponseEntity
+			.status(successCode.getStatus())
+			.body(SuccessResponse.ok(successCode, data));
+	}
 
-    @GetMapping("/{memberId}/profile")
-    public ResponseEntity<SuccessResponse<MemberProfileResponseDTO>> getMemberProfile(
-        @PathVariable Long memberId,
-        @PageableDefault(size = 9)
-        Pageable pageable
-    ) {
-        MemberSuccessCode successCode = MemberSuccessCode.MEMBER_PROFILE_GET_SUCCESS;
+	@GetMapping("/{memberId}/profile")
+	public ResponseEntity<SuccessResponse<MemberProfileResponseDTO>> getMemberProfile(
+		@PathVariable
+		Long memberId,
+		@PageableDefault(size = 9)
+		Pageable pageable) {
+		MemberSuccessCode successCode = MemberSuccessCode.MEMBER_PROFILE_GET_SUCCESS;
 
-        MemberProfileResponseDTO data = memberProfileQueryService.getMemberProfile(memberId, pageable);
+		MemberProfileResponseDTO data = memberProfileQueryService.getMemberProfile(memberId, pageable);
 
-        return ResponseEntity
-            .status(successCode.getStatus())
-            .body(SuccessResponse.ok(successCode, data));
-    }
+		return ResponseEntity
+			.status(successCode.getStatus())
+			.body(SuccessResponse.ok(successCode, data));
+	}
 
-    @GetMapping("/me/favorites")
-    public ResponseEntity<SuccessResponse<PageResponseDTO<TemplateCardResponseDTO>>> getMyFavoriteTemplates(
-        @AuthenticationPrincipal Long memberId,
-        @PageableDefault(size = 9)
-        Pageable pageable
-    ) {
-        MemberSuccessCode successCode = MemberSuccessCode.FAVORITE_TEMPLATE_LIST_GET_SUCCESS;
+	@GetMapping("/me/favorites")
+	public ResponseEntity<SuccessResponse<PageResponseDTO<TemplateCardResponseDTO>>> getMyFavoriteTemplates(
+		@AuthenticationPrincipal
+		Long memberId,
+		@PageableDefault(size = 9)
+		Pageable pageable) {
+		MemberSuccessCode successCode = MemberSuccessCode.FAVORITE_TEMPLATE_LIST_GET_SUCCESS;
 
-        PageResponseDTO<TemplateCardResponseDTO> data = memberMyPageQueryService.getMyFavoriteTemplates(memberId, pageable);
+		PageResponseDTO<TemplateCardResponseDTO> data = memberMyPageQueryService.getMyFavoriteTemplates(memberId,
+			pageable);
 
-        return ResponseEntity
-                .status(successCode.getStatus())
-                .body(SuccessResponse.ok(successCode, data));
-    }
+		return ResponseEntity
+			.status(successCode.getStatus())
+			.body(SuccessResponse.ok(successCode, data));
+	}
 
-    @GetMapping("/me/mypage")
-    public ResponseEntity<SuccessResponse<MemberMyPageResponseDTO>> getMyPage(
-            @LoginUser Member member) {
-        MemberSuccessCode successCode = MemberSuccessCode.MEMBER_MY_PAGE_RETRIEVED;
+	@GetMapping("/me/mypage")
+	public ResponseEntity<SuccessResponse<MemberMyPageResponseDTO>> getMyPage(
+		@LoginUser
+		Member member) {
+		MemberSuccessCode successCode = MemberSuccessCode.MEMBER_MY_PAGE_RETRIEVED;
 
-        MemberMyPageResponseDTO data = memberMyPageQueryService.getMyPage(member);
+		MemberMyPageResponseDTO data = memberMyPageQueryService.getMyPage(member);
 
-        return ResponseEntity
-                .status(successCode.getStatus())
-                .body(SuccessResponse.ok(successCode, data));
-    }
+		return ResponseEntity
+			.status(successCode.getStatus())
+			.body(SuccessResponse.ok(successCode, data));
+	}
 
-    @PatchMapping("/me/profile")
-    public ResponseEntity<SuccessResponse<MemberProfileUpdateResponseDTO>> updateMyProfile(
-            @LoginUser Member member,
-            @Valid @RequestBody MemberProfileUpdateRequestDTO request
-    ) {
-        MemberSuccessCode successCode = MemberSuccessCode.MEMBER_PROFILE_UPDATED;
+	@PatchMapping("/me/profile")
+	public ResponseEntity<SuccessResponse<MemberProfileUpdateResponseDTO>> updateMyProfile(
+		@LoginUser
+		Member member,
+		@Valid @RequestBody
+		MemberProfileUpdateRequestDTO request) {
+		MemberSuccessCode successCode = MemberSuccessCode.MEMBER_PROFILE_UPDATED;
 
-        MemberProfileUpdateResponseDTO data = memberProfileUpdateService.updateMyProfile(member, request);
+		MemberProfileUpdateResponseDTO data = memberProfileUpdateService.updateMyProfile(member, request);
 
-        return ResponseEntity
-                .status(successCode.getStatus())
-                .body(SuccessResponse.ok(successCode, data));
-    }
+		return ResponseEntity
+			.status(successCode.getStatus())
+			.body(SuccessResponse.ok(successCode, data));
+	}
 
-    @PatchMapping("/me/password")
-    public ResponseEntity<SuccessResponse<Void>> updatePassword(
-            @LoginUser Member member,
-            @Valid @RequestBody MemberPasswordUpdateRequestDTO request) {
-        MemberSuccessCode successCode = MemberSuccessCode.MEMBER_PASSWORD_UPDATED;
+	@PatchMapping("/me/password")
+	public ResponseEntity<SuccessResponse<Void>> updatePassword(
+		@LoginUser
+		Member member,
+		@Valid @RequestBody
+		MemberPasswordUpdateRequestDTO request) {
+		MemberSuccessCode successCode = MemberSuccessCode.MEMBER_PASSWORD_UPDATED;
 
-        memberPasswordUpdateService.updatePassword(
-                member,
-                request.currentPassword(),
-                request.newPassword()
-        );
+		memberPasswordUpdateService.updatePassword(
+			member,
+			request.currentPassword(),
+			request.newPassword());
 
-        return ResponseEntity
-                .status(successCode.getStatus())
-                .body(SuccessResponse.ok(successCode, null));
-    }
+		return ResponseEntity
+			.status(successCode.getStatus())
+			.body(SuccessResponse.ok(successCode, null));
+	}
 
-    @DeleteMapping("/me")
-    public ResponseEntity<SuccessResponse<Void>> withdraw(
-            @LoginUser Member member,
-            @RequestBody(required = false) MemberWithdrawRequestDTO request,
-            HttpServletRequest httpRequest,
-            HttpServletResponse httpResponse
-    ) {
+	@DeleteMapping("/me")
+	public ResponseEntity<SuccessResponse<Void>> withdraw(
+		@LoginUser
+		Member member,
+		@RequestBody(required = false)
+		MemberWithdrawRequestDTO request,
+		HttpServletRequest httpRequest,
+		HttpServletResponse httpResponse) {
 
-        MemberSuccessCode successCode = MemberSuccessCode.MEMBER_WITHDRAW_SUCCESS;
+		MemberSuccessCode successCode = MemberSuccessCode.MEMBER_WITHDRAW_SUCCESS;
 
-        String reason = (request == null) ? null : request.reason();
-        memberWithdrawService.withdraw(member, reason, httpRequest, httpResponse);
+		String reason = (request == null) ? null : request.reason();
+		memberWithdrawService.withdraw(member, reason, httpRequest, httpResponse);
 
-        return ResponseEntity
-                .status(successCode.getStatus())
-                .body(SuccessResponse.ok(successCode, null));
-    }
+		return ResponseEntity
+			.status(successCode.getStatus())
+			.body(SuccessResponse.ok(successCode, null));
+	}
 
-    @GetMapping("/me/templates")
-    public ResponseEntity<SuccessResponse<PageResponseDTO<TemplateCardResponseDTO>>> getMyTemplates(
-            @AuthenticationPrincipal Long memberId,
-            @PageableDefault(size = 9)
-            Pageable pageable
-    ) {
-        PageResponseDTO<TemplateCardResponseDTO> response = memberMyPageQueryService.getMyTemplates(memberId, pageable);
-        return ResponseEntity
-                .status(TemplateSuccessCode.TEMPLATE_LIST_GET_SUCCESS.getStatus())
-                .body(SuccessResponse.ok(TemplateSuccessCode.TEMPLATE_LIST_GET_SUCCESS, response));
-    }
+	@GetMapping("/me/templates")
+	public ResponseEntity<SuccessResponse<PageResponseDTO<TemplateCardResponseDTO>>> getMyTemplates(
+		@AuthenticationPrincipal
+		Long memberId,
+		@PageableDefault(size = 9)
+		Pageable pageable) {
+		PageResponseDTO<TemplateCardResponseDTO> response = memberMyPageQueryService.getMyTemplates(memberId, pageable);
+		return ResponseEntity
+			.status(TemplateSuccessCode.TEMPLATE_LIST_GET_SUCCESS.getStatus())
+			.body(SuccessResponse.ok(TemplateSuccessCode.TEMPLATE_LIST_GET_SUCCESS, response));
+	}
 
-    @PostMapping("/onboarding")
-    public ResponseEntity<SuccessResponse<MemberSignupResponseDTO>> completeOAuthOnboarding(
-            @LoginUser Member member,
-            @Valid @RequestBody MemberOAuthOnboardingRequestDTO request,
-            HttpServletResponse response
-    ) {
-        MemberSuccessCode successCode = MemberSuccessCode.MEMBER_OAUTH_ONBOARDING_COMPLETED;
-        MemberSignupResponseDTO data = memberOAuthOnboardingService.completeOAuthOnboarding(member, request, response);
+	@PostMapping("/onboarding")
+	public ResponseEntity<SuccessResponse<MemberSignupResponseDTO>> completeOAuthOnboarding(
+		@LoginUser
+		Member member,
+		@Valid @RequestBody
+		MemberOAuthOnboardingRequestDTO request,
+		HttpServletResponse response) {
+		MemberSuccessCode successCode = MemberSuccessCode.MEMBER_OAUTH_ONBOARDING_COMPLETED;
+		MemberSignupResponseDTO data = memberOAuthOnboardingService.completeOAuthOnboarding(member, request, response);
 
-        return ResponseEntity
-                .status(successCode.getStatus())
-                .body(SuccessResponse.ok(successCode, data));
-    }
+		return ResponseEntity
+			.status(successCode.getStatus())
+			.body(SuccessResponse.ok(successCode, data));
+	}
 
 }

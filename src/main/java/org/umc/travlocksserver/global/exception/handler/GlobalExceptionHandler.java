@@ -37,8 +37,8 @@ public class GlobalExceptionHandler {
 	public ResponseEntity<ErrorResponse> handleAiClientException(AiClientException e) {
 		log.error("AI 연동에 실패했습니다.", e);
 		return ResponseEntity
-				.status(HttpStatus.SERVICE_UNAVAILABLE)
-				.body(new ErrorResponse(ErrorCode.AI_SERVICE_UNAVAILABLE));
+			.status(HttpStatus.SERVICE_UNAVAILABLE)
+			.body(new ErrorResponse(ErrorCode.AI_SERVICE_UNAVAILABLE));
 	}
 
 	// ⚪ 요청 헤더 누락 예외 처리

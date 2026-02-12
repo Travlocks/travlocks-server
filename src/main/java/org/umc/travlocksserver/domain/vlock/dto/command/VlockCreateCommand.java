@@ -13,6 +13,5 @@ public record VlockCreateCommand(
 	String memo,
 	String coverImgUrl,
 	Double latitude,
-	Double longitude
-) {
+	Double longitude) {
 }

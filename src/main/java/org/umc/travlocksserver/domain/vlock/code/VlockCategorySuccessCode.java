@@ -10,8 +10,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum VlockCategorySuccessCode implements BaseCode {
 
-	DEFAULT_VLOCK_CATEGORY_GET_SUCCESS(HttpStatus.OK, "기본 블록 카테고리를 성공적으로 조회했습니다.")
-	;
+	DEFAULT_VLOCK_CATEGORY_GET_SUCCESS(HttpStatus.OK, "기본 블록 카테고리를 성공적으로 조회했습니다.");
 
 	private final HttpStatus status;
 	private final String message;

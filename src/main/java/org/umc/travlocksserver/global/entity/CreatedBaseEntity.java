@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @EntityListeners(AuditingEntityListener.class)
 public abstract class CreatedBaseEntity {
 
-    @CreatedDate
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+	@CreatedDate
+	@Column(name = "created_at", nullable = false, updatable = false)
+	private LocalDateTime createdAt;
 }

@@ -55,8 +55,7 @@ public class VlockCommandService {
 			getCity(request.cityId()),
 			getMember(memberId),
 			request.name(), request.address(), request.memo(),
-			imageUrl, request.latitude(), request.longitude()
-		);
+			imageUrl, request.latitude(), request.longitude());
 
 		Vlock savedVlock = vlockRepository.save(Vlock.create(command));
 
@@ -67,8 +66,7 @@ public class VlockCommandService {
 		Long memberId,
 		Long vlockId,
 		VlockUpdateRequestDTO request,
-		MultipartFile coverImg
-	) {
+		MultipartFile coverImg) {
 		validateMemberExists(memberId);
 		Vlock vlock = getOwnedVlock(memberId, vlockId);
 
@@ -80,8 +78,7 @@ public class VlockCommandService {
 			getCity(request.cityId()),
 			request.name(), request.latitude(), request.longitude(),
 			request.address(), request.memo(),
-			newImageUrl, request.isPublic()
-		);
+			newImageUrl, request.isPublic());
 
 		vlock.update(command);
 
@@ -107,45 +104,46 @@ public class VlockCommandService {
 		vlock.softDelete();
 	}
 
-    // ⚪ 외부(카카오맵) API를 통해 블록을 삽입하는 메서드 (추천시 블록에 데이터가 너무 적을 경우 사용)
-    public void upsertVlocksFromExternal(Long cityId, List<KakaoPlace> places) {
-        City city = cityQueryService.getReferenceById(cityId);
+	// ⚪ 외부(카카오맵) API를 통해 블록을 삽입하는 메서드 (추천시 블록에 데이터가 너무 적을 경우 사용)
+	public void upsertVlocksFromExternal(Long cityId, List<KakaoPlace> places) {
+		City city = cityQueryService.getReferenceById(cityId);
 
-        for (KakaoPlace place : places) {
-            if (place.placeId() == null || place.placeId().isBlank()) continue;
-            VlockCategory category = mapCategory(place.categoryName());
+		for (KakaoPlace place : places) {
+			if (place.placeId() == null || place.placeId().isBlank())
+				continue;
+			VlockCategory category = mapCategory(place.categoryName());
 
-            // 공개된 Vlock의 ExternalplaceId 기준 Vlock 조회 후 없으면 생성
-            Vlock vlock = vlockRepository.findByExternalPlaceIdAndIsPublicTrue(place.placeId())
-                    .orElseGet(() -> Vlock.createByExternal(
-                            place.placeId(),
-                            category,
-                            city,
-                            place.name(),
-                            place.latitude(),
-                            place.longitude(),
-                            place.address()
-                    ));
+			// 공개된 Vlock의 ExternalplaceId 기준 Vlock 조회 후 없으면 생성
+			Vlock vlock = vlockRepository.findByExternalPlaceIdAndIsPublicTrue(place.placeId())
+				.orElseGet(() -> Vlock.createByExternal(
+					place.placeId(),
+					category,
+					city,
+					place.name(),
+					place.latitude(),
+					place.longitude(),
+					place.address()));
 
-            vlockRepository.save(vlock);
-        }
+			vlockRepository.save(vlock);
+		}
 
-    }
+	}
 
-    // ⚪ 외부(카카오맵) API를 통해 가져온 카테고리를 우리 서비스 내의 카테고리로 매핑하는 메서드
-    private VlockCategory mapCategory(String name) {
-        String mappedName = switch (name) {
-            case "음식점" -> "식당";
-            case "카페" -> "카페";
-            case "관광명소" -> "관광지";
-            case "문화시설" -> "문화";
-            default -> "기타";
-        };
+	// ⚪ 외부(카카오맵) API를 통해 가져온 카테고리를 우리 서비스 내의 카테고리로 매핑하는 메서드
+	private VlockCategory mapCategory(String name) {
+		String mappedName = switch (name) {
+			case "음식점" -> "식당";
+			case "카페" -> "카페";
+			case "관광명소" -> "관광지";
+			case "문화시설" -> "문화";
+			default -> "기타";
+		};
 
-        return vlockCategoryQueryService.getByName(mappedName)
-                .orElseGet(() -> vlockCategoryQueryService.getByName("기타")
-                        .orElseThrow(() -> new VlockCategoryException(VlockCategoryErrorCode.DEFAULT_VLOCK_CATEGORY_NOT_FOUND)));
-    }
+		return vlockCategoryQueryService.getByName(mappedName)
+			.orElseGet(() -> vlockCategoryQueryService.getByName("기타")
+				.orElseThrow(
+					() -> new VlockCategoryException(VlockCategoryErrorCode.DEFAULT_VLOCK_CATEGORY_NOT_FOUND)));
+	}
 
 	private void validateMemberExists(Long memberId) {
 		if (!memberRepository.existsById(memberId)) {

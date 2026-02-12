@@ -8,7 +8,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @Setter
 @ConfigurationProperties(prefix = "oauth.google")
 public class GoogleOAuthProperties {
-    private String clientId;
-    private String jwkSetUri;
+	private String clientId;
+	private String jwkSetUri;
 }
-

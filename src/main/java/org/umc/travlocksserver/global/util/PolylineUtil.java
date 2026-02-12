@@ -49,9 +49,7 @@ public class PolylineUtil {
 		try {
 			return objectMapper.readValue(
 				polylineJson,
-				new TypeReference<List<List<Double>>>() {
-				}
-			);
+				new TypeReference<List<List<Double>>>() {});
 		} catch (Exception e) {
 			log.error("Polyline 역직렬화 실패: {}", e.getMessage());
 			return new ArrayList<>();

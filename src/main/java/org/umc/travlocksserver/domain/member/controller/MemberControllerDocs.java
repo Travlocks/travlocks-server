@@ -33,227 +33,194 @@ import jakarta.validation.constraints.NotBlank;
 @Tag(name = "Member API", description = "회원 관련 API 입니다.")
 public interface MemberControllerDocs {
 
-	@Operation(
-			summary = "이메일 존재 여부 검사 API",
-			description = """
-					회원가입 시 이메일 존재 여부를 확인합니다.
-					
-					- data.exists=true  : 이미 사용 중인 이메일
-					- data.exists=false : 사용 가능한 이메일
-					"""
-	)
+	@Operation(summary = "이메일 존재 여부 검사 API", description = """
+		회원가입 시 이메일 존재 여부를 확인합니다.
+
+		- data.exists=true  : 이미 사용 중인 이메일
+		- data.exists=false : 사용 가능한 이메일
+		""")
 	@ApiResponses({
-			@ApiResponse(responseCode = "200", description = "이메일 존재 여부 검사 성공"),
-			@ApiResponse(responseCode = "400", description = "요청 값 검증 실패(이메일 형식/빈 값 등)", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+		@ApiResponse(responseCode = "200", description = "이메일 존재 여부 검사 성공"),
+		@ApiResponse(responseCode = "400", description = "요청 값 검증 실패(이메일 형식/빈 값 등)", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 	})
 	ResponseEntity<SuccessResponse<MemberEmailExistsResponseDTO>> checkEmailExists(
-			@NotBlank(message = "이메일은 필수입니다.") @Email(message = "올바르지 않은 이메일 형식입니다.")
-			String email
-	);
+		@NotBlank(message = "이메일은 필수입니다.") @Email(message = "올바르지 않은 이메일 형식입니다.")
+		String email);
 
-	@Operation(
-			summary = "닉네임 중복 검사 API",
-			description = """
-					회원가입 시 닉네임 중복 여부를 확인합니다.
-					
-					- data.exists=true  : 이미 사용 중인 닉네임
-					- data.exists=false : 사용 가능한 닉네임
-					"""
-	)
+	@Operation(summary = "닉네임 중복 검사 API", description = """
+		회원가입 시 닉네임 중복 여부를 확인합니다.
+
+		- data.exists=true  : 이미 사용 중인 닉네임
+		- data.exists=false : 사용 가능한 닉네임
+		""")
 	@ApiResponses({
-			@ApiResponse(responseCode = "200", description = "닉네임 중복 검사 성공"),
-			@ApiResponse(responseCode = "400", description = "요청 값 검증 실패(빈 값 등)", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+		@ApiResponse(responseCode = "200", description = "닉네임 중복 검사 성공"),
+		@ApiResponse(responseCode = "400", description = "요청 값 검증 실패(빈 값 등)", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 	})
 	ResponseEntity<SuccessResponse<MemberNicknameExistsResponseDTO>> checkNicknameExists(
-			@NotBlank(message = "닉네임은 필수입니다.")
-			String nickname
-	);
+		@NotBlank(message = "닉네임은 필수입니다.")
+		String nickname);
 
-	@Operation(
-			summary = "회원가입 API",
-			description = """
-					회원가입을 진행합니다.
-					
-					- 이메일 인증 성공 후 발급된 signupToken이 필요합니다.
-					- signupToken에 매핑된 email과 요청 email이 일치해야 합니다.
-					- 회원가입 성공 시 accessToken과 refreshToken이 발급됩니다.
-					"""
-	)
+	@Operation(summary = "회원가입 API", description = """
+		회원가입을 진행합니다.
+
+		- 이메일 인증 성공 후 발급된 signupToken이 필요합니다.
+		- signupToken에 매핑된 email과 요청 email이 일치해야 합니다.
+		- 회원가입 성공 시 accessToken과 refreshToken이 발급됩니다.
+		""")
 	@ApiResponses({
-			@ApiResponse(responseCode = "201", description = "회원가입 성공"),
-			@ApiResponse(responseCode = "400", description = "요청 값 검증 실패 / 약관 오류 / 존재하지 않는 여행 스타일·테마 ID 포함", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-			@ApiResponse(responseCode = "401", description = "인증 실패(예: signupToken 만료/불일치)", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-			@ApiResponse(responseCode = "409", description = "충돌(예: 이메일/닉네임 중복)", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+		@ApiResponse(responseCode = "201", description = "회원가입 성공"),
+		@ApiResponse(responseCode = "400", description = "요청 값 검증 실패 / 약관 오류 / 존재하지 않는 여행 스타일·테마 ID 포함", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+		@ApiResponse(responseCode = "401", description = "인증 실패(예: signupToken 만료/불일치)", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+		@ApiResponse(responseCode = "409", description = "충돌(예: 이메일/닉네임 중복)", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 	})
 	ResponseEntity<SuccessResponse<MemberSignupResponseDTO>> signup(
-			@Valid MemberSignupRequestDTO request,
-			HttpServletResponse response
-	);
+		@Valid
+		MemberSignupRequestDTO request,
+		HttpServletResponse response);
 
-	@Operation(
-			summary = "유저 프로필 조회 API",
-			description = """
-					특정 유저의 프로필과 공개 템플릿 목록을 조회합니다.
-					
-					[Query Params]
-					- page: 페이지 번호(0부터 시작, 기본 0)
-					- size: 한 번에 가져올 템플릿 개수(기본 9)
-					"""
-	)
+	@Operation(summary = "유저 프로필 조회 API", description = """
+		특정 유저의 프로필과 공개 템플릿 목록을 조회합니다.
+
+		[Query Params]
+		- page: 페이지 번호(0부터 시작, 기본 0)
+		- size: 한 번에 가져올 템플릿 개수(기본 9)
+		""")
 	@ApiResponses({
-			@ApiResponse(responseCode = "200", description = "유저 프로필 조회 성공"),
-			@ApiResponse(responseCode = "404", description = "존재하지 않는 유저", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+		@ApiResponse(responseCode = "200", description = "유저 프로필 조회 성공"),
+		@ApiResponse(responseCode = "404", description = "존재하지 않는 유저", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 	})
 	ResponseEntity<SuccessResponse<MemberProfileResponseDTO>> getMemberProfile(
-			@PathVariable Long memberId,
-			@PageableDefault(size = 9) Pageable pageable
-	);
+		@PathVariable
+		Long memberId,
+		@PageableDefault(size = 9)
+		Pageable pageable);
 
-	@Operation(
-			summary = "마이페이지 내 즐겨찾기 목록 조회 API",
-			description = """
-				    마이페이지에서 즐겨찾기 템플릿 목록을 조회합니다.
-					
-					[Query Params]
-					- page: 페이지 번호(0부터 시작, 기본 0)
-					- size: 한 번에 가져올 템플릿 개수(기본 9)
-					"""
-	)
+	@Operation(summary = "마이페이지 내 즐겨찾기 목록 조회 API", description = """
+		   마이페이지에서 즐겨찾기 템플릿 목록을 조회합니다.
+
+		[Query Params]
+		- page: 페이지 번호(0부터 시작, 기본 0)
+		- size: 한 번에 가져올 템플릿 개수(기본 9)
+		""")
 	@ApiResponses({
-			@ApiResponse(responseCode = "200", description = "내 즐겨찾기 목록 조회 성공"),
-			@ApiResponse(responseCode = "404", description = "존재하지 않는 유저", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+		@ApiResponse(responseCode = "200", description = "내 즐겨찾기 목록 조회 성공"),
+		@ApiResponse(responseCode = "404", description = "존재하지 않는 유저", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 	})
 	ResponseEntity<SuccessResponse<PageResponseDTO<TemplateCardResponseDTO>>> getMyFavoriteTemplates(
-			@AuthenticationPrincipal Long memberId,
-			@PageableDefault(size = 9) Pageable pageable
-	);
+		@AuthenticationPrincipal
+		Long memberId,
+		@PageableDefault(size = 9)
+		Pageable pageable);
 
-	@Operation(
-			summary = "마이페이지 조회 API",
-			description = """
-					로그인한 사용자의 마이페이지 정보를 조회합니다.
-					
-					- 닉네임 / 한줄 소개 / 프로필 이미지 URL
-					- 선호 여행 스타일 ID 목록
-					- 선호 여행 테마 ID 목록
-					- 내가 생성한 블록 / 템플릿 / 즐겨찾기 수
-					- 최근 생성한 블록 최대 4개
-					- 최근 생성한(=최근 사용) 템플릿 최대 4개
-					"""
-	)
+	@Operation(summary = "마이페이지 조회 API", description = """
+		로그인한 사용자의 마이페이지 정보를 조회합니다.
+
+		- 닉네임 / 한줄 소개 / 프로필 이미지 URL
+		- 선호 여행 스타일 ID 목록
+		- 선호 여행 테마 ID 목록
+		- 내가 생성한 블록 / 템플릿 / 즐겨찾기 수
+		- 최근 생성한 블록 최대 4개
+		- 최근 생성한(=최근 사용) 템플릿 최대 4개
+		""")
 	@ApiResponses({
-			@ApiResponse(responseCode = "200", description = "마이페이지 조회 성공"),
-			@ApiResponse(responseCode = "401", description = "인증 실패(토큰 없음/만료/유효하지 않음)", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-			@ApiResponse(responseCode = "404", description = "존재하지 않는 유저", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+		@ApiResponse(responseCode = "200", description = "마이페이지 조회 성공"),
+		@ApiResponse(responseCode = "401", description = "인증 실패(토큰 없음/만료/유효하지 않음)", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+		@ApiResponse(responseCode = "404", description = "존재하지 않는 유저", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 	})
 	ResponseEntity<SuccessResponse<MemberMyPageResponseDTO>> getMyPage(
-			@Parameter(hidden = true) Member member
-	);
+		@Parameter(hidden = true)
+		Member member);
 
-	@Operation(
-			summary = "프로필 편집 API",
-			description = """
-					마이페이지 프로필을 편집합니다.
-					
-					- 요청에 포함되지 않은 필드는 기존 값을 유지합니다.
-					- introduction: null 전달 시 소개가 삭제됩니다.
-					- preferredTravelStyleIds / preferredTravelThemeIds:
-					  - 필드 없음 -> 유지
-					  - null -> 400 오류
-					  - [] -> 전체 해제
-					  - [id...] -> 해당 목록으로 교체 (최대 2개)
-					"""
-	)
+	@Operation(summary = "프로필 편집 API", description = """
+		마이페이지 프로필을 편집합니다.
+
+		- 요청에 포함되지 않은 필드는 기존 값을 유지합니다.
+		- introduction: null 전달 시 소개가 삭제됩니다.
+		- preferredTravelStyleIds / preferredTravelThemeIds:
+		  - 필드 없음 -> 유지
+		  - null -> 400 오류
+		  - [] -> 전체 해제
+		  - [id...] -> 해당 목록으로 교체 (최대 2개)
+		""")
 	@ApiResponses({
-			@ApiResponse(responseCode = "200", description = "프로필 수정 성공"),
-			@ApiResponse(responseCode = "400", description = "검증 실패/중복 닉네임/스타일·테마 개수 초과/존재하지 않는 ID", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-			@ApiResponse(responseCode = "401", description = "인증 실패", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+		@ApiResponse(responseCode = "200", description = "프로필 수정 성공"),
+		@ApiResponse(responseCode = "400", description = "검증 실패/중복 닉네임/스타일·테마 개수 초과/존재하지 않는 ID", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+		@ApiResponse(responseCode = "401", description = "인증 실패", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 	})
 	ResponseEntity<SuccessResponse<MemberProfileUpdateResponseDTO>> updateMyProfile(
-			Member member,
-			@Valid MemberProfileUpdateRequestDTO request
-	);
+		Member member,
+		@Valid
+		MemberProfileUpdateRequestDTO request);
 
-	@Operation(
-			summary = "비밀번호 변경 API",
-			description = """
-					로그인한 사용자의 비밀번호를 변경합니다.
-					
-					- currentPassword가 현재 비밀번호와 일치해야 합니다.
-					- newPassword는 기존 비밀번호와 달라야 합니다.
-					"""
-	)
+	@Operation(summary = "비밀번호 변경 API", description = """
+		로그인한 사용자의 비밀번호를 변경합니다.
+
+		- currentPassword가 현재 비밀번호와 일치해야 합니다.
+		- newPassword는 기존 비밀번호와 달라야 합니다.
+		""")
 	@ApiResponses({
-			@ApiResponse(responseCode = "200", description = "비밀번호 변경 성공"),
-			@ApiResponse(responseCode = "400", description = "요청 값 검증 실패 / 현재 비밀번호 불일치 / 새 비밀번호가 기존과 동일", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-			@ApiResponse(responseCode = "401", description = "인증 실패(토큰 없음/만료 등)", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-			@ApiResponse(responseCode = "404", description = "존재하지 않는 유저", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+		@ApiResponse(responseCode = "200", description = "비밀번호 변경 성공"),
+		@ApiResponse(responseCode = "400", description = "요청 값 검증 실패 / 현재 비밀번호 불일치 / 새 비밀번호가 기존과 동일", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+		@ApiResponse(responseCode = "401", description = "인증 실패(토큰 없음/만료 등)", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+		@ApiResponse(responseCode = "404", description = "존재하지 않는 유저", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 	})
 	ResponseEntity<SuccessResponse<Void>> updatePassword(
-			Member member,
-			@Valid MemberPasswordUpdateRequestDTO request
-	);
+		Member member,
+		@Valid
+		MemberPasswordUpdateRequestDTO request);
 
-	@Operation(
-			summary = "회원 탈퇴 API",
-			description = """
-					로그인한 사용자가 계정을 탈퇴합니다.
-					
-					- 탈퇴 사유(reason)는 선택값입니다. (요청 Body 생략 가능)
-					- 탈퇴 시 처리 정책:
-					  - 개인 데이터(선호스타일/선호테마/약관동의/즐겨찾기/OAuth 계정)는 삭제됩니다.
-					  - 사용자가 생성한 콘텐츠(블록/템플릿/템플릿 평점)는 삭제하지 않고 유지되며, 작성자는 '탈퇴한 사용자(더미 계정)'로 변경됩니다.
-					  - refreshToken은 서버(Redis)에서 무효화되고, 클라이언트 쿠키도 만료 처리됩니다.
-					  - members는 소프트 삭제(status=DELETED) + 개인정보 익명화 처리됩니다.
-					"""
-	)
+	@Operation(summary = "회원 탈퇴 API", description = """
+		로그인한 사용자가 계정을 탈퇴합니다.
+
+		- 탈퇴 사유(reason)는 선택값입니다. (요청 Body 생략 가능)
+		- 탈퇴 시 처리 정책:
+		  - 개인 데이터(선호스타일/선호테마/약관동의/즐겨찾기/OAuth 계정)는 삭제됩니다.
+		  - 사용자가 생성한 콘텐츠(블록/템플릿/템플릿 평점)는 삭제하지 않고 유지되며, 작성자는 '탈퇴한 사용자(더미 계정)'로 변경됩니다.
+		  - refreshToken은 서버(Redis)에서 무효화되고, 클라이언트 쿠키도 만료 처리됩니다.
+		  - members는 소프트 삭제(status=DELETED) + 개인정보 익명화 처리됩니다.
+		""")
 	@ApiResponses({
-			@ApiResponse(responseCode = "200", description = "회원 탈퇴 성공"),
-			@ApiResponse(responseCode = "401", description = "인증 실패(토큰 없음/만료/유효하지 않음)", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-			@ApiResponse(responseCode = "404", description = "존재하지 않는 유저", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+		@ApiResponse(responseCode = "200", description = "회원 탈퇴 성공"),
+		@ApiResponse(responseCode = "401", description = "인증 실패(토큰 없음/만료/유효하지 않음)", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+		@ApiResponse(responseCode = "404", description = "존재하지 않는 유저", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 	})
 	ResponseEntity<SuccessResponse<Void>> withdraw(
-			Member member,
-			MemberWithdrawRequestDTO request,
-			HttpServletRequest httpRequest,
-			HttpServletResponse httpResponse
-	);
+		Member member,
+		MemberWithdrawRequestDTO request,
+		HttpServletRequest httpRequest,
+		HttpServletResponse httpResponse);
 
-	@Operation(
-			summary = "마이페이지 내 템플릿 조회 API",
-			description = """
-					마이페이지에서 내 템플릿 리스트를 조회하는 API입니다.
-					페이지네이션이 있기 때문에 query param으로 page를 받습니다.
-						
-					- page: 페이지 번호(0부터 시작)
-					- size: 페이지 크기
-					"""
-	)
+	@Operation(summary = "마이페이지 내 템플릿 조회 API", description = """
+		마이페이지에서 내 템플릿 리스트를 조회하는 API입니다.
+		페이지네이션이 있기 때문에 query param으로 page를 받습니다.
+
+		- page: 페이지 번호(0부터 시작)
+		- size: 페이지 크기
+		""")
 	@ApiResponse(responseCode = "200", description = "템플릿 리스트 조회에 성공했습니다.")
 	ResponseEntity<SuccessResponse<PageResponseDTO<TemplateCardResponseDTO>>> getMyTemplates(
-			Long memberId,
-			Pageable pageable
-	);
+		Long memberId,
+		Pageable pageable);
 
-    @Operation(
-            summary = "OAuth2 온보딩 완료 API",
-            description = """
-                    OAuth 인증은 끝났지만 추가정보가 없는(ONBOARDING 상태) 사용자가
-                    약관/닉네임/선호 여행 스타일·테마를 입력하여 회원가입을 최종 완료합니다. (ACTIVE 전환)
-                    
-                    - Authorization 헤더의 accessToken이 필요합니다.
-                    - 성공 시 회원가입 API와 동일한 형태로 accessToken(바디) + refreshToken(Set-Cookie)이 발급됩니다.
-                    """
-    )
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "OAuth 온보딩 완료 성공"),
-            @ApiResponse(responseCode = "400", description = "요청 값 검증 실패 / 약관 오류 / 스타일·테마 개수 초과 / 존재하지 않는 ID", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "401", description = "인증 실패(토큰 없음/만료/유효하지 않음)", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "409", description = "닉네임 중복", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
-    })
-    ResponseEntity<SuccessResponse<MemberSignupResponseDTO>> completeOAuthOnboarding(
-            @Parameter(hidden = true) Member member,
-            @Valid MemberOAuthOnboardingRequestDTO request,
-            @Parameter(hidden = true) HttpServletResponse response
-    );
+	@Operation(summary = "OAuth2 온보딩 완료 API", description = """
+		OAuth 인증은 끝났지만 추가정보가 없는(ONBOARDING 상태) 사용자가
+		약관/닉네임/선호 여행 스타일·테마를 입력하여 회원가입을 최종 완료합니다. (ACTIVE 전환)
+
+		- Authorization 헤더의 accessToken이 필요합니다.
+		- 성공 시 회원가입 API와 동일한 형태로 accessToken(바디) + refreshToken(Set-Cookie)이 발급됩니다.
+		""")
+	@ApiResponses({
+		@ApiResponse(responseCode = "200", description = "OAuth 온보딩 완료 성공"),
+		@ApiResponse(responseCode = "400", description = "요청 값 검증 실패 / 약관 오류 / 스타일·테마 개수 초과 / 존재하지 않는 ID", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+		@ApiResponse(responseCode = "401", description = "인증 실패(토큰 없음/만료/유효하지 않음)", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+		@ApiResponse(responseCode = "409", description = "닉네임 중복", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+	})
+	ResponseEntity<SuccessResponse<MemberSignupResponseDTO>> completeOAuthOnboarding(
+		@Parameter(hidden = true)
+		Member member,
+		@Valid
+		MemberOAuthOnboardingRequestDTO request,
+		@Parameter(hidden = true)
+		HttpServletResponse response);
 }

@@ -12,10 +12,10 @@ import org.umc.travlocksserver.global.entity.SoftDeleteBaseEntity;
 @Table(name = "regions")
 public class Region extends SoftDeleteBaseEntity {
 
-    @Id
-    @Column(name = "region_id")
-    private Long id;
+	@Id
+	@Column(name = "region_id")
+	private Long id;
 
-    @Column(nullable = false, length = 10)
-    private String name;
+	@Column(nullable = false, length = 10)
+	private String name;
 }

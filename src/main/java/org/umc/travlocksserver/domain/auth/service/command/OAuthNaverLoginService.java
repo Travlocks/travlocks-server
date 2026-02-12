@@ -19,49 +19,47 @@ import org.umc.travlocksserver.domain.member.entity.Member;
 @RequiredArgsConstructor
 public class OAuthNaverLoginService {
 
-    private final NaverOAuthClient naverOAuthClient;
-    private final OAuthMemberFactory oAuthMemberFactory;
-    private final AuthService authService;
+	private final NaverOAuthClient naverOAuthClient;
+	private final OAuthMemberFactory oAuthMemberFactory;
+	private final AuthService authService;
 
-    @Transactional
-    public AuthOAuthLoginResponseDTO login(
-            AuthOAuthNaverLoginRequestDTO request,
-            HttpServletResponse response
-    ) {
-        // code -> token
-        NaverTokenResponse token = naverOAuthClient.exchangeCodeForToken(request.code(), request.state());
-        if (token == null || token.accessToken() == null || token.accessToken().isBlank()) {
-            throw new AuthException(AuthErrorCode.OAUTH_INVALID_TOKEN);
-        }
+	@Transactional
+	public AuthOAuthLoginResponseDTO login(
+		AuthOAuthNaverLoginRequestDTO request,
+		HttpServletResponse response) {
+		// code -> token
+		NaverTokenResponse token = naverOAuthClient.exchangeCodeForToken(request.code(), request.state());
+		if (token == null || token.accessToken() == null || token.accessToken().isBlank()) {
+			throw new AuthException(AuthErrorCode.OAUTH_INVALID_TOKEN);
+		}
 
-        // token -> profile
-        NaverProfileResponse profile = naverOAuthClient.fetchUserProfile(token.accessToken());
-        if (profile == null || profile.response() == null || profile.response().id() == null || profile.response().id().isBlank()) {
-            throw new AuthException(AuthErrorCode.OAUTH_INVALID_TOKEN);
-        }
+		// token -> profile
+		NaverProfileResponse profile = naverOAuthClient.fetchUserProfile(token.accessToken());
+		if (profile == null || profile.response() == null || profile.response().id() == null
+			|| profile.response().id().isBlank()) {
+			throw new AuthException(AuthErrorCode.OAUTH_INVALID_TOKEN);
+		}
 
-        String providerUserId = profile.response().id();
-        String email = profile.response().email();
+		String providerUserId = profile.response().id();
+		String email = profile.response().email();
 
-        boolean emailVerified = (email != null && !email.isBlank());
+		boolean emailVerified = (email != null && !email.isBlank());
 
-        // 로그인 or 신규 생성
-        Member member = oAuthMemberFactory.getOrCreateOnboardingMember(
-                OAuthProvider.NAVER,
-                providerUserId,
-                email,
-                emailVerified
-        );
+		// 로그인 or 신규 생성
+		Member member = oAuthMemberFactory.getOrCreateOnboardingMember(
+			OAuthProvider.NAVER,
+			providerUserId,
+			email,
+			emailVerified);
 
-        // 토큰 발급
-        AuthService.IssuedTokens issued = authService.issueTokens(member.getId(), response);
+		// 토큰 발급
+		AuthService.IssuedTokens issued = authService.issueTokens(member.getId(), response);
 
-        return new AuthOAuthLoginResponseDTO(
-                member.getId(),
-                member.getStatus(),
-                issued.accessToken(),
-                issued.accessTokenExpiresIn()
-        );
-    }
+		return new AuthOAuthLoginResponseDTO(
+			member.getId(),
+			member.getStatus(),
+			issued.accessToken(),
+			issued.accessTokenExpiresIn());
+	}
 
 }

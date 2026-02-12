@@ -8,5 +8,5 @@ public interface VlockRepositoryCustom {
 
 	List<VlockResponseDTO> findPopularVlocks(Long cityId);
 
-	List<VlockResponseDTO> findCategoryVlocks(Long cityId,Long categoryId);
+	List<VlockResponseDTO> findCategoryVlocks(Long cityId, Long categoryId);
 }

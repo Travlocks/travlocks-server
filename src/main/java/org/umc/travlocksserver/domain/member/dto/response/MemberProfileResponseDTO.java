@@ -8,6 +8,5 @@ public record MemberProfileResponseDTO(
 	String nickname,
 	String introduction,
 	String profileImageUrl,
-	PageResponseDTO<TemplateCardResponseDTO> templates
-) {
+	PageResponseDTO<TemplateCardResponseDTO> templates) {
 }

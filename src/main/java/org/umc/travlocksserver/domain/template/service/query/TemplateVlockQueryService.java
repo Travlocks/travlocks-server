@@ -14,13 +14,13 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class TemplateVlockQueryService {
 
-    private final TemplateVlockRepository templateVlockRepository;
+	private final TemplateVlockRepository templateVlockRepository;
 
-    public List<TemplateVlock> getAllByTemplateDayIdOrderByOrderNo(Long templateDayId) {
-        return templateVlockRepository.findAllByTemplateDayIdOrderByOrderNo(templateDayId);
-    }
+	public List<TemplateVlock> getAllByTemplateDayIdOrderByOrderNo(Long templateDayId) {
+		return templateVlockRepository.findAllByTemplateDayIdOrderByOrderNo(templateDayId);
+	}
 
-    public List<Vlock> getDistinctVlocksByTemplateId(Long templateId) {
-        return templateVlockRepository.findDistinctVlocksByTemplateId(templateId);
-    }
+	public List<Vlock> getDistinctVlocksByTemplateId(Long templateId) {
+		return templateVlockRepository.findDistinctVlocksByTemplateId(templateId);
+	}
 }

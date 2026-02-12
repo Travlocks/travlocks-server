@@ -34,7 +34,6 @@ public class MemberProfileQueryService {
 			member.getNickname(),
 			member.getIntroduction(),
 			member.getProfileImageUrl(),
-			PageResponseDTO.from(page)
-		);
+			PageResponseDTO.from(page));
 	}
 }

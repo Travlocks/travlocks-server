@@ -26,9 +26,9 @@ public class EmailVerificationService {
 	private static final Duration SIGNUP_TOKEN_TTL = Duration.ofMinutes(20);
 
 	private final EmailVerificationRedisRepository redisRepository;
-    private final MailSender mailSender;
-    private final MailTemplateLoader templateLoader;
-    private final MemberRepository memberRepository;
+	private final MailSender mailSender;
+	private final MailTemplateLoader templateLoader;
+	private final MemberRepository memberRepository;
 	private final SignupTokenRedisRepository signupTokenRedisRepository;
 
 	private static final SecureRandom RANDOM = new SecureRandom();
@@ -48,15 +48,15 @@ public class EmailVerificationService {
 			new EmailVerificationRedisRepository.EmailVerificationCache(email, code),
 			TTL);
 
-        String subject = "[트래블록스] 이메일 인증 코드 안내";
-        String html = templateLoader.load("mail/verification-code.html")
-                .replace("{{CODE}}", code);
-        try {
-            mailSender.send(email, subject, html);
-        } catch (Exception e) {
-            e.printStackTrace();   // ← 이거 하나만으로도 원인 다 나옴
-            throw new RuntimeException("EMAIL_SEND_FAILED");
-        }
+		String subject = "[트래블록스] 이메일 인증 코드 안내";
+		String html = templateLoader.load("mail/verification-code.html")
+			.replace("{{CODE}}", code);
+		try {
+			mailSender.send(email, subject, html);
+		} catch (Exception e) {
+			e.printStackTrace(); // ← 이거 하나만으로도 원인 다 나옴
+			throw new RuntimeException("EMAIL_SEND_FAILED");
+		}
 
 		return new AuthSendEmailResponseDTO(verificationId);
 	}
@@ -97,14 +97,13 @@ public class EmailVerificationService {
 
 		String newCode = generate6DigitCode();
 
-
-        String subject = "[트래블록스] 이메일 인증 코드 안내";
-        String htmlBody = templateLoader.load("mail/verification-code.html")
-                .replace("{{CODE}}", newCode);
+		String subject = "[트래블록스] 이메일 인증 코드 안내";
+		String htmlBody = templateLoader.load("mail/verification-code.html")
+			.replace("{{CODE}}", newCode);
 		try {
-            mailSender.send(oldCache.email(), subject, htmlBody);
+			mailSender.send(oldCache.email(), subject, htmlBody);
 		} catch (Exception e) {
-            // 실패하면 Redis 그대로 유지
+			// 실패하면 Redis 그대로 유지
 			throw new AuthException(EMAIL_SEND_FAILED);
 		}
 

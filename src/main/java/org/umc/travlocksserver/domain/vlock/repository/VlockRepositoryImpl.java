@@ -65,8 +65,7 @@ public class VlockRepositoryImpl implements VlockRepositoryCustom {
 			.where(
 				city.id.eq(cityId),
 				vlock.deletedAt.isNull(),
-				vlock.isPublic.isTrue()
-			);
+				vlock.isPublic.isTrue());
 	}
 
 	private ConstructorExpression<VlockResponseDTO> vlockResponseProjection(StringExpression coverImgUrl) {
@@ -77,17 +76,14 @@ public class VlockRepositoryImpl implements VlockRepositoryCustom {
 			Projections.constructor(VlockCategoryDTO.class,
 				vlockCategory.id,
 				vlockCategory.name,
-				vlockCategory.stayHours
-			),
+				vlockCategory.stayHours),
 
 			Projections.constructor(CityDTO.class,
 				city.id,
 				city.name,
 				Projections.constructor(RegionDTO.class,
 					region.id,
-					region.name
-				)
-			),
+					region.name)),
 
 			vlock.name,
 			vlock.address,
@@ -102,7 +98,6 @@ public class VlockRepositoryImpl implements VlockRepositoryCustom {
 			vlock.isPublic,
 
 			vlock.createdAt,
-			vlock.updatedAt
-		);
+			vlock.updatedAt);
 	}
 }

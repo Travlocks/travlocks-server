@@ -24,27 +24,25 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class CustomAuthEntryPoint implements AuthenticationEntryPoint {
 
-    private final ObjectMapper objectMapper;
+	private final ObjectMapper objectMapper;
 
-    @Override
-    public void commence(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            AuthenticationException authException
-    ) throws IOException {
+	@Override
+	public void commence(
+		HttpServletRequest request,
+		HttpServletResponse response,
+		AuthenticationException authException) throws IOException {
 
-        // JwtAuthFilter에서 인증 실패 시 request에 저장한 에러 코드 조회
-        Object attr = request.getAttribute(JwtAuthFilter.AUTH_ERROR_ATTR);
+		// JwtAuthFilter에서 인증 실패 시 request에 저장한 에러 코드 조회
+		Object attr = request.getAttribute(JwtAuthFilter.AUTH_ERROR_ATTR);
 
-        // request attribute에 SecurityErrorCode가 담겨 있으면 그대로 사용
-        SecurityErrorCode errorCode =
-                (attr instanceof SecurityErrorCode sec)
-                        ? sec
-                        : SecurityErrorCode.UNAUTHORIZED;
+		// request attribute에 SecurityErrorCode가 담겨 있으면 그대로 사용
+		SecurityErrorCode errorCode = (attr instanceof SecurityErrorCode sec)
+			? sec
+			: SecurityErrorCode.UNAUTHORIZED;
 
-        // ErrorResponse 형식으로 401 응답 반환
-        response.setStatus(errorCode.getStatus().value());
-        response.setContentType("application/json;charset=UTF-8");
-        response.getWriter().write(objectMapper.writeValueAsString(new ErrorResponse(errorCode)));
-    }
+		// ErrorResponse 형식으로 401 응답 반환
+		response.setStatus(errorCode.getStatus().value());
+		response.setContentType("application/json;charset=UTF-8");
+		response.getWriter().write(objectMapper.writeValueAsString(new ErrorResponse(errorCode)));
+	}
 }
