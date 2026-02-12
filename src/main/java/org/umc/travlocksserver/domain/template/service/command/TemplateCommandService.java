@@ -11,6 +11,10 @@ import org.umc.travlocksserver.domain.template.entity.Template;
 import org.umc.travlocksserver.domain.template.exception.TemplateException;
 import org.umc.travlocksserver.domain.template.repository.TemplateRepository;
 import org.umc.travlocksserver.global.aws.S3Provider;
+import org.umc.travlocksserver.domain.member.entity.Member;
+import org.umc.travlocksserver.domain.member.service.query.MemberQueryService;
+import org.umc.travlocksserver.domain.template.entity.Template;
+import org.umc.travlocksserver.domain.template.service.query.TemplateQueryService;
 
 @Service
 @RequiredArgsConstructor
@@ -55,5 +59,14 @@ public class TemplateCommandService {
         );
 
         return TemplateSaveResponseDTO.from(template);
+    private final TemplateQueryService templateQueryService;
+    private final MemberQueryService memberQueryService;
+
+    public void deleteById(Long memberId, Long templateId) {
+        Member member = memberQueryService.getById(memberId);
+        Template template = templateQueryService.getTemplateByIdAndOwnerId(templateId, memberId);
+
+        member.decreaseTemplateCount();
+        template.softDelete();
     }
 }

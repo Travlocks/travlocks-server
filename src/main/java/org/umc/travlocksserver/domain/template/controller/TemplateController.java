@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.umc.travlocksserver.domain.template.dto.request.TemplatePreInputRequestDTO;
 import org.umc.travlocksserver.domain.template.dto.response.TemplatePreInputResponseDTO;
 import org.umc.travlocksserver.domain.template.enums.TripDays;
-import org.umc.travlocksserver.domain.template.service.command.TemplatePreInputService;
+import org.umc.travlocksserver.domain.template.service.command.*;
 import org.umc.travlocksserver.domain.member.entity.Member;
 import org.umc.travlocksserver.domain.template.code.TemplateSuccessCode;
 import org.umc.travlocksserver.domain.template.dto.request.TemplateRatingCreateRequestDTO;
@@ -30,12 +30,8 @@ import org.umc.travlocksserver.domain.template.enums.TransportType;
 import org.umc.travlocksserver.domain.template.dto.response.OptimizeResponseDTO;
 import org.umc.travlocksserver.domain.template.dto.response.*;
 import org.umc.travlocksserver.domain.template.code.TemplateDaySuccessCode;
-import org.umc.travlocksserver.domain.template.service.command.TemplateDayCommandService;
 import org.umc.travlocksserver.domain.template.dto.response.VlockSuggestionsResponseDTO;
-import org.umc.travlocksserver.domain.template.service.command.TemplateRatingCommandService;
-import org.umc.travlocksserver.domain.template.service.command.TemplateRemixService;
 import org.umc.travlocksserver.domain.template.service.query.TemplateCanvasQueryService;
-import org.umc.travlocksserver.domain.template.service.command.TemplateDayOptimizeCommandService;
 import org.umc.travlocksserver.domain.template.service.query.TemplateQueryService;
 import org.umc.travlocksserver.domain.template.dto.response.PopularTemplateResponse;
 import org.umc.travlocksserver.domain.template.service.query.TemplateRouteQueryService;
@@ -315,5 +311,16 @@ public class TemplateController implements TemplateControllerDocs {
 		return ResponseEntity
 			.status(successCode.getStatus())
 			.body(SuccessResponse.ok(successCode));
+	}
+
+	@DeleteMapping("/{templateId}")
+	public ResponseEntity<SuccessResponse<Void>> deleteTemplate(
+			@AuthenticationPrincipal Long memberId,
+			@PathVariable Long templateId
+	) {
+		templateCommandService.deleteById(memberId, templateId);
+		return ResponseEntity.ok(
+				SuccessResponse.ok(TemplateSuccessCode.TEMPLATE_DELETED_SUCCESS)
+		);
 	}
 }

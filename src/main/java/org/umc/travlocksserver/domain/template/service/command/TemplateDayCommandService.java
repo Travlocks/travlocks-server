@@ -552,7 +552,6 @@ public class TemplateDayCommandService {
      */
     private void fetchFromExternal(Long templateId, LatLng center, Integer radiusKm) {
         List<CityProjectionDTO> cities = templateCityQueryService.getCitiesByTemplateId(templateId);
-        log.info("템플릿 도시 추천 = {}", cities.get(0).cityName());
         if (cities.isEmpty()) return;
 
         Double x = (center == null) ? null : center.lng();
