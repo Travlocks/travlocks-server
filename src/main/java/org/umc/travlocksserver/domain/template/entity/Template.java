@@ -145,4 +145,15 @@ public class Template extends SoftDeleteBaseEntity {
             this.favoriteCount--;
         }
     }
+    public void updateMetadata(
+            String title,
+            String description,
+            String coverImageUrl,
+            Boolean isPublic
+    ) {
+        if (title != null) this.title = title;
+        if (description != null) this.description = description;
+        if (coverImageUrl != null) this.coverImageUrl = coverImageUrl;
+        if (isPublic != null) this.isPublic = isPublic;
+    }
 }
