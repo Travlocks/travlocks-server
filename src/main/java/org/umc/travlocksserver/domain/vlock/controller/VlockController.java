@@ -2,6 +2,9 @@ package org.umc.travlocksserver.domain.vlock.controller;
 
 import java.util.List;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -34,6 +37,19 @@ public class VlockController implements VlockControllerDocs {
 
 	private final VlockCommandService vlockCommandService;
 	private final VlockQueryService vlockQueryService;
+
+	/** 블록 검색 */
+	@GetMapping("/search")
+	public ResponseEntity<SuccessResponse<List<VlockResponseDTO>>> searchVlocks(
+		@RequestParam String query,
+		@PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+	) {
+		List<VlockResponseDTO> responses = vlockQueryService.searchVlocks(query, pageable);
+
+		return ResponseEntity
+			.status(HttpStatus.OK)
+			.body(SuccessResponse.ok(VlockSuccessCode.VLOCK_GET_SUCCESS, responses));
+	}
 
 	/** 블록 생성 */
 	@PostMapping(

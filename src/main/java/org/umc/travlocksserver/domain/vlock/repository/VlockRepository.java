@@ -80,4 +80,13 @@ public interface VlockRepository extends JpaRepository<Vlock,Long>, VlockReposit
             Pageable pageable
     );
 
+    @Query("""
+        SELECT v
+        FROM Vlock v
+        WHERE (v.name LIKE %:keyword% OR v.address LIKE %:keyword% OR v.memo LIKE %:keyword%)
+          AND v.isPublic = true
+          AND v.deletedAt IS NULL
+    """)
+    List<Vlock> searchByKeyword(@Param("keyword") String keyword, Pageable pageable);
+
 }
