@@ -11,9 +11,9 @@ import org.umc.travlocksserver.domain.location.repository.CityRepository;
 @Transactional(readOnly = true)
 public class CityQueryService {
 
-    private final CityRepository cityRepository;
+	private final CityRepository cityRepository;
 
-    public City getReferenceById(Long cityId) {
-        return cityRepository.getReferenceById(cityId);
-    }
+	public City getReferenceById(Long cityId) {
+		return cityRepository.getReferenceById(cityId);
+	}
 }

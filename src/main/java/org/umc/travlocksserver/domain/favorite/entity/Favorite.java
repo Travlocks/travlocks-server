@@ -11,25 +11,22 @@ import org.umc.travlocksserver.global.entity.CreatedBaseEntity;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
 @Entity
-@Table(
-        name = "favorites",
-        uniqueConstraints = {
-                @UniqueConstraint(columnNames = {"member_id", "template_id"})
-        }
-)
+@Table(name = "favorites", uniqueConstraints = {
+	@UniqueConstraint(columnNames = {"member_id", "template_id"})
+})
 public class Favorite extends CreatedBaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "favorite_id")
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "favorite_id")
+	private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id", nullable = false)
-    private Member member;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "member_id", nullable = false)
+	private Member member;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "template_id", nullable = false)
-    private Template template;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "template_id", nullable = false)
+	private Template template;
 
 }

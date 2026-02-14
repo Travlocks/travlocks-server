@@ -12,39 +12,39 @@ import java.util.List;
 @RequiredArgsConstructor
 public class KakaoPlaceWebClient implements KakaoPlaceClient {
 
-    private final WebClient kakaoWebClient;
-    @Value("${kakao.keyword-search.path}")
-    private String keywordSearchPath;
+	private final WebClient kakaoWebClient;
+	@Value("${kakao.keyword-search.path}")
+	private String keywordSearchPath;
 
-    @Override
-    public List<KakaoPlace> searchPlaces(String query, Double x, Double y, Integer radius, int size) {
-        KakaoSearchResponseDTO response = kakaoWebClient.get()
-                .uri(uriBuilder -> {
-                    uriBuilder.path(keywordSearchPath)
-                            .queryParam("query", query)
-                            .queryParam("size", size);
+	@Override
+	public List<KakaoPlace> searchPlaces(String query, Double x, Double y, Integer radius, int size) {
+		KakaoSearchResponseDTO response = kakaoWebClient.get()
+			.uri(uriBuilder -> {
+				uriBuilder.path(keywordSearchPath)
+					.queryParam("query", query)
+					.queryParam("size", size);
 
-                    if (x != null && y != null) {
-                        uriBuilder.queryParam("x", x).queryParam("y", y);
-                    }
+				if (x != null && y != null) {
+					uriBuilder.queryParam("x", x).queryParam("y", y);
+				}
 
-                    if (radius != null) {
-                        uriBuilder.queryParam("radius", radius);
-                    }
+				if (radius != null) {
+					uriBuilder.queryParam("radius", radius);
+				}
 
-                    return uriBuilder.build();
-                })
-                .retrieve()
-                .bodyToMono(KakaoSearchResponseDTO.class)
-                .block();
+				return uriBuilder.build();
+			})
+			.retrieve()
+			.bodyToMono(KakaoSearchResponseDTO.class)
+			.block();
 
-        if (response == null || response.documents() == null) {
-            return List.of();
-        }
+		if (response == null || response.documents() == null) {
+			return List.of();
+		}
 
-        return response.documents().stream()
-                .map(KakaoPlace::from)
-                .filter(dto -> dto.latitude() != null && dto.longitude() != null)
-                .toList();
-    }
+		return response.documents().stream()
+			.map(KakaoPlace::from)
+			.filter(dto -> dto.latitude() != null && dto.longitude() != null)
+			.toList();
+	}
 }

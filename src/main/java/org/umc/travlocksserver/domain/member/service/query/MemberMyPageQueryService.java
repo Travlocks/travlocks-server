@@ -28,49 +28,46 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MemberMyPageQueryService {
 
-    private final MemberRepository memberRepository;
-    private final PreferredTravelStyleRepository preferredTravelStyleRepository;
-    private final PreferredTravelThemeRepository preferredTravelThemeRepository;
-    private final VlockRepository vlockRepository;
+	private final MemberRepository memberRepository;
+	private final PreferredTravelStyleRepository preferredTravelStyleRepository;
+	private final PreferredTravelThemeRepository preferredTravelThemeRepository;
+	private final VlockRepository vlockRepository;
 	private final TemplateRepository templateRepository;
 	private final FavoriteRepository favoriteRepository;
 	private final S3Properties s3Properties;
 
-    @Transactional(readOnly = true)
-    public MemberMyPageResponseDTO getMyPage(Member member) {
-        Long memberId = member.getId();
+	@Transactional(readOnly = true)
+	public MemberMyPageResponseDTO getMyPage(Member member) {
+		Long memberId = member.getId();
 
-        List<Long> styleIds = preferredTravelStyleRepository.findPreferredStyleIdsByMemberId(memberId);
-        List<Long> themeIds = preferredTravelThemeRepository.findPreferredThemeIdsByMemberId(memberId);
+		List<Long> styleIds = preferredTravelStyleRepository.findPreferredStyleIdsByMemberId(memberId);
+		List<Long> themeIds = preferredTravelThemeRepository.findPreferredThemeIdsByMemberId(memberId);
 
-        PageRequest recent4 = PageRequest.of(0, 4);
+		PageRequest recent4 = PageRequest.of(0, 4);
 
-        List<MyPageRecentVlockDTO> vlocks =
-                vlockRepository.findRecentCreatedVlocks(memberId, recent4);
-        List<MyPageRecentTemplateDTO> templates =
-                templateRepository.findRecentCreatedTemplatesWithFavorite(memberId, recent4);
+		List<MyPageRecentVlockDTO> vlocks = vlockRepository.findRecentCreatedVlocks(memberId, recent4);
+		List<MyPageRecentTemplateDTO> templates = templateRepository.findRecentCreatedTemplatesWithFavorite(memberId,
+			recent4);
 
-        return new MemberMyPageResponseDTO(
-                member.getId(),
-                member.getNickname(),
-                member.getIntroduction(),
-                member.getProfileImageUrl(),
-                member.getEmail(),
-                styleIds,
-                themeIds,
-                new MemberMyPageResponseDTO.Counts(
-                        member.getVlockCount(),
-                        member.getTemplateCount(),
-                        member.getStarCount()
-                ),
-                new MemberMyPageResponseDTO.Recent(vlocks, templates)
-        );
-    }
+		return new MemberMyPageResponseDTO(
+			member.getId(),
+			member.getNickname(),
+			member.getIntroduction(),
+			member.getProfileImageUrl(),
+			member.getEmail(),
+			styleIds,
+			themeIds,
+			new MemberMyPageResponseDTO.Counts(
+				member.getVlockCount(),
+				member.getTemplateCount(),
+				member.getStarCount()),
+			new MemberMyPageResponseDTO.Recent(vlocks, templates));
+	}
 
-    public PageResponseDTO<TemplateCardResponseDTO> getMyTemplates(Long memberId, Pageable pageable) {
-        Page<TemplateCardResponseDTO> response = templateRepository.findMyTemplates(memberId, pageable);
-        return PageResponseDTO.from(response);
-    }
+	public PageResponseDTO<TemplateCardResponseDTO> getMyTemplates(Long memberId, Pageable pageable) {
+		Page<TemplateCardResponseDTO> response = templateRepository.findMyTemplates(memberId, pageable);
+		return PageResponseDTO.from(response);
+	}
 
 	public PageResponseDTO<TemplateCardResponseDTO> getMyFavoriteTemplates(Long memberId, Pageable pageable) {
 		memberRepository.findById(memberId)

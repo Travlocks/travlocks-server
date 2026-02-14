@@ -26,122 +26,119 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class NotificationCommandService {
 
-    @Value("${sse.timeout-ms}")
-    private long SSE_TIMEOUT_MS;
+	@Value("${sse.timeout-ms}")
+	private long SSE_TIMEOUT_MS;
 
-    @Value("${cookie.sse-token.token-ttl-ms}")
-    private long SSE_TOKEN_TTL_MS;
+	@Value("${cookie.sse-token.token-ttl-ms}")
+	private long SSE_TOKEN_TTL_MS;
 
-    private final SseEmitterRepository emitterRepository;
-    private final NotificationRepository notificationRepository;
-    private final MemberQueryService memberQueryService;
-    private final JwtTokenProvider jwtTokenProvider;
-    private final TimeAgoFormatter timeAgoFormatter;
+	private final SseEmitterRepository emitterRepository;
+	private final NotificationRepository notificationRepository;
+	private final MemberQueryService memberQueryService;
+	private final JwtTokenProvider jwtTokenProvider;
+	private final TimeAgoFormatter timeAgoFormatter;
 
-    /**
-     * 클라이언트의 SSE 연결 생성 및 등록
-     * - 로그인한 사용자가 실시간 알림을 수신할 수 있도록 서버와 클라이언트 간 SSE 스트림 연결 생성
-    * */
-    public SseEmitter subscribe(Long memberId) {
-        String emitterId = memberId + "-" + UUID.randomUUID();  // 한 유저는 여러 연결을 가질 수 있음 emitterId로 관리
-        SseEmitter emitter = new SseEmitter(SSE_TIMEOUT_MS);  // SSE 연결 생성
+	/**
+	 * 클라이언트의 SSE 연결 생성 및 등록
+	 * - 로그인한 사용자가 실시간 알림을 수신할 수 있도록 서버와 클라이언트 간 SSE 스트림 연결 생성
+	* */
+	public SseEmitter subscribe(Long memberId) {
+		String emitterId = memberId + "-" + UUID.randomUUID(); // 한 유저는 여러 연결을 가질 수 있음 emitterId로 관리
+		SseEmitter emitter = new SseEmitter(SSE_TIMEOUT_MS); // SSE 연결 생성
 
-        emitterRepository.add(memberId, emitterId, emitter);
+		emitterRepository.add(memberId, emitterId, emitter);
 
-        emitter.onCompletion(() -> emitterRepository.remove(memberId, emitterId));
-        emitter.onTimeout(() -> emitterRepository.remove(memberId, emitterId));
-        emitter.onError(e -> emitterRepository.remove(memberId, emitterId));
+		emitter.onCompletion(() -> emitterRepository.remove(memberId, emitterId));
+		emitter.onTimeout(() -> emitterRepository.remove(memberId, emitterId));
+		emitter.onError(e -> emitterRepository.remove(memberId, emitterId));
 
-        // 연결 직후 connected 이벤트 전송 (프론트 연결 확인, 프록시 연결 유지를 위함)
-        try {
-            emitter.send(
-                    SseEmitter.event()
-                            .name(SseEventNames.CONNECTED)
-                            .data("ok"));
-        } catch (IOException e) {
-            try {
-                emitter.complete();
-            } catch (Exception ignored) {}
-        }
+		// 연결 직후 connected 이벤트 전송 (프론트 연결 확인, 프록시 연결 유지를 위함)
+		try {
+			emitter.send(
+				SseEmitter.event()
+					.name(SseEventNames.CONNECTED)
+					.data("ok"));
+		} catch (IOException e) {
+			try {
+				emitter.complete();
+			} catch (Exception ignored) {}
+		}
 
-        return emitter;
-    }
+		return emitter;
+	}
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public Notification createNotification(Long receiverId, Long actorId, Long templateId, NotificationType type) {
-        Member member = memberQueryService.getById(actorId);
-        return notificationRepository.save(
-                Notification.create(
-                        receiverId,
-                        actorId,
-                        member.getNickname(),
-                        templateId,
-                        type)
-        );
-    }
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	public Notification createNotification(Long receiverId, Long actorId, Long templateId, NotificationType type) {
+		Member member = memberQueryService.getById(actorId);
+		return notificationRepository.save(
+			Notification.create(
+				receiverId,
+				actorId,
+				member.getNickname(),
+				templateId,
+				type));
+	}
 
-    /**
-     * 사용자에게 읽지 않은 알림이 있음(SSE 이벤트)을 실시간으로 푸시
-     * */
-    public void signalHasUnread(Long receiverId, boolean hasUnread) {
-        Map<String, SseEmitter> emitters = emitterRepository.getEmitters(receiverId);
-        if (emitters.isEmpty())
-            return;
+	/**
+	 * 사용자에게 읽지 않은 알림이 있음(SSE 이벤트)을 실시간으로 푸시
+	 * */
+	public void signalHasUnread(Long receiverId, boolean hasUnread) {
+		Map<String, SseEmitter> emitters = emitterRepository.getEmitters(receiverId);
+		if (emitters.isEmpty())
+			return;
 
-        NotificationSsePayloadDTO payload = new NotificationSsePayloadDTO(hasUnread);
+		NotificationSsePayloadDTO payload = new NotificationSsePayloadDTO(hasUnread);
 
-        for (Map.Entry<String, SseEmitter> entry : emitters.entrySet()) {
-            String emitterId = entry.getKey();
-            SseEmitter emitter = entry.getValue();
-            try {
-                emitter.send(
-                        SseEmitter.event()
-                                .name(SseEventNames.UNREAD)
-                                .data(payload)
-                );
-            } catch (IOException e) {  // SSE 연결이 끊겼는데 보내려고 할 떄
-                emitterRepository.remove(receiverId, emitterId);  // 연결 정리
-            }
-        }
-    }
+		for (Map.Entry<String, SseEmitter> entry : emitters.entrySet()) {
+			String emitterId = entry.getKey();
+			SseEmitter emitter = entry.getValue();
+			try {
+				emitter.send(
+					SseEmitter.event()
+						.name(SseEventNames.UNREAD)
+						.data(payload));
+			} catch (IOException e) { // SSE 연결이 끊겼는데 보내려고 할 떄
+				emitterRepository.remove(receiverId, emitterId); // 연결 정리
+			}
+		}
+	}
 
-    /**
-     * 사용자에게 들어온 새로운 알림(SSE 이벤트)을 실시간으로 푸시
-     * */
-    public void pushNotificationCreated(Notification notification) {
-        Map<String, SseEmitter> emitters = emitterRepository.getEmitters(notification.getReceiverId());
+	/**
+	 * 사용자에게 들어온 새로운 알림(SSE 이벤트)을 실시간으로 푸시
+	 * */
+	public void pushNotificationCreated(Notification notification) {
+		Map<String, SseEmitter> emitters = emitterRepository.getEmitters(notification.getReceiverId());
 
-        if (emitters.isEmpty()) {
-            return;
-        }
+		if (emitters.isEmpty()) {
+			return;
+		}
 
-        NotificationAllResponseDTO.NotificationDTO payload = NotificationAllResponseDTO.NotificationDTO.
-                from(notification, timeAgoFormatter.format(notification.getCreatedAt()));
+		NotificationAllResponseDTO.NotificationDTO payload = NotificationAllResponseDTO.NotificationDTO
+			.from(notification, timeAgoFormatter.format(notification.getCreatedAt()));
 
-        for (Map.Entry<String, SseEmitter> entry : emitters.entrySet()) {
-            String emitterId = entry.getKey();
-            SseEmitter emitter = entry.getValue();
+		for (Map.Entry<String, SseEmitter> entry : emitters.entrySet()) {
+			String emitterId = entry.getKey();
+			SseEmitter emitter = entry.getValue();
 
-            try {
-                emitter.send(
-                        SseEmitter.event()
-                                .name(SseEventNames.NOTIFICATION)
-                                .data(payload)
-                );
-            } catch (IOException e) {
-                emitterRepository.remove(notification.getReceiverId(), emitterId);
-            }
-        }
-    }
+			try {
+				emitter.send(
+					SseEmitter.event()
+						.name(SseEventNames.NOTIFICATION)
+						.data(payload));
+			} catch (IOException e) {
+				emitterRepository.remove(notification.getReceiverId(), emitterId);
+			}
+		}
+	}
 
-    public String generateSseToken(Long memberId) {
-        long ttlSeconds = SSE_TOKEN_TTL_MS / 1000L;
-        return jwtTokenProvider.generateSseToken(memberId, ttlSeconds);
-    }
+	public String generateSseToken(Long memberId) {
+		long ttlSeconds = SSE_TOKEN_TTL_MS / 1000L;
+		return jwtTokenProvider.generateSseToken(memberId, ttlSeconds);
+	}
 
-    @Transactional
-    public void deleteAllNotification(Long memberId) {
-        notificationRepository.deleteAllByReceiverId(memberId);
-        signalHasUnread(memberId, false);
-    }
+	@Transactional
+	public void deleteAllNotification(Long memberId) {
+		notificationRepository.deleteAllByReceiverId(memberId);
+		signalHasUnread(memberId, false);
+	}
 }

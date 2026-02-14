@@ -59,12 +59,11 @@ public class TemplateRemixService {
 
 		// 이벤트 발행
 		eventPublisher.publishEvent(new TemplateActivityEvent(
-				original.getOwner().getId(),
-				remixer.getId(),
-				remixer.getNickname(),
-				original.getId(),
-				NotificationType.TEMPLATE_REMIXED
-				));
+			original.getOwner().getId(),
+			remixer.getId(),
+			remixer.getNickname(),
+			original.getId(),
+			NotificationType.TEMPLATE_REMIXED));
 
 		return new TemplateRemixResponseDTO(original.getId(), remixedTemplate.getId());
 	}

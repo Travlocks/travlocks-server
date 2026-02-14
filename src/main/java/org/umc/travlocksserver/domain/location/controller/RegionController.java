@@ -11,17 +11,17 @@ import org.umc.travlocksserver.global.response.SuccessResponse;
 @RestController
 @RequestMapping("/api/v1/regions")
 @RequiredArgsConstructor
-public class RegionController implements RegionControllerDocs{
+public class RegionController implements RegionControllerDocs {
 
-    private final RegionQueryService regionQueryService;  // ← 기존 Service 재사용
+	private final RegionQueryService regionQueryService; // ← 기존 Service 재사용
 
-    @GetMapping
-    public ResponseEntity<SuccessResponse<RegionListResponseDTO>> getRegions() {
-        RegionSuccessCode successCode = RegionSuccessCode.REGION_RETRIEVE_SUCCESS;
-        RegionListResponseDTO response = regionQueryService.getAllRegions();
+	@GetMapping
+	public ResponseEntity<SuccessResponse<RegionListResponseDTO>> getRegions() {
+		RegionSuccessCode successCode = RegionSuccessCode.REGION_RETRIEVE_SUCCESS;
+		RegionListResponseDTO response = regionQueryService.getAllRegions();
 
-        return ResponseEntity
-                .status(successCode.getStatus())
-                .body(SuccessResponse.ok(successCode, response));
-    }
+		return ResponseEntity
+			.status(successCode.getStatus())
+			.body(SuccessResponse.ok(successCode, response));
+	}
 }

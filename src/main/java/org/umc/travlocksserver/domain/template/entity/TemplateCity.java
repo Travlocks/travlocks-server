@@ -13,16 +13,16 @@ import org.umc.travlocksserver.global.entity.BaseEntity;
 @Table(name = "template_cities")
 public class TemplateCity extends BaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "template_city_id")
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "template_city_id")
+	private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "template_id", nullable = false)
-    private Template template;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "template_id", nullable = false)
+	private Template template;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "city_id", nullable = false)
-    private City city;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "city_id", nullable = false)
+	private City city;
 }

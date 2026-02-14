@@ -6,10 +6,9 @@ import java.util.List;
 
 public interface TemplateRepositoryCustom {
 
-    List<TemplateRecommendationCardDTO> recommendPersonalized(
-            List<Long> preferredThemeIds,
-            List<Long> recentThemeIds,
-            List<Long> excludedTemplateIds,
-            int limit
-    );
+	List<TemplateRecommendationCardDTO> recommendPersonalized(
+		List<Long> preferredThemeIds,
+		List<Long> recentThemeIds,
+		List<Long> excludedTemplateIds,
+		int limit);
 }

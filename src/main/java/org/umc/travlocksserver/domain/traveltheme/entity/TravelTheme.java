@@ -12,11 +12,11 @@ import org.umc.travlocksserver.global.entity.CreatedSoftDeleteBaseEntity;
 @Table(name = "travel_themes")
 public class TravelTheme extends CreatedSoftDeleteBaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "travel_theme_id")
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "travel_theme_id")
+	private Long id;
 
-    @Column(name = "content", nullable = false, length = 20)
-    private String content;
+	@Column(name = "content", nullable = false, length = 20)
+	private String content;
 }

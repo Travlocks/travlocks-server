@@ -10,6 +10,5 @@ public interface MoveTimeRepository extends JpaRepository<MoveTime, Long> {
 	Optional<MoveTime> findByFromVlockIdAndToVlockIdAndTransportType(
 		Long fromVlockId,
 		Long toVlockId,
-		TransportType transportType
-	);
+		TransportType transportType);
 }

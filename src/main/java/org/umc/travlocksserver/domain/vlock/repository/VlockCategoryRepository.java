@@ -9,5 +9,5 @@ import java.util.Optional;
 @Repository
 public interface VlockCategoryRepository extends JpaRepository<VlockCategory, Long> {
 
-    Optional<VlockCategory> findByName(String name);
+	Optional<VlockCategory> findByName(String name);
 }

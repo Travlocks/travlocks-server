@@ -69,7 +69,7 @@ public class TmapDTO {
 		@Getter
 		@NoArgsConstructor
 		@AllArgsConstructor
-		@JsonIgnoreProperties(ignoreUnknown = true)  // 알 수 없는 필드 무시
+		@JsonIgnoreProperties(ignoreUnknown = true) // 알 수 없는 필드 무시
 		public static class Properties {
 			private Integer totalDistance; // 전체 거리(m)
 			private Integer totalTime; // 전체 시간(초)

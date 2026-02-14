@@ -10,15 +10,13 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class JacksonConfig {
 
-    @Bean
-    public Jackson2ObjectMapperBuilderCustomizer jacksonCustomizer() {
-        return builder -> {
-            builder.modules(
-                    new JsonNullableModule(),
-                    new JavaTimeModule()
-            );
-            builder.featuresToDisable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-        };
-    }
+	@Bean
+	public Jackson2ObjectMapperBuilderCustomizer jacksonCustomizer() {
+		return builder -> {
+			builder.modules(
+				new JsonNullableModule(),
+				new JavaTimeModule());
+			builder.featuresToDisable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+		};
+	}
 }
-

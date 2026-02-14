@@ -19,8 +19,7 @@ public record TemplateCanvasResponseDTO(
 	Double totalStayHours,
 	List<Long> cities,
 	List<TemplateCanvasVlockDTO> vlocks,
-	LocalDateTime createdAt
-) {
+	LocalDateTime createdAt) {
 	public static TemplateCanvasResponseDTO from(
 		Template template,
 		Integer dayNo,
@@ -29,8 +28,7 @@ public record TemplateCanvasResponseDTO(
 		double totalMoveHours,
 		double totalStayHours,
 		List<Long> cities,
-		List<TemplateCanvasVlockDTO> vlocks
-	) {
+		List<TemplateCanvasVlockDTO> vlocks) {
 		return new TemplateCanvasResponseDTO(
 			template.getId(),
 			template.getTitle(),
@@ -43,7 +41,6 @@ public record TemplateCanvasResponseDTO(
 			totalStayHours,
 			cities,
 			vlocks,
-			template.getCreatedAt()
-		);
+			template.getCreatedAt());
 	}
 }

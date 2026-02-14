@@ -11,10 +11,10 @@ import org.umc.travlocksserver.domain.member.repository.MemberRepository;
 @RequiredArgsConstructor
 public class MemberQueryService {
 
-    private final MemberRepository memberRepository;
+	private final MemberRepository memberRepository;
 
-    public Member getById(Long memberId) {
-        return memberRepository.findById(memberId)
-                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
-    }
+	public Member getById(Long memberId) {
+		return memberRepository.findById(memberId)
+			.orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+	}
 }

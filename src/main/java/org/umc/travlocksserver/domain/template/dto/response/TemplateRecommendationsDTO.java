@@ -5,9 +5,8 @@ import org.umc.travlocksserver.infra.redis.template.CachedTemplateRecommendation
 import java.util.List;
 
 public record TemplateRecommendationsDTO(
-        List<TemplateRecommendationCardDTO> templates
-) {
-    public static TemplateRecommendationsDTO from(CachedTemplateRecommendations cached) {
-        return new TemplateRecommendationsDTO(cached.templates());
-    }
+	List<TemplateRecommendationCardDTO> templates) {
+	public static TemplateRecommendationsDTO from(CachedTemplateRecommendations cached) {
+		return new TemplateRecommendationsDTO(cached.templates());
+	}
 }

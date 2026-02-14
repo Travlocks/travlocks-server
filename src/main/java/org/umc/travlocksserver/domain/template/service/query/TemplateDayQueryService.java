@@ -13,10 +13,10 @@ import org.umc.travlocksserver.domain.template.repository.TemplateDayRepository;
 @Transactional(readOnly = true)
 public class TemplateDayQueryService {
 
-    private final TemplateDayRepository templateDayRepository;
+	private final TemplateDayRepository templateDayRepository;
 
-    public TemplateDay getTemplateDayAccesible(Long memberId, Long templateId, int dayNo) {
-        return templateDayRepository.findTemplateDayAccesible(memberId, templateId, dayNo)
-                .orElseThrow(() -> new TemplateDayException(TemplateDayErrorCode.TEMPLATE_DAY_NOT_FOUND));
-    }
+	public TemplateDay getTemplateDayAccesible(Long memberId, Long templateId, int dayNo) {
+		return templateDayRepository.findTemplateDayAccesible(memberId, templateId, dayNo)
+			.orElseThrow(() -> new TemplateDayException(TemplateDayErrorCode.TEMPLATE_DAY_NOT_FOUND));
+	}
 }

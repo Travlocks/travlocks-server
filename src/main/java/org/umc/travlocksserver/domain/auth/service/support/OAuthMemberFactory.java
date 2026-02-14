@@ -18,51 +18,53 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class OAuthMemberFactory {
-    private final MemberRepository memberRepository;
-    private final OAuthAccountRepository oauthAccountRepository;
-    private final DefaultProfileImageProvider defaultProfileImageProvider;
+	private final MemberRepository memberRepository;
+	private final OAuthAccountRepository oauthAccountRepository;
+	private final DefaultProfileImageProvider defaultProfileImageProvider;
 
-    @Transactional
-    public Member getOrCreateOnboardingMember(OAuthProvider provider, String providerUserId, String email, boolean emailVerified) {
-        return oauthAccountRepository.findByProviderAndProviderId(provider, providerUserId)
-                .map(OAuthAccount::getMember)
-                .orElseGet(() -> createOnboardingMember(provider, providerUserId, email, emailVerified));
-    }
+	@Transactional
+	public Member getOrCreateOnboardingMember(OAuthProvider provider, String providerUserId, String email,
+		boolean emailVerified) {
+		return oauthAccountRepository.findByProviderAndProviderId(provider, providerUserId)
+			.map(OAuthAccount::getMember)
+			.orElseGet(() -> createOnboardingMember(provider, providerUserId, email, emailVerified));
+	}
 
-    private Member createOnboardingMember(OAuthProvider provider, String providerUserId, String email, boolean emailVerified) {
-        if (email != null && memberRepository.existsByEmail(email)) {
-            throw new MemberException(MemberErrorCode.EMAIL_ALREADY_EXISTS);
-        }
+	private Member createOnboardingMember(OAuthProvider provider, String providerUserId, String email,
+		boolean emailVerified) {
+		if (email != null && memberRepository.existsByEmail(email)) {
+			throw new MemberException(MemberErrorCode.EMAIL_ALREADY_EXISTS);
+		}
 
-        Member member = Member.builder()
-                .email(email)
-                .nickname(generateUniqueTempNickname())
-                .passwordHash(null)
-                .status(MemberStatus.ONBOARDING)
-                .emailVerified(emailVerified)
-                .profileImageUrl(defaultProfileImageProvider.pickRandomUrl())
-                .vlockCount(0)
-                .templateCount(0)
-                .starCount(0)
-                .build();
+		Member member = Member.builder()
+			.email(email)
+			.nickname(generateUniqueTempNickname())
+			.passwordHash(null)
+			.status(MemberStatus.ONBOARDING)
+			.emailVerified(emailVerified)
+			.profileImageUrl(defaultProfileImageProvider.pickRandomUrl())
+			.vlockCount(0)
+			.templateCount(0)
+			.starCount(0)
+			.build();
 
-        Member saved = memberRepository.save(member);
+		Member saved = memberRepository.save(member);
 
-        oauthAccountRepository.save(OAuthAccount.builder()
-                .member(saved)
-                .provider(provider)
-                .providerId(providerUserId)
-                .build());
+		oauthAccountRepository.save(OAuthAccount.builder()
+			.member(saved)
+			.provider(provider)
+			.providerId(providerUserId)
+			.build());
 
-        return saved;
-    }
+		return saved;
+	}
 
-    private String generateUniqueTempNickname() {
-        for (int i = 0; i < 10; i++) {
-            String candidate = "u" + UUID.randomUUID().toString().replace("-", "").substring(0, 9);
-            if (!memberRepository.existsByNickname(candidate)) return candidate;
-        }
-        throw new MemberException(MemberErrorCode.NICKNAME_ALREADY_EXISTS);
-    }
+	private String generateUniqueTempNickname() {
+		for (int i = 0; i < 10; i++) {
+			String candidate = "u" + UUID.randomUUID().toString().replace("-", "").substring(0, 9);
+			if (!memberRepository.existsByNickname(candidate))
+				return candidate;
+		}
+		throw new MemberException(MemberErrorCode.NICKNAME_ALREADY_EXISTS);
+	}
 }
-

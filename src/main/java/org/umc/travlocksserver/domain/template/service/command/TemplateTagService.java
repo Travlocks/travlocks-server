@@ -27,57 +27,57 @@ import java.util.List;
 @Transactional
 public class TemplateTagService {
 
-    private final TemplateRepository templateRepository;
-    private final TemplateVlockRepository templateVlockRepository;
-    private final CityRepository cityRepository;
-    private final HyperClovaSuggestionClient hyperClovaSuggestionClient;
-    private final TagRepository tagRepository;
-    private final TemplateTagRepository templateTagRepository;
+	private final TemplateRepository templateRepository;
+	private final TemplateVlockRepository templateVlockRepository;
+	private final CityRepository cityRepository;
+	private final HyperClovaSuggestionClient hyperClovaSuggestionClient;
+	private final TagRepository tagRepository;
+	private final TemplateTagRepository templateTagRepository;
 
-    public void generateTags(Long templateId, LocalDateTime now) {
-        Template template = templateRepository.findById(templateId)
-                .orElseThrow(() -> new TemplateException(TemplateErrorCode.TEMPLATE_NOT_FOUND));
+	public void generateTags(Long templateId, LocalDateTime now) {
+		Template template = templateRepository.findById(templateId)
+			.orElseThrow(() -> new TemplateException(TemplateErrorCode.TEMPLATE_NOT_FOUND));
 
-        List<Vlock> vlocks = templateVlockRepository.findDistinctVlocksByTemplateId(templateId);
+		List<Vlock> vlocks = templateVlockRepository.findDistinctVlocksByTemplateId(templateId);
 
-        Region region = templateRepository.findRegionByTemplateId(templateId).get(0);
-        String travelTheme = String.valueOf(template.getTravelTheme().getContent());
-        String tripDays= template.getTripDays().getDescription();
+		Region region = templateRepository.findRegionByTemplateId(templateId).get(0);
+		String travelTheme = String.valueOf(template.getTravelTheme().getContent());
+		String tripDays = template.getTripDays().getDescription();
 
-        String travelTransit = switch(template.getTransportType()) {
-            case WALK -> "도보";
-            case TRANSIT -> "대중교통";
-            case CAR -> "차";
-        };
+		String travelTransit = switch (template.getTransportType()) {
+			case WALK -> "도보";
+			case TRANSIT -> "대중교통";
+			case CAR -> "차";
+		};
 
-        List<String> fixedInfoTags = List.of(travelTheme, tripDays, travelTransit);
-        List<String> cities = cityRepository.findNameByRegionId(region.getId());
+		List<String> fixedInfoTags = List.of(travelTheme, tripDays, travelTransit);
+		List<String> cities = cityRepository.findNameByRegionId(region.getId());
 
-        // AI 호출
-        AiTagResponseDTO response = hyperClovaSuggestionClient.requestToAiForTag(String.valueOf(region), fixedInfoTags, cities, vlocks);
+		// AI 호출
+		AiTagResponseDTO response = hyperClovaSuggestionClient.requestToAiForTag(String.valueOf(region), fixedInfoTags,
+			cities, vlocks);
 
-        template.increaseTagVersion();
+		template.increaseTagVersion();
 
-        saveTemplateTags(template, List.of(region.getName()), TagType.REGION);
-        saveTemplateTags(template, fixedInfoTags, TagType.FIXED_INFO);
-        saveTemplateTags(template,response.cities(), TagType.CITY);
-        saveTemplateTags(template, response.free(), TagType.FREE);
-    }
+		saveTemplateTags(template, List.of(region.getName()), TagType.REGION);
+		saveTemplateTags(template, fixedInfoTags, TagType.FIXED_INFO);
+		saveTemplateTags(template, response.cities(), TagType.CITY);
+		saveTemplateTags(template, response.free(), TagType.FREE);
+	}
 
-    private void saveTemplateTags(Template template, List<String> tags, TagType tagType) {
-        for (String t : tags) {
-            System.out.println("이건 saveTemplateTags에서 호출 " + t);
-            Tag tag = tagRepository.findByName(t)
-                    .orElse(tagRepository.save(Tag.create(t)));
+	private void saveTemplateTags(Template template, List<String> tags, TagType tagType) {
+		for (String t : tags) {
+			System.out.println("이건 saveTemplateTags에서 호출 " + t);
+			Tag tag = tagRepository.findByName(t)
+				.orElse(tagRepository.save(Tag.create(t)));
 
-            TemplateTag templateTag = TemplateTag.create(
-                    tag,
-                    template,
-                    tagType,
-                    template.getTagVersion()
-            );
+			TemplateTag templateTag = TemplateTag.create(
+				tag,
+				template,
+				tagType,
+				template.getTagVersion());
 
-            templateTagRepository.save(templateTag);
-        }
-    }
+			templateTagRepository.save(templateTag);
+		}
+	}
 }

@@ -6,5 +6,5 @@ import org.umc.travlocksserver.domain.member.entity.Policy;
 import java.util.List;
 
 public interface PolicyRepository extends JpaRepository<Policy, Long> {
-    List<Policy> findAllByIdIn(List<Long> ids);
+	List<Policy> findAllByIdIn(List<Long> ids);
 }

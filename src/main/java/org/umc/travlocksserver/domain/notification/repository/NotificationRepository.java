@@ -11,29 +11,29 @@ import java.util.List;
 
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
 
-    @Modifying
-    @Query("""
-        DELETE FROM Notification n
-        WHERE n.receiverId = :receiverId
-    """)
-    void deleteAllByReceiverId(Long receiverId);
+	@Modifying
+	@Query("""
+		    DELETE FROM Notification n
+		    WHERE n.receiverId = :receiverId
+		""")
+	void deleteAllByReceiverId(Long receiverId);
 
-    @Query("""
-        SELECT n
-        FROM Notification n
-        WHERE n.receiverId = :receiverId
-        ORDER BY n.createdAt DESC, n.id DESC
-    """)
-    List<Notification> findFirstPage(Long receiverId, Pageable pageable);
+	@Query("""
+		    SELECT n
+		    FROM Notification n
+		    WHERE n.receiverId = :receiverId
+		    ORDER BY n.createdAt DESC, n.id DESC
+		""")
+	List<Notification> findFirstPage(Long receiverId, Pageable pageable);
 
-    @Query("""
-        SELECT n
-        FROM Notification n
-        WHERE n.receiverId = :receiverId
-          AND n.createdAt < :cursor
-        ORDER BY n.createdAt DESC, n.id DESC
-    """)
-    List<Notification> findNextPage(Long receiverId, LocalDateTime cursor, Pageable pageable);
+	@Query("""
+		    SELECT n
+		    FROM Notification n
+		    WHERE n.receiverId = :receiverId
+		      AND n.createdAt < :cursor
+		    ORDER BY n.createdAt DESC, n.id DESC
+		""")
+	List<Notification> findNextPage(Long receiverId, LocalDateTime cursor, Pageable pageable);
 
-    long countByReceiverId(Long receiverId);
+	long countByReceiverId(Long receiverId);
 }

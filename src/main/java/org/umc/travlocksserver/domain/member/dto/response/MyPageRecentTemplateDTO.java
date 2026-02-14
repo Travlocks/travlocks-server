@@ -8,9 +8,9 @@ import java.time.LocalDateTime;
 @Getter
 @AllArgsConstructor
 public class MyPageRecentTemplateDTO {
-    private Long templateId;
-    private String templateTitle;
-    private Long regionId;
-    private LocalDateTime createdAt;
-    private boolean isFavorite;
+	private Long templateId;
+	private String templateTitle;
+	private Long regionId;
+	private LocalDateTime createdAt;
+	private boolean isFavorite;
 }

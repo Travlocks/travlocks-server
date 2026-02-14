@@ -9,16 +9,16 @@ import org.umc.travlocksserver.domain.travelstyle.entity.PreferredTravelStyle;
 import java.util.List;
 
 public interface PreferredTravelStyleRepository extends JpaRepository<PreferredTravelStyle, Long> {
-    @Modifying(clearAutomatically = true, flushAutomatically = true)
-    @Query("delete from PreferredTravelStyle pts where pts.member.id = :memberId")
-    void deleteByMemberId(@Param("memberId") Long memberId);
+	@Modifying(clearAutomatically = true, flushAutomatically = true)
+	@Query("delete from PreferredTravelStyle pts where pts.member.id = :memberId")
+	void deleteByMemberId(@Param("memberId")
+	Long memberId);
 
-
-    @Query("""
-        SELECT pts.travelStyle.id
-        FROM PreferredTravelStyle pts
-        WHERE pts.member.id = :memberId
-    """)
-    List<Long> findPreferredStyleIdsByMemberId(@Param("memberId") Long memberId);
+	@Query("""
+		    SELECT pts.travelStyle.id
+		    FROM PreferredTravelStyle pts
+		    WHERE pts.member.id = :memberId
+		""")
+	List<Long> findPreferredStyleIdsByMemberId(@Param("memberId")
+	Long memberId);
 }
-

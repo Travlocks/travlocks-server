@@ -9,8 +9,7 @@ import org.umc.travlocksserver.global.code.BaseCode;
 @RequiredArgsConstructor
 public enum VlockCategoryErrorCode implements BaseCode {
 
-	DEFAULT_VLOCK_CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "블록 카테고리가 존재하지 않습니다.")
-	;
+	DEFAULT_VLOCK_CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "블록 카테고리가 존재하지 않습니다.");
 
 	private final HttpStatus status;
 	private final String message;

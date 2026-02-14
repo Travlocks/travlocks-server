@@ -23,8 +23,7 @@ public class VlockCategoryController implements VlockCategoryControllerDocs {
 	public ResponseEntity<SuccessResponse<VlockCategoriesDTO>> getCategoriesVlocks() {
 		VlockCategoriesDTO responses = vlockCategoryQueryService.getAllCategories();
 
-		return ResponseEntity.
-			status(HttpStatus.OK)
+		return ResponseEntity.status(HttpStatus.OK)
 			.body(SuccessResponse.ok(VlockCategorySuccessCode.DEFAULT_VLOCK_CATEGORY_GET_SUCCESS, responses));
 	}
 }

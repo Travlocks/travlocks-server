@@ -16,8 +16,7 @@ public enum VlockErrorCode implements BaseCode {
 
 	VLOCK_FORBIDDEN(HttpStatus.FORBIDDEN, "해당 블록에 대한 접근 권한이 없습니다."),
 
-	VLOCK_ALREADY_DELETED(HttpStatus.BAD_REQUEST, "이미 삭제된 블록입니다.")
-	;
+	VLOCK_ALREADY_DELETED(HttpStatus.BAD_REQUEST, "이미 삭제된 블록입니다.");
 
 	private final HttpStatus status;
 	private final String message;

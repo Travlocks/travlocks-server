@@ -18,21 +18,21 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class NotificationQueryService {
 
-    private final NotificationRepository notificationRepository;
-    private final TimeAgoFormatter timeAgoFormatter;
+	private final NotificationRepository notificationRepository;
+	private final TimeAgoFormatter timeAgoFormatter;
 
-    public NotificationAllResponseDTO getNotifications(Long memberId, String cursor, Integer size) {
-        Pageable pageable = PageRequest.of(0, size);
+	public NotificationAllResponseDTO getNotifications(Long memberId, String cursor, Integer size) {
+		Pageable pageable = PageRequest.of(0, size);
 
-        long totalCount = notificationRepository.countByReceiverId(memberId);
+		long totalCount = notificationRepository.countByReceiverId(memberId);
 
-        List<Notification> notifications = (cursor == null || cursor.isBlank())
-                ? notificationRepository.findFirstPage(memberId, pageable)
-                : notificationRepository.findNextPage(memberId, LocalDateTime.parse(cursor), pageable);
+		List<Notification> notifications = (cursor == null || cursor.isBlank())
+			? notificationRepository.findFirstPage(memberId, pageable)
+			: notificationRepository.findNextPage(memberId, LocalDateTime.parse(cursor), pageable);
 
-        boolean hasNext = notifications.size() == size;  // 이번에 가져온 데이터 수가 size와 같으면 다음에 데이터가 더 있을 수 있음
-        String nextCursor = hasNext ? notifications.get(notifications.size() - 1).getCreatedAt().toString() : null;
+		boolean hasNext = notifications.size() == size; // 이번에 가져온 데이터 수가 size와 같으면 다음에 데이터가 더 있을 수 있음
+		String nextCursor = hasNext ? notifications.get(notifications.size() - 1).getCreatedAt().toString() : null;
 
-        return NotificationAllResponseDTO.from(totalCount, hasNext, nextCursor, notifications, timeAgoFormatter);
-    }
+		return NotificationAllResponseDTO.from(totalCount, hasNext, nextCursor, notifications, timeAgoFormatter);
+	}
 }

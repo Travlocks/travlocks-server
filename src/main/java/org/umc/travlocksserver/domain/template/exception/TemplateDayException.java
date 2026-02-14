@@ -4,7 +4,7 @@ import org.umc.travlocksserver.domain.template.code.TemplateDayErrorCode;
 import org.umc.travlocksserver.global.exception.GeneralException;
 
 public class TemplateDayException extends GeneralException {
-    public TemplateDayException(TemplateDayErrorCode errorCode) {
-        super(errorCode);
-    }
+	public TemplateDayException(TemplateDayErrorCode errorCode) {
+		super(errorCode);
+	}
 }

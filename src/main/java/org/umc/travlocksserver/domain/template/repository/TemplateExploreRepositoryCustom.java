@@ -6,13 +6,12 @@ import org.umc.travlocksserver.domain.template.enums.TripDays;
 import java.util.List;
 
 public interface TemplateExploreRepositoryCustom {
-    List<TemplateExploreResponseDTO> findExploreTemplates(
-            String keyword,
-            List<String> cityNames,
-            List<String> travelThemes,
-            List<TripDays> tripDays,
-            List<String> transportTypes,
-            String sort,
-            int offset
-    );
+	List<TemplateExploreResponseDTO> findExploreTemplates(
+		String keyword,
+		List<String> cityNames,
+		List<String> travelThemes,
+		List<TripDays> tripDays,
+		List<String> transportTypes,
+		String sort,
+		int offset);
 }

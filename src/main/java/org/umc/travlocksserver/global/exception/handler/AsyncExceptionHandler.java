@@ -12,7 +12,10 @@ import lombok.extern.slf4j.Slf4j;
 public class AsyncExceptionHandler implements AsyncUncaughtExceptionHandler {
 
 	@Override
-	public void handleUncaughtException(@NonNull Throwable ex, @NonNull Method method, @Nullable Object... params) {
+	public void handleUncaughtException(@NonNull
+	Throwable ex, @NonNull
+	Method method, @Nullable
+	Object... params) {
 		log.error("[Async Error] Method: {}, Message: {}",
 			method.getName(), ex.getMessage(), ex);
 	}

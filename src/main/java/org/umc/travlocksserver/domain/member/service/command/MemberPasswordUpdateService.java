@@ -11,18 +11,18 @@ import org.umc.travlocksserver.domain.member.code.MemberErrorCode;
 @Service
 @RequiredArgsConstructor
 public class MemberPasswordUpdateService {
-    private final PasswordEncoder passwordEncoder;
+	private final PasswordEncoder passwordEncoder;
 
-    @Transactional
-    public void updatePassword(Member member, String currentPassword, String newPassword) {
-        if (!member.matchesPassword(passwordEncoder, currentPassword)) {
-            throw new MemberException(MemberErrorCode.PASSWORD_MISMATCH);
-        }
+	@Transactional
+	public void updatePassword(Member member, String currentPassword, String newPassword) {
+		if (!member.matchesPassword(passwordEncoder, currentPassword)) {
+			throw new MemberException(MemberErrorCode.PASSWORD_MISMATCH);
+		}
 
-        if (member.matchesPassword(passwordEncoder, newPassword)) {
-            throw new MemberException(MemberErrorCode.SAME_AS_CURRENT_PASSWORD);
-        }
+		if (member.matchesPassword(passwordEncoder, newPassword)) {
+			throw new MemberException(MemberErrorCode.SAME_AS_CURRENT_PASSWORD);
+		}
 
-        member.changePassword(passwordEncoder.encode(newPassword));
-    }
+		member.changePassword(passwordEncoder.encode(newPassword));
+	}
 }

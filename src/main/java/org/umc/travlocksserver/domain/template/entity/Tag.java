@@ -12,19 +12,19 @@ import org.umc.travlocksserver.global.entity.CreatedBaseEntity;
 @Table(name = "tags")
 public class Tag extends CreatedBaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "tag_id")
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "tag_id")
+	private Long id;
 
-    @Column(nullable = false, length = 10)
-    private String name;
+	@Column(nullable = false, length = 10)
+	private String name;
 
-    public Tag(String name) {
-        this.name = name;
-    }
+	public Tag(String name) {
+		this.name = name;
+	}
 
-    public static Tag create(String name) {
-        return new Tag(name);
-    }
+	public static Tag create(String name) {
+		return new Tag(name);
+	}
 }

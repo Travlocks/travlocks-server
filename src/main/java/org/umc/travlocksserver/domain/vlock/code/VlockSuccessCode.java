@@ -16,8 +16,7 @@ public enum VlockSuccessCode implements BaseCode {
 
 	VLOCK_GET_SUCCESS(HttpStatus.OK, "블록을 성공적으로 조회했습니다."),
 
-	VLOCK_DELETE_SUCCESS(HttpStatus.OK, "블록 삭제가 완료되었습니다.")
-	;
+	VLOCK_DELETE_SUCCESS(HttpStatus.OK, "블록 삭제가 완료되었습니다.");
 
 	private final HttpStatus status;
 	private final String message;

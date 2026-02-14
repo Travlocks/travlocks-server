@@ -11,10 +11,11 @@ import java.util.Optional;
 
 public interface OAuthAccountRepository extends JpaRepository<OAuthAccount, Long> {
 
-    Optional<OAuthAccount> findByProviderAndProviderId(OAuthProvider provider, String providerId);
+	Optional<OAuthAccount> findByProviderAndProviderId(OAuthProvider provider, String providerId);
 
-    @Modifying(clearAutomatically = true, flushAutomatically = true)
-    @Query("delete from OAuthAccount oa where oa.member.id = :memberId")
-    void deleteByMemberId(@Param("memberId") Long memberId);
+	@Modifying(clearAutomatically = true, flushAutomatically = true)
+	@Query("delete from OAuthAccount oa where oa.member.id = :memberId")
+	void deleteByMemberId(@Param("memberId")
+	Long memberId);
 
 }

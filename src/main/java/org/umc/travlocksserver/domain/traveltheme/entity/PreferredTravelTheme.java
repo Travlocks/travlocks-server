@@ -10,22 +10,21 @@ import org.umc.travlocksserver.global.entity.BaseEntity;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
 @Entity
-@Table(name = "preferred_travel_themes",
-        uniqueConstraints = {
-                @UniqueConstraint(name = "uk_member_theme", columnNames = {"member_id", "travel_theme_id"})
-        })
+@Table(name = "preferred_travel_themes", uniqueConstraints = {
+	@UniqueConstraint(name = "uk_member_theme", columnNames = {"member_id", "travel_theme_id"})
+})
 public class PreferredTravelTheme extends BaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "preferred_travel_theme_id")
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "preferred_travel_theme_id")
+	private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id", nullable = false)
-    private Member member;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "member_id", nullable = false)
+	private Member member;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "travel_theme_id", nullable = false)
-    private TravelTheme travelTheme;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "travel_theme_id", nullable = false)
+	private TravelTheme travelTheme;
 }

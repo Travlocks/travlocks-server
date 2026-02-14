@@ -15,23 +15,26 @@ import java.time.Duration;
 @Configuration
 public class HyperClovaClientConfig {
 
-    @Bean
-    WebClient hyperClovaClient(
-            @Value("${hyperclova.base-url}") String baseUrl,
-            @Value("${hyperclova.api-key}") String apiKey,
-            @Value("${hyperclova.timeout-ms.connect}") int connectTimeoutMs,
-            @Value("${hyperclova.timeout-ms.response}") int responseTimeoutMs
-    ) {
-        // 타임아웃 설정
-        HttpClient http = HttpClient.create()
-                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, connectTimeoutMs)
-                .responseTimeout(Duration.ofMillis(responseTimeoutMs));
+	@Bean
+	WebClient hyperClovaClient(
+		@Value("${hyperclova.base-url}")
+		String baseUrl,
+		@Value("${hyperclova.api-key}")
+		String apiKey,
+		@Value("${hyperclova.timeout-ms.connect}")
+		int connectTimeoutMs,
+		@Value("${hyperclova.timeout-ms.response}")
+		int responseTimeoutMs) {
+		// 타임아웃 설정
+		HttpClient http = HttpClient.create()
+			.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, connectTimeoutMs)
+			.responseTimeout(Duration.ofMillis(responseTimeoutMs));
 
-        return WebClient.builder()
-                .baseUrl(baseUrl)
-                .clientConnector(new ReactorClientHttpConnector(http))
-                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + apiKey)
-                .build();
-    }
+		return WebClient.builder()
+			.baseUrl(baseUrl)
+			.clientConnector(new ReactorClientHttpConnector(http))
+			.defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+			.defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + apiKey)
+			.build();
+	}
 }
