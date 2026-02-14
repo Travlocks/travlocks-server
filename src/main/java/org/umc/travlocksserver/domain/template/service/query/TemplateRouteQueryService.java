@@ -43,8 +43,7 @@ public class TemplateRouteQueryService {
 	public List<TemplateDayRouteResponseDTO> getDayRoutes(
 		Long templateId,
 		Integer dayNo,
-		TransportType transportType
-	) {
+		TransportType transportType) {
 		TemplateDay templateDay = templateDayRepository
 			.findByTemplateIdAndDayNo(templateId, dayNo)
 			.orElseThrow(() -> new TemplateException(TemplateErrorCode.TEMPLATE_DAY_NOT_FOUND));
@@ -66,8 +65,7 @@ public class TemplateRouteQueryService {
 			TemplateDayRouteResponseDTO route = getOrCreateRoute(
 				from.getVlock().getId(),
 				to.getVlock().getId(),
-				transportType
-			);
+				transportType);
 			routes.add(route);
 		}
 
@@ -81,8 +79,7 @@ public class TemplateRouteQueryService {
 	public TemplateDayRouteResponseDTO getOrCreateRoute(
 		Long fromVlockId,
 		Long toVlockId,
-		TransportType transportType
-	) {
+		TransportType transportType) {
 		return moveTimeRepository
 			.findByFromVlockIdAndToVlockIdAndTransportType(fromVlockId, toVlockId, transportType)
 			.map(this::toResponseDTO)
@@ -99,8 +96,7 @@ public class TemplateRouteQueryService {
 	private TemplateDayRouteResponseDTO createAndSaveRoute(
 		Long fromVlockId,
 		Long toVlockId,
-		TransportType transportType
-	) {
+		TransportType transportType) {
 		Vlock fromVlock = vlockRepository.findById(fromVlockId)
 			.orElseThrow(() -> new VlockException(VlockErrorCode.START_VLOCK_NOT_FOUND));
 
@@ -131,15 +127,13 @@ public class TemplateRouteQueryService {
 	private TmapDTO.RouteInfo calculateRoute(
 		Vlock fromVlock,
 		Vlock toVlock,
-		TransportType transportType
-	) {
+		TransportType transportType) {
 		return switch (transportType) {
 			case WALK -> tmapApiService.getPedestrianRoute(
 				fromVlock.getLongitude(),
 				fromVlock.getLatitude(),
 				toVlock.getLongitude(),
-				toVlock.getLatitude()
-			);
+				toVlock.getLatitude());
 			case CAR, TRANSIT -> throw new TemplateException(TemplateErrorCode.UNSUPPORTED_TRANSPORT_TYPE);
 		};
 	}
@@ -155,7 +149,6 @@ public class TemplateRouteQueryService {
 			moveTime.getMoveMinutes(),
 			moveTime.getDistanceMeter(),
 			moveTime.getTransportType(),
-			polylineUtil.toCoordinates(moveTime.getPolyline())
-		);
+			polylineUtil.toCoordinates(moveTime.getPolyline()));
 	}
 }

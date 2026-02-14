@@ -1,20 +1,24 @@
 package org.umc.travlocksserver.global.jwt;
 
-
 public interface JwtTokenProvider {
 
-    String generateAccessToken(Long memberId);
-    String generateRefreshToken(Long memberId, String jti);
+	String generateAccessToken(Long memberId);
 
-    long getAccessTokenExpiresInSeconds();
+	String generateRefreshToken(Long memberId, String jti);
 
-    String extractJti(String refreshToken);
-    Long extractMemberId(String refreshToken);
-    boolean validateRefreshToken(String refreshToken);
+	long getAccessTokenExpiresInSeconds();
 
-    void validateAccessTokenOrThrow(String accessToken);
-    Long extractMemberIdFromAccessToken(String accessToken);
+	String extractJti(String refreshToken);
 
-    String generateSseToken(Long memberId, long sseTtlSeconds);
-    Long extractMemberIdFromSseToken(String sseToken);
+	Long extractMemberId(String refreshToken);
+
+	boolean validateRefreshToken(String refreshToken);
+
+	void validateAccessTokenOrThrow(String accessToken);
+
+	Long extractMemberIdFromAccessToken(String accessToken);
+
+	String generateSseToken(Long memberId, long sseTtlSeconds);
+
+	Long extractMemberIdFromSseToken(String sseToken);
 }

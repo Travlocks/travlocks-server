@@ -5,5 +5,4 @@ import org.springframework.stereotype.Repository;
 import org.umc.travlocksserver.domain.template.entity.TemplateTag;
 
 @Repository
-public interface TemplateTagRepository extends JpaRepository<TemplateTag, Long> {
-}
+public interface TemplateTagRepository extends JpaRepository<TemplateTag, Long> {}

@@ -19,6 +19,5 @@ public record VlockRequestDTO(
 	String memo,
 
 	Double latitude,
-	Double longitude
-) {
+	Double longitude) {
 }

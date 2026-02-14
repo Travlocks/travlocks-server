@@ -17,12 +17,12 @@ import java.util.List;
 @RequiredArgsConstructor
 public class WebConfig implements WebMvcConfigurer {
 
-    private final MemberRepository memberRepository;
+	private final MemberRepository memberRepository;
 
-    @Override
-    public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-        resolvers.add(new LoginUserArgumentResolver(memberRepository));
-    }
+	@Override
+	public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
+		resolvers.add(new LoginUserArgumentResolver(memberRepository));
+	}
 
 	/**
 	 * 미지정 타입(octet-stream)을 JSON으로 인식하도록 설정

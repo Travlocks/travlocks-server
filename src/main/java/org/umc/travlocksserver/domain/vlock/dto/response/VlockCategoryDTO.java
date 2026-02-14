@@ -7,13 +7,11 @@ public record VlockCategoryDTO(
 
 	String name,
 
-	Double stayHours
-) {
+	Double stayHours) {
 	public static VlockCategoryDTO from(VlockCategory vlockCategory) {
 		return new VlockCategoryDTO(
 			vlockCategory.getId(),
 			vlockCategory.getName(),
-			vlockCategory.getStayHours()
-		);
+			vlockCategory.getStayHours());
 	}
 }

@@ -41,9 +41,10 @@ public class VlockController implements VlockControllerDocs {
 	/** 블록 검색 */
 	@GetMapping("/search")
 	public ResponseEntity<SuccessResponse<List<VlockResponseDTO>>> searchVlocks(
-		@RequestParam String query,
-		@PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
-	) {
+		@RequestParam
+		String query,
+		@PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC)
+		Pageable pageable) {
 		List<VlockResponseDTO> responses = vlockQueryService.searchVlocks(query, pageable);
 
 		return ResponseEntity
@@ -52,14 +53,14 @@ public class VlockController implements VlockControllerDocs {
 	}
 
 	/** 블록 생성 */
-	@PostMapping(
-		consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
-		produces = MediaType.APPLICATION_JSON_VALUE
-	)
+	@PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<SuccessResponse<VlockResponseDTO>> createVlock(
-		@AuthenticationPrincipal Long memberId,
-		@Valid @RequestPart("request") VlockRequestDTO request,
-		@RequestPart(value = "coverImg", required = false) MultipartFile coverImg) {
+		@AuthenticationPrincipal
+		Long memberId,
+		@Valid @RequestPart("request")
+		VlockRequestDTO request,
+		@RequestPart(value = "coverImg", required = false)
+		MultipartFile coverImg) {
 		VlockResponseDTO response = vlockCommandService.createVlock(memberId, request, coverImg);
 
 		return ResponseEntity
@@ -70,8 +71,8 @@ public class VlockController implements VlockControllerDocs {
 	/** 인기 블록 조회 */
 	@GetMapping("/popular")
 	public ResponseEntity<SuccessResponse<List<VlockResponseDTO>>> getPopularVlocks(
-		@RequestParam Long cityId
-	) {
+		@RequestParam
+		Long cityId) {
 		List<VlockResponseDTO> responses = vlockQueryService.getPopularVlocks(cityId);
 
 		return ResponseEntity
@@ -82,9 +83,10 @@ public class VlockController implements VlockControllerDocs {
 	/** 카테고리 블록 조회 */
 	@GetMapping
 	public ResponseEntity<SuccessResponse<List<VlockResponseDTO>>> getCategoriesVlocks(
-		@RequestParam Long cityId,
-		@RequestParam Long categoryId
-	) {
+		@RequestParam
+		Long cityId,
+		@RequestParam
+		Long categoryId) {
 		List<VlockResponseDTO> responses = vlockQueryService.getCategoriesVlocks(cityId, categoryId);
 
 		return ResponseEntity
@@ -95,9 +97,10 @@ public class VlockController implements VlockControllerDocs {
 	/** 생성 블록 조회 */
 	@GetMapping("/me")
 	public ResponseEntity<SuccessResponse<List<VlockResponseDTO>>> getMyVlocks(
-		@AuthenticationPrincipal Long memberId,
-		@RequestParam Long cityId
-	) {
+		@AuthenticationPrincipal
+		Long memberId,
+		@RequestParam
+		Long cityId) {
 		List<VlockResponseDTO> responses = vlockQueryService.getMyVlocks(memberId, cityId);
 
 		return ResponseEntity
@@ -106,15 +109,16 @@ public class VlockController implements VlockControllerDocs {
 	}
 
 	/** 블록 수정 */
-	@PutMapping(
-		value = "/{vlockId}",
-		consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
-		produces = MediaType.APPLICATION_JSON_VALUE)
+	@PutMapping(value = "/{vlockId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<SuccessResponse<VlockResponseDTO>> updateVlock(
-		@AuthenticationPrincipal Long memberId,
-		@PathVariable Long vlockId,
-		@Valid @RequestPart("request") VlockUpdateRequestDTO request,
-		@RequestPart(value = "coverImg", required = false) MultipartFile coverImg) {
+		@AuthenticationPrincipal
+		Long memberId,
+		@PathVariable
+		Long vlockId,
+		@Valid @RequestPart("request")
+		VlockUpdateRequestDTO request,
+		@RequestPart(value = "coverImg", required = false)
+		MultipartFile coverImg) {
 		VlockResponseDTO response = vlockCommandService.updateVlock(memberId, vlockId, request, coverImg);
 
 		return ResponseEntity
@@ -125,9 +129,10 @@ public class VlockController implements VlockControllerDocs {
 	/** 블록 삭제 */
 	@DeleteMapping("/{vlockId}")
 	public ResponseEntity<SuccessResponse<Void>> deleteVlock(
-		@AuthenticationPrincipal Long memberId,
-		@PathVariable Long vlockId
-	) {
+		@AuthenticationPrincipal
+		Long memberId,
+		@PathVariable
+		Long vlockId) {
 		vlockCommandService.deleteVlock(memberId, vlockId);
 
 		return ResponseEntity

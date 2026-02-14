@@ -13,22 +13,22 @@ import org.umc.travlocksserver.global.entity.CreatedBaseEntity;
 @Table(name = "template_ratings")
 public class TemplateRating extends CreatedBaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "template_rating_id")
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "template_rating_id")
+	private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id", nullable = false)
-    private Member member;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "member_id", nullable = false)
+	private Member member;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "template_id", nullable = false)
-    private Template template;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "template_id", nullable = false)
+	private Template template;
 
-    @Column(nullable = false)
-    private Double rating;
+	@Column(nullable = false)
+	private Double rating;
 
-    @Column(columnDefinition = "TEXT")
-    private String content;
+	@Column(columnDefinition = "TEXT")
+	private String content;
 }

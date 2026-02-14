@@ -25,84 +25,84 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class VlockQueryService {
 
-    private final VlockRepository vlockRepository;
-    private final MemberRepository memberRepository;
-    private final CityRepository cityRepository;
-    private final VlockCategoryRepository categoryRepository;
+	private final VlockRepository vlockRepository;
+	private final MemberRepository memberRepository;
+	private final CityRepository cityRepository;
+	private final VlockCategoryRepository categoryRepository;
 	private final S3Properties s3Properties;
 
-    public List<Vlock> getPopularByCityIds(List<Long> cityIds, Pageable pageable) {
-        return vlockRepository.findPopularByCityIds(cityIds, pageable);
-    }
+	public List<Vlock> getPopularByCityIds(List<Long> cityIds, Pageable pageable) {
+		return vlockRepository.findPopularByCityIds(cityIds, pageable);
+	}
 
-    public List<Vlock> getAllById(List<Long> ids) {
-        return vlockRepository.findAllById(ids);
-    }
+	public List<Vlock> getAllById(List<Long> ids) {
+		return vlockRepository.findAllById(ids);
+	}
 
-    public List<Vlock> getVlocksInBoxExcluding(
-            List<Long> cityIds,
-            List<Long> excludeVlockIds,
-            double minLat,
-            double maxLat,
-            double minLng,
-            double maxLng,
-            Pageable pageable
-    ) {
-        return vlockRepository.findVlocksInBoxExcluding(cityIds, excludeVlockIds, minLat, maxLat, minLng, maxLng, pageable);
-    }
+	public List<Vlock> getVlocksInBoxExcluding(
+		List<Long> cityIds,
+		List<Long> excludeVlockIds,
+		double minLat,
+		double maxLat,
+		double minLng,
+		double maxLng,
+		Pageable pageable) {
+		return vlockRepository.findVlocksInBoxExcluding(cityIds, excludeVlockIds, minLat, maxLat, minLng, maxLng,
+			pageable);
+	}
 
-    /** 인기 블록 조회 */
-    public List<VlockResponseDTO> getPopularVlocks(Long cityId) {
-        validateCityExists(cityId);
+	/** 인기 블록 조회 */
+	public List<VlockResponseDTO> getPopularVlocks(Long cityId) {
+		validateCityExists(cityId);
 
-        return vlockRepository
-                .findPopularVlocks(cityId);
-    }
+		return vlockRepository
+			.findPopularVlocks(cityId);
+	}
 
-    /** 카테고리 블록 조회 */
-    public List<VlockResponseDTO> getCategoriesVlocks(Long cityId, Long categoryId) {
-        validateCityExists(cityId);
-        validateCategoryExists(categoryId);
+	/** 카테고리 블록 조회 */
+	public List<VlockResponseDTO> getCategoriesVlocks(Long cityId, Long categoryId) {
+		validateCityExists(cityId);
+		validateCategoryExists(categoryId);
 
-        return vlockRepository
-                .findCategoryVlocks(cityId, categoryId);
-    }
+		return vlockRepository
+			.findCategoryVlocks(cityId, categoryId);
+	}
 
-    /** 생성 블록 조회 */
-    public List<VlockResponseDTO> getMyVlocks(Long memberId, Long cityId) {
-        validateMemberExists(memberId);
-        validateCityExists(cityId);
+	/** 생성 블록 조회 */
+	public List<VlockResponseDTO> getMyVlocks(Long memberId, Long cityId) {
+		validateMemberExists(memberId);
+		validateCityExists(cityId);
 
-        return vlockRepository
-                .findAllByOwnerIdAndCityIdAndDeletedAtIsNullOrderByUsageCountDescIdDesc(memberId, cityId)
-                .stream()
-                .map(vlock -> VlockResponseDTO.from(vlock, s3Properties.domain()))
-                .toList();
-    }
+		return vlockRepository
+			.findAllByOwnerIdAndCityIdAndDeletedAtIsNullOrderByUsageCountDescIdDesc(memberId, cityId)
+			.stream()
+			.map(vlock -> VlockResponseDTO.from(vlock, s3Properties.domain()))
+			.toList();
+	}
 
-    /** 블록 검색 */
-    public List<VlockResponseDTO> searchVlocks(String keyword, Pageable pageable) {
-        return vlockRepository.searchByKeyword(keyword, pageable)
-                .stream()
-                .map(vlock -> VlockResponseDTO.from(vlock, s3Properties.domain()))
-                .toList();
-    }
+	/** 블록 검색 */
+	public List<VlockResponseDTO> searchVlocks(String keyword, Pageable pageable) {
+		return vlockRepository.searchByKeyword(keyword, pageable)
+			.stream()
+			.map(vlock -> VlockResponseDTO.from(vlock, s3Properties.domain()))
+			.toList();
+	}
 
-    private void validateMemberExists(Long memberId) {
-        if (!memberRepository.existsById(memberId)) {
-            throw new MemberException(MemberErrorCode.MEMBER_NOT_FOUND);
-        }
-    }
+	private void validateMemberExists(Long memberId) {
+		if (!memberRepository.existsById(memberId)) {
+			throw new MemberException(MemberErrorCode.MEMBER_NOT_FOUND);
+		}
+	}
 
-    private void validateCityExists(Long cityId) {
-        if (!cityRepository.existsById(cityId)) {
-            throw new CityException(CityErrorCode.CITY_NOT_FOUND);
-        }
-    }
+	private void validateCityExists(Long cityId) {
+		if (!cityRepository.existsById(cityId)) {
+			throw new CityException(CityErrorCode.CITY_NOT_FOUND);
+		}
+	}
 
-    private void validateCategoryExists(Long categoryId) {
-        if (!categoryRepository.existsById(categoryId)) {
-            throw new VlockException(VlockCategoryErrorCode.DEFAULT_VLOCK_CATEGORY_NOT_FOUND);
-        }
-    }
+	private void validateCategoryExists(Long categoryId) {
+		if (!categoryRepository.existsById(categoryId)) {
+			throw new VlockException(VlockCategoryErrorCode.DEFAULT_VLOCK_CATEGORY_NOT_FOUND);
+		}
+	}
 }

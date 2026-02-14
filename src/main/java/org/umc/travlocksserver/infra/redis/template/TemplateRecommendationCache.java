@@ -12,25 +12,25 @@ import java.time.Duration;
 @RequiredArgsConstructor
 public class TemplateRecommendationCache {
 
-    private final RedisTemplate<String, Object> redis;
-    private final ObjectMapper objectMapper;
+	private final RedisTemplate<String, Object> redis;
+	private final ObjectMapper objectMapper;
 
-    @Value("${cache.recommendation.templates.cache-ttl-minutes}")
-    private long ttlMinutes;
+	@Value("${cache.recommendation.templates.cache-ttl-minutes}")
+	private long ttlMinutes;
 
-    public CachedTemplateRecommendations get(Long memberId) {
-        Object object = redis.opsForValue().get(key(memberId));
-        if (object == null) {
-            return null;
-        }
-        return objectMapper.convertValue(object, CachedTemplateRecommendations.class);
-    }
+	public CachedTemplateRecommendations get(Long memberId) {
+		Object object = redis.opsForValue().get(key(memberId));
+		if (object == null) {
+			return null;
+		}
+		return objectMapper.convertValue(object, CachedTemplateRecommendations.class);
+	}
 
-    public void set(Long memberId, CachedTemplateRecommendations value) {
-        redis.opsForValue().set(key(memberId), value, Duration.ofMinutes(ttlMinutes));
-    }
+	public void set(Long memberId, CachedTemplateRecommendations value) {
+		redis.opsForValue().set(key(memberId), value, Duration.ofMinutes(ttlMinutes));
+	}
 
-    private String key(Long memberId) {
-        return "recommendation:templates:v1:member:" + memberId;
-    }
+	private String key(Long memberId) {
+		return "recommendation:templates:v1:member:" + memberId;
+	}
 }

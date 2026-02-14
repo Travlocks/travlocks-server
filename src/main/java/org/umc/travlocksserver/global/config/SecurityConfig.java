@@ -21,115 +21,112 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final JwtAuthFilter jwtAuthFilter;
-    private final CustomAuthEntryPoint customAuthEntryPoint;
+	private final JwtAuthFilter jwtAuthFilter;
+	private final CustomAuthEntryPoint customAuthEntryPoint;
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(
-            HttpSecurity http,
-            SseCookieAuthFilter sseCookieAuthFilter
-    ) throws Exception {
-        http
-                // CORS 활성화
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+	@Bean
+	public SecurityFilterChain securityFilterChain(
+		HttpSecurity http,
+		SseCookieAuthFilter sseCookieAuthFilter) throws Exception {
+		http
+			// CORS 활성화
+			.cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
-                // REST API 서버 → 폼 로그인, 기본 로그인 비활성화
-                .formLogin(form -> form.disable())
-                .httpBasic(basic -> basic.disable())
+			// REST API 서버 → 폼 로그인, 기본 로그인 비활성화
+			.formLogin(form -> form.disable())
+			.httpBasic(basic -> basic.disable())
 
-                // CSRF 비활성화
-                .csrf(csrf -> csrf.disable())
+			// CSRF 비활성화
+			.csrf(csrf -> csrf.disable())
 
-                // Session 생성 X
-                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+			// Session 생성 X
+			.sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-                //  인증 실패(401) 응답을 커스터마이징
-                .exceptionHandling(e -> e.authenticationEntryPoint(customAuthEntryPoint))
+			//  인증 실패(401) 응답을 커스터마이징
+			.exceptionHandling(e -> e.authenticationEntryPoint(customAuthEntryPoint))
 
-                // 인가 설정
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        // Swagger 관련 URL 허용
-                        .requestMatchers(
-                                "/swagger-ui/**",
-                                "/swagger-ui.html",
-                                "/v3/api-docs/**",
-                                "/health"
+			// 인가 설정
+			.authorizeHttpRequests(auth -> auth
+				.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+				// Swagger 관련 URL 허용
+				.requestMatchers(
+					"/swagger-ui/**",
+					"/swagger-ui.html",
+					"/v3/api-docs/**",
+					"/health"
 
-                        ).permitAll()
+				).permitAll()
 
-                        .requestMatchers(
-                                // 회원가입 & 이메일 인증
-                                "/api/v1/auth/email-verification",
-                                "/api/v1/auth/email-verification/confirm",
-                                "/api/v1/auth/email-verification/resend",
-                                "/api/v1/members/signup",
+				.requestMatchers(
+					// 회원가입 & 이메일 인증
+					"/api/v1/auth/email-verification",
+					"/api/v1/auth/email-verification/confirm",
+					"/api/v1/auth/email-verification/resend",
+					"/api/v1/members/signup",
 
-                                // 비밀번호 재설정 (로그인 전)
-                                "/api/v1/auth/password-reset/request",
-                                "/api/v1/auth/password-reset/verify",
-                                "/api/v1/auth/password-reset/confirm",
+					// 비밀번호 재설정 (로그인 전)
+					"/api/v1/auth/password-reset/request",
+					"/api/v1/auth/password-reset/verify",
+					"/api/v1/auth/password-reset/confirm",
 
-                                // 로그인/토큰
-                                "/api/v1/auth/login",
-                                "/api/v1/auth/refresh",
-                                "/api/v1/auth/logout",
+					// 로그인/토큰
+					"/api/v1/auth/login",
+					"/api/v1/auth/refresh",
+					"/api/v1/auth/logout",
 
-                                // OAuth 로그인
-                                "/api/v1/auth/oauth/**",
+					// OAuth 로그인
+					"/api/v1/auth/oauth/**",
 
-                                // 중복/존재 여부 검사
-                                "/api/v1/members/email/exists",
-                                "/api/v1/members/nickname/exists"
-                        ).permitAll()
+					// 중복/존재 여부 검사
+					"/api/v1/members/email/exists",
+					"/api/v1/members/nickname/exists")
+				.permitAll()
 
-                        .requestMatchers(
-                                HttpMethod.POST,
-                                "/api/v1/members/onboarding"
-                        ).authenticated()
+				.requestMatchers(
+					HttpMethod.POST,
+					"/api/v1/members/onboarding")
+				.authenticated()
 
-                        // 나머지는 인증 필요
-                        .anyRequest().authenticated()
-                )
-                // 액세스 토큰 검증 필터
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+				// 나머지는 인증 필요
+				.anyRequest().authenticated())
+			// 액세스 토큰 검증 필터
+			.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
 
-                // SSE 구독용 쿠키 인증 필터
-                .addFilterBefore(sseCookieAuthFilter,  UsernamePasswordAuthenticationFilter.class);
+			// SSE 구독용 쿠키 인증 필터
+			.addFilterBefore(sseCookieAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
-        return http.build();
-    }
+		return http.build();
+	}
 
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration config = new CorsConfiguration();
+	@Bean
+	public CorsConfigurationSource corsConfigurationSource() {
+		CorsConfiguration config = new CorsConfiguration();
 
-        config.setAllowCredentials(true);
-        config.setAllowedOriginPatterns(List.of(
-                "http://localhost:5173",
-                "http://localhost:8080",
+		config.setAllowCredentials(true);
+		config.setAllowedOriginPatterns(List.of(
+			"http://localhost:5173",
+			"http://localhost:8080",
 
-                // legacy (.kro.kr)
-                "https://travlocks.kro.kr",
-                "https://www.travlocks.kro.kr",
-                "https://api.travlocks.kro.kr",
+			// legacy (.kro.kr)
+			"https://travlocks.kro.kr",
+			"https://www.travlocks.kro.kr",
+			"https://api.travlocks.kro.kr",
 
-                // new (.com)
-                "https://travlocks.com",
-                "https://www.travlocks.com",
-                "https://api.travlocks.com",
+			// new (.com)
+			"https://travlocks.com",
+			"https://www.travlocks.com",
+			"https://api.travlocks.com",
 
-                // Vercel preview
-                "https://*.vercel.app"
-        ));
-        config.addAllowedMethod("*");
-        config.addAllowedHeader("*");
+			// Vercel preview
+			"https://*.vercel.app"));
+		config.addAllowedMethod("*");
+		config.addAllowedHeader("*");
 
-        config.setMaxAge(3600L);
+		config.setMaxAge(3600L);
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config);
-        return source;
-    }
+		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+		source.registerCorsConfiguration("/**", config);
+		return source;
+	}
 
 }

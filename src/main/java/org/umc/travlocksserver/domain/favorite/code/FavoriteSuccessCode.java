@@ -9,9 +9,9 @@ import org.umc.travlocksserver.global.code.BaseCode;
 @RequiredArgsConstructor
 public enum FavoriteSuccessCode implements BaseCode {
 
-    FAVORITE_ADD_SUCCESS(HttpStatus.OK, "즐겨찾기 추가 성공"),
-    FAVORITE_REMOVE_SUCCESS(HttpStatus.OK, "즐겨찾기 취소 성공");
+	FAVORITE_ADD_SUCCESS(HttpStatus.OK, "즐겨찾기 추가 성공"),
+	FAVORITE_REMOVE_SUCCESS(HttpStatus.OK, "즐겨찾기 취소 성공");
 
-    private final HttpStatus status;
-    private final String message;
+	private final HttpStatus status;
+	private final String message;
 }

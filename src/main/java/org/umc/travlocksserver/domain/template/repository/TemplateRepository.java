@@ -26,7 +26,8 @@ public interface TemplateRepository extends JpaRepository<Template, Long>, Templ
 		    WHERE t.owner.id = :memberId
 		        AND t.parentTemplate IS NOT NULL
 		""")
-	List<Long> findRemixedTemplateIdsByMemberId(@Param("memberId") Long memberId);
+	List<Long> findRemixedTemplateIdsByMemberId(@Param("memberId")
+	Long memberId);
 
 	@Query("""
 			SELECT t
@@ -43,13 +44,14 @@ public interface TemplateRepository extends JpaRepository<Template, Long>, Templ
 	List<Template> findPopularTemplates(Pageable pageable);
 
 	@Query("""
-			select t 
+			select t
 			from Template t
 			where t.owner.id = :memberId
 			    and t.isPublic = true
 			order by t.id desc
 		""")
-	List<Template> findPublicTemplatesFirst(@Param("memberId") Long memberId, Pageable pageable);
+	List<Template> findPublicTemplatesFirst(@Param("memberId")
+	Long memberId, Pageable pageable);
 
 	@Query("""
 		    SELECT t.travelTheme.id
@@ -57,17 +59,20 @@ public interface TemplateRepository extends JpaRepository<Template, Long>, Templ
 		    WHERE t.owner.id = :memberId
 		    ORDER BY t.updatedAt DESC
 		""")
-	List<Long> findRecentThemeIdsByMemberId(@Param("memberId") Long memberId, Pageable pageable);
+	List<Long> findRecentThemeIdsByMemberId(@Param("memberId")
+	Long memberId, Pageable pageable);
 
 	@Query("""
-		    select t 
+		    select t
 			from Template t
 			where t.owner.id = :memberId
 			    and t.isPublic = true
 			    and t.id < :cursor
 			order by t.id desc
 		""")
-	List<Template> findPublicTemplatesAfterCursor(@Param("memberId") Long memberId, @Param("cursor") Long cursor,
+	List<Template> findPublicTemplatesAfterCursor(@Param("memberId")
+	Long memberId, @Param("cursor")
+	Long cursor,
 		Pageable pageable);
 
 	default List<Template> findPublicTemplatesFirst(Long memberId, int limit) {
@@ -79,106 +84,108 @@ public interface TemplateRepository extends JpaRepository<Template, Long>, Templ
 	}
 
 	@Query("""
-        SELECT t
-        FROM Template t
-            LEFT JOIN FETCH t.templateCities tc
-            LEFT JOIN FETCH tc.city c
-            LEFT JOIN FETCH c.region r
-        WHERE t.owner.id = :ownerId
-        ORDER BY t.updatedAt DESC
-    """)
+		    SELECT t
+		    FROM Template t
+		        LEFT JOIN FETCH t.templateCities tc
+		        LEFT JOIN FETCH tc.city c
+		        LEFT JOIN FETCH c.region r
+		    WHERE t.owner.id = :ownerId
+		    ORDER BY t.updatedAt DESC
+		""")
 	List<Template> findRecentTemplatesByOwner(Long ownerId);
 
-    @Modifying(clearAutomatically = true, flushAutomatically = true)
-    @Query("update Template t set t.owner.id = :deletedMemberId where t.owner.id = :memberId")
-    void transferOwner(@Param("memberId") Long memberId,
-                       @Param("deletedMemberId") Long deletedMemberId);
+	@Modifying(clearAutomatically = true, flushAutomatically = true)
+	@Query("update Template t set t.owner.id = :deletedMemberId where t.owner.id = :memberId")
+	void transferOwner(@Param("memberId")
+	Long memberId,
+		@Param("deletedMemberId")
+		Long deletedMemberId);
 
 	@Query("""
-		SELECT t.id
-		FROM Template t
-		WHERE t.updatedAt between :from and :to
-	""")
+			SELECT t.id
+			FROM Template t
+			WHERE t.updatedAt between :from and :to
+		""")
 	List<Long> findRecentlyUpdatedTemplateIds(
-			LocalDateTime from,
-			LocalDateTime to
-	);
+		LocalDateTime from,
+		LocalDateTime to);
 
 	@Query("""
-		SELECT r
-		FROM Template t
-			JOIN t.templateCities tc
-			JOIN tc.city c
-			JOIN c.region r
-		WHERE t.id = :templateId
-	""")
+			SELECT r
+			FROM Template t
+				JOIN t.templateCities tc
+				JOIN tc.city c
+				JOIN c.region r
+			WHERE t.id = :templateId
+		""")
 	List<Region> findRegionByTemplateId(Long templateId);
 
-    @Query("""
-    select new org.umc.travlocksserver.domain.member.dto.response.MyPageRecentTemplateDTO(
-        t.id,
-        t.title,
-        min(r.id),
-        t.createdAt,
-        case when count(f.id) > 0 then true else false end
-    )
-    from Template t
-    left join t.templateCities tc
-    left join tc.city c
-    left join c.region r
-    left join Favorite f
-        on f.template.id = t.id
-       and f.member.id = :memberId
-    where t.owner.id = :memberId
-      and t.deletedAt is null
-    group by t.id, t.title, t.createdAt
-    order by t.createdAt desc, t.id desc
-    """)
-    List<MyPageRecentTemplateDTO> findRecentCreatedTemplatesWithFavorite(
-            @Param("memberId") Long memberId,
-            Pageable pageable
-    );
+	@Query("""
+		select new org.umc.travlocksserver.domain.member.dto.response.MyPageRecentTemplateDTO(
+		    t.id,
+		    t.title,
+		    min(r.id),
+		    t.createdAt,
+		    case when count(f.id) > 0 then true else false end
+		)
+		from Template t
+		left join t.templateCities tc
+		left join tc.city c
+		left join c.region r
+		left join Favorite f
+		    on f.template.id = t.id
+		   and f.member.id = :memberId
+		where t.owner.id = :memberId
+		  and t.deletedAt is null
+		group by t.id, t.title, t.createdAt
+		order by t.createdAt desc, t.id desc
+		""")
+	List<MyPageRecentTemplateDTO> findRecentCreatedTemplatesWithFavorite(
+		@Param("memberId")
+		Long memberId,
+		Pageable pageable);
 
 	@Query("""
-		SELECT new org.umc.travlocksserver.domain.template.dto.response.TemplateCardResponseDTO(
-			t.id,
-			t.coverImageUrl,
-			t.title,
-			tt.id,
-			tt.content,
-			o.id,
-			o.nickname,
-			t.avgRating,
-			t.favoriteCount
-		)
-		FROM Template t
-			JOIN t.owner o
-			JOIN t.travelTheme tt
-		WHERE t.owner.id = :memberId
-		ORDER BY t.updatedAt DESC, t.id DESC
-	""")
+			SELECT new org.umc.travlocksserver.domain.template.dto.response.TemplateCardResponseDTO(
+				t.id,
+				t.coverImageUrl,
+				t.title,
+				tt.id,
+				tt.content,
+				o.id,
+				o.nickname,
+				t.avgRating,
+				t.favoriteCount
+			)
+			FROM Template t
+				JOIN t.owner o
+				JOIN t.travelTheme tt
+			WHERE t.owner.id = :memberId
+			ORDER BY t.updatedAt DESC, t.id DESC
+		""")
 	Page<TemplateCardResponseDTO> findMyTemplates(Long memberId, Pageable pageable);
 
 	@Query("""
-		SELECT new org.umc.travlocksserver.domain.template.dto.response.TemplateCardResponseDTO(
-			t.id,
-			t.coverImageUrl,
-			t.title,
-			tt.id,
-			tt.content,
-			o.id,
-			o.nickname,
-			t.avgRating,
-			t.favoriteCount
-		)
-		FROM Template t
-			JOIN t.owner o
-			JOIN t.travelTheme tt
-		WHERE t.owner.id = :memberId
-		  AND t.isPublic = true
-		ORDER BY t.updatedAt DESC, t.id DESC
-	""")
-	Page<TemplateCardResponseDTO> findPublicTemplateCardsByOwnerId(@Param("memberId") Long memberId, Pageable pageable);
+			SELECT new org.umc.travlocksserver.domain.template.dto.response.TemplateCardResponseDTO(
+				t.id,
+				t.coverImageUrl,
+				t.title,
+				tt.id,
+				tt.content,
+				o.id,
+				o.nickname,
+				t.avgRating,
+				t.favoriteCount
+			)
+			FROM Template t
+				JOIN t.owner o
+				JOIN t.travelTheme tt
+			WHERE t.owner.id = :memberId
+			  AND t.isPublic = true
+			ORDER BY t.updatedAt DESC, t.id DESC
+		""")
+	Page<TemplateCardResponseDTO> findPublicTemplateCardsByOwnerId(@Param("memberId")
+	Long memberId, Pageable pageable);
 
-    Optional<Template> findByIdAndOwnerId(Long id, Long ownerId);
+	Optional<Template> findByIdAndOwnerId(Long id, Long ownerId);
 }

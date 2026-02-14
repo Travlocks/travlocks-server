@@ -14,31 +14,30 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 @Configuration
 public class RedisConfig {
 
-    @Bean
-    public RedisTemplate<String, Object> redisTemplate(
-            RedisConnectionFactory connectionFactory,
-            ObjectMapper objectMapper
-    ) {
-        ObjectMapper mapper = objectMapper.copy()  // Redis 전용 복사본을 만들어서 Redis 직렬화 옵션을 바꿔도 API JSON 응답에는 영향주지 않음
-                .registerModule(new JavaTimeModule())
-                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+	@Bean
+	public RedisTemplate<String, Object> redisTemplate(
+		RedisConnectionFactory connectionFactory,
+		ObjectMapper objectMapper) {
+		ObjectMapper mapper = objectMapper.copy() // Redis 전용 복사본을 만들어서 Redis 직렬화 옵션을 바꿔도 API JSON 응답에는 영향주지 않음
+			.registerModule(new JavaTimeModule())
+			.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
-        StringRedisSerializer string = new StringRedisSerializer();
-        GenericJackson2JsonRedisSerializer json = new GenericJackson2JsonRedisSerializer(mapper);
+		StringRedisSerializer string = new StringRedisSerializer();
+		GenericJackson2JsonRedisSerializer json = new GenericJackson2JsonRedisSerializer(mapper);
 
-        RedisTemplate<String, Object> template = new RedisTemplate<>();
-        template.setConnectionFactory(connectionFactory);
+		RedisTemplate<String, Object> template = new RedisTemplate<>();
+		template.setConnectionFactory(connectionFactory);
 
-        template.setKeySerializer(string);  // Redis key를 사람이 읽는 문자열로 저장
-        template.setValueSerializer(json);  // Redis value를 JSON 문자열로 저장
+		template.setKeySerializer(string); // Redis key를 사람이 읽는 문자열로 저장
+		template.setValueSerializer(json); // Redis value를 JSON 문자열로 저장
 
-        template.setHashKeySerializer(string);
-        template.setHashValueSerializer(json);
+		template.setHashKeySerializer(string);
+		template.setHashValueSerializer(json);
 
-        template.setDefaultSerializer(json);
+		template.setDefaultSerializer(json);
 
-        template.afterPropertiesSet();
+		template.afterPropertiesSet();
 
-        return template;
-    }
+		return template;
+	}
 }

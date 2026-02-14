@@ -9,9 +9,8 @@ import org.umc.travlocksserver.global.code.BaseCode;
 @RequiredArgsConstructor
 public enum RegionSuccessCode implements BaseCode {
 
-    REGION_RETRIEVE_SUCCESS(HttpStatus.OK, "여행지 목록 조회에 성공했습니다.")
-    ;
+	REGION_RETRIEVE_SUCCESS(HttpStatus.OK, "여행지 목록 조회에 성공했습니다.");
 
-    private final HttpStatus status;
-    private final String message;
+	private final HttpStatus status;
+	private final String message;
 }

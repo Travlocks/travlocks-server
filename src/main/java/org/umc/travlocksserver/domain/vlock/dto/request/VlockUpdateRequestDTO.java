@@ -22,6 +22,5 @@ public record VlockUpdateRequestDTO(
 	Double longitude,
 
 	Boolean isPublic,
-	Boolean deleteCoverImg
-) {
+	Boolean deleteCoverImg) {
 }

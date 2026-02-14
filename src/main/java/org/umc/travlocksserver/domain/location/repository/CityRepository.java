@@ -16,9 +16,9 @@ public interface CityRepository extends JpaRepository<City, Long> {
 	Optional<City> findWithRegionById(Long id);
 
 	@Query("""
-		SELECT c.name
-		FROM City c
-		WHERE c.id = :id
-	""")
-    List<String> findNameByRegionId(Long id);
+			SELECT c.name
+			FROM City c
+			WHERE c.id = :id
+		""")
+	List<String> findNameByRegionId(Long id);
 }

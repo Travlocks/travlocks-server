@@ -10,15 +10,16 @@ import org.umc.travlocksserver.domain.auth.repository.SignupTokenRedisRepository
 @RequiredArgsConstructor
 public class SignupTokenService {
 
-    private final SignupTokenRedisRepository signupTokenRedisRepository;
+	private final SignupTokenRedisRepository signupTokenRedisRepository;
 
-    public String getEmail(String signupToken) {
-        String email = signupTokenRedisRepository.findEmail(signupToken);
-        if (email == null) throw new AuthException(AuthErrorCode.INVALID_SIGNUP_TOKEN);
-        return email;
-    }
+	public String getEmail(String signupToken) {
+		String email = signupTokenRedisRepository.findEmail(signupToken);
+		if (email == null)
+			throw new AuthException(AuthErrorCode.INVALID_SIGNUP_TOKEN);
+		return email;
+	}
 
-    public void consume(String signupToken) {
-        signupTokenRedisRepository.delete(signupToken);
-    }
+	public void consume(String signupToken) {
+		signupTokenRedisRepository.delete(signupToken);
+	}
 }

@@ -19,39 +19,37 @@ import org.umc.travlocksserver.global.annotation.LoginUser;
 @RequiredArgsConstructor
 public class LoginUserArgumentResolver implements HandlerMethodArgumentResolver {
 
-    private final MemberRepository memberRepository;
+	private final MemberRepository memberRepository;
 
-    @Override
-    public boolean supportsParameter(MethodParameter parameter) {
-        return parameter.hasParameterAnnotation(LoginUser.class)
-                && parameter.getParameterType().equals(Member.class);
-    }
+	@Override
+	public boolean supportsParameter(MethodParameter parameter) {
+		return parameter.hasParameterAnnotation(LoginUser.class)
+			&& parameter.getParameterType().equals(Member.class);
+	}
 
-    @Override
-    public Object resolveArgument(
-            MethodParameter parameter,
-            ModelAndViewContainer mavContainer,
-            NativeWebRequest webRequest,
-            WebDataBinderFactory binderFactory
-    ) {
-        Authentication authentication =
-                SecurityContextHolder.getContext().getAuthentication();
+	@Override
+	public Object resolveArgument(
+		MethodParameter parameter,
+		ModelAndViewContainer mavContainer,
+		NativeWebRequest webRequest,
+		WebDataBinderFactory binderFactory) {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (authentication == null
-                || !authentication.isAuthenticated()
-                || "anonymousUser".equals(authentication.getPrincipal())) {
-            throw new InsufficientAuthenticationException("Authentication required");
-        }
+		if (authentication == null
+			|| !authentication.isAuthenticated()
+			|| "anonymousUser".equals(authentication.getPrincipal())) {
+			throw new InsufficientAuthenticationException("Authentication required");
+		}
 
-        Long memberId = (Long) authentication.getPrincipal();
+		Long memberId = (Long)authentication.getPrincipal();
 
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+		Member member = memberRepository.findById(memberId)
+			.orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
 
-        if (member.getStatus() == MemberStatus.DELETED) {
-            throw new MemberException(MemberErrorCode.MEMBER_DELETED);
-        }
+		if (member.getStatus() == MemberStatus.DELETED) {
+			throw new MemberException(MemberErrorCode.MEMBER_DELETED);
+		}
 
-        return member;
-    }
+		return member;
+	}
 }

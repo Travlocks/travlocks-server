@@ -18,38 +18,35 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class RegionQueryService {
 
-    private final RegionRepository regionRepository;
-    private final CityRepository cityRepository;
+	private final RegionRepository regionRepository;
+	private final CityRepository cityRepository;
 
-    public RegionListResponseDTO getAllRegions() {
-        // 1. 모든 Region 조회
-        List<Region> regions = regionRepository.findAll();
+	public RegionListResponseDTO getAllRegions() {
+		// 1. 모든 Region 조회
+		List<Region> regions = regionRepository.findAll();
 
-        // 2. 모든 City 조회 후 Region별로 그룹핑
-        List<City> allCities = cityRepository.findAll();
-        Map<Long, List<City>> citiesByRegion = allCities.stream()
-                .collect(Collectors.groupingBy(city -> city.getRegion().getId()));
+		// 2. 모든 City 조회 후 Region별로 그룹핑
+		List<City> allCities = cityRepository.findAll();
+		Map<Long, List<City>> citiesByRegion = allCities.stream()
+			.collect(Collectors.groupingBy(city -> city.getRegion().getId()));
 
-        // 3. DTO 변환
-        List<RegionListResponseDTO.RegionDTO> regionDTOs = regions.stream()
-                .map(region -> {
-                    List<RegionListResponseDTO.CityDTO> cityDTOs =
-                            citiesByRegion.getOrDefault(region.getId(), List.of())
-                                    .stream()
-                                    .map(city -> new RegionListResponseDTO.CityDTO(
-                                            city.getId(),
-                                            city.getName()
-                                    ))
-                                    .toList();
+		// 3. DTO 변환
+		List<RegionListResponseDTO.RegionDTO> regionDTOs = regions.stream()
+			.map(region -> {
+				List<RegionListResponseDTO.CityDTO> cityDTOs = citiesByRegion.getOrDefault(region.getId(), List.of())
+					.stream()
+					.map(city -> new RegionListResponseDTO.CityDTO(
+						city.getId(),
+						city.getName()))
+					.toList();
 
-                    return new RegionListResponseDTO.RegionDTO(
-                            region.getId(),
-                            region.getName(),
-                            cityDTOs
-                    );
-                })
-                .toList();
+				return new RegionListResponseDTO.RegionDTO(
+					region.getId(),
+					region.getName(),
+					cityDTOs);
+			})
+			.toList();
 
-        return RegionListResponseDTO.of(regionDTOs);
-    }
+		return RegionListResponseDTO.of(regionDTOs);
+	}
 }

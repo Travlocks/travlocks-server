@@ -26,8 +26,7 @@ public record VlockResponseDTO(
 	Boolean isPublic,
 
 	LocalDateTime createdAt,
-	LocalDateTime updatedAt
-) {
+	LocalDateTime updatedAt) {
 	public static VlockResponseDTO from(Vlock vlock, String s3Domain) {
 		String coverImgUrl = vlock.getCoverImgUrl();
 
@@ -56,7 +55,6 @@ public record VlockResponseDTO(
 			vlock.getIsPublic(),
 
 			vlock.getCreatedAt(),
-			vlock.getUpdatedAt()
-		);
+			vlock.getUpdatedAt());
 	}
 }

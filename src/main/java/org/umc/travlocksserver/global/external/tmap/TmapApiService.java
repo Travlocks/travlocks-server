@@ -62,8 +62,7 @@ public class TmapApiService {
 				url,
 				HttpMethod.POST,
 				httpEntity,
-				String.class
-			);
+				String.class);
 
 			String rawBody = stringResponse.getBody();
 			if (rawBody == null || rawBody.isBlank()) {
@@ -74,8 +73,7 @@ public class TmapApiService {
 			log.info("TMAP API 응답 수신: status={}, hasNullChar={}, bodyPreview={}",
 				stringResponse.getStatusCode(),
 				hasNullChar,
-				abbreviateForLog(rawBody, 2000)
-			);
+				abbreviateForLog(rawBody, 2000));
 
 			String sanitizedBody = sanitizeJson(rawBody);
 			if (!sanitizedBody.equals(rawBody)) {
@@ -83,8 +81,8 @@ public class TmapApiService {
 					rawBody.length(), sanitizedBody.length());
 			}
 
-			TmapDTO.PedestrianResponse responseBody =
-				objectMapper.readValue(sanitizedBody, TmapDTO.PedestrianResponse.class);
+			TmapDTO.PedestrianResponse responseBody = objectMapper.readValue(sanitizedBody,
+				TmapDTO.PedestrianResponse.class);
 
 			// 3) 응답 파싱
 			if (responseBody == null || responseBody.getFeatures() == null || responseBody.getFeatures().isEmpty()) {
@@ -120,8 +118,8 @@ public class TmapApiService {
 
 			// LineString 타입의 좌표 수집
 			if (feature.getGeometry() != null && "LineString".equals(feature.getGeometry().getType())) {
-				@SuppressWarnings("unchecked")
-				List<List<Double>> lineCoords = (List<List<Double>>)feature.getGeometry().getCoordinates();
+				@SuppressWarnings("unchecked") List<List<Double>> lineCoords = (List<List<Double>>)feature.getGeometry()
+					.getCoordinates();
 				if (lineCoords != null) {
 					coordinates.addAll(lineCoords);
 				}

@@ -15,37 +15,37 @@ import org.umc.travlocksserver.global.response.SuccessResponse;
 @RequestMapping("/api/v1/templates")
 public class FavoriteController implements FavoriteControllerDocs {
 
-    private final FavoriteCommandService favoriteCommandService;
+	private final FavoriteCommandService favoriteCommandService;
 
-    /**
-     * 즐겨찾기 추가
-     */
-    @PutMapping("/{templateId}/favorite")
-    @Override
-    public ResponseEntity<SuccessResponse<Void>> addFavorite(
-            @PathVariable Long templateId,
-            @Parameter(hidden = true) @LoginUser Member member
-    ) {
-        Long memberId = member.getId();
-        favoriteCommandService.addFavorite(memberId, templateId);
-        return ResponseEntity.ok(
-                SuccessResponse.ok(FavoriteSuccessCode.FAVORITE_ADD_SUCCESS)
-        );
-    }
+	/**
+	 * 즐겨찾기 추가
+	 */
+	@PutMapping("/{templateId}/favorite")
+	@Override
+	public ResponseEntity<SuccessResponse<Void>> addFavorite(
+		@PathVariable
+		Long templateId,
+		@Parameter(hidden = true) @LoginUser
+		Member member) {
+		Long memberId = member.getId();
+		favoriteCommandService.addFavorite(memberId, templateId);
+		return ResponseEntity.ok(
+			SuccessResponse.ok(FavoriteSuccessCode.FAVORITE_ADD_SUCCESS));
+	}
 
-    /**
-     * 즐겨찾기 취소
-     */
-    @DeleteMapping("/{templateId}/favorite")
-    @Override
-    public ResponseEntity<SuccessResponse<Void>> removeFavorite(
-            @PathVariable Long templateId,
-            @Parameter(hidden = true) @LoginUser Member member
-    ) {
-        Long memberId = member.getId();
-        favoriteCommandService.removeFavorite(memberId, templateId);
-        return ResponseEntity.ok(
-                SuccessResponse.ok(FavoriteSuccessCode.FAVORITE_REMOVE_SUCCESS)
-        );
-    }
+	/**
+	 * 즐겨찾기 취소
+	 */
+	@DeleteMapping("/{templateId}/favorite")
+	@Override
+	public ResponseEntity<SuccessResponse<Void>> removeFavorite(
+		@PathVariable
+		Long templateId,
+		@Parameter(hidden = true) @LoginUser
+		Member member) {
+		Long memberId = member.getId();
+		favoriteCommandService.removeFavorite(memberId, templateId);
+		return ResponseEntity.ok(
+			SuccessResponse.ok(FavoriteSuccessCode.FAVORITE_REMOVE_SUCCESS));
+	}
 }

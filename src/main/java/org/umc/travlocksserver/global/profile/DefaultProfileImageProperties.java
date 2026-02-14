@@ -6,6 +6,6 @@ import java.util.List;
 
 @ConfigurationProperties(prefix = "app.profile")
 public record DefaultProfileImageProperties(
-        String defaultBaseUrl,
-        List<String> defaultFiles
-) {}
+	String defaultBaseUrl,
+	List<String> defaultFiles) {
+}

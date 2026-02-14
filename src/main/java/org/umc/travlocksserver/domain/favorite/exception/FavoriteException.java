@@ -5,7 +5,7 @@ import org.umc.travlocksserver.global.exception.GeneralException;
 
 public class FavoriteException extends GeneralException {
 
-    public FavoriteException(BaseCode errorCode) {
-        super(errorCode);
-    }
+	public FavoriteException(BaseCode errorCode) {
+		super(errorCode);
+	}
 }

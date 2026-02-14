@@ -79,13 +79,13 @@ public class S3Provider {
 
 		try {
 			PutObjectRequest putObjectRequest = PutObjectRequest.builder()
-					.bucket(bucket)
-					.key(fileName)
-					.contentType(file.getContentType())
-					.build();
+				.bucket(bucket)
+				.key(fileName)
+				.contentType(file.getContentType())
+				.build();
 
 			s3Client.putObject(putObjectRequest,
-					RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
+				RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
 		} catch (IOException e) {
 			throw new S3ExceptionHandler(ErrorCode.FILE_READ_ERROR);
 		} catch (S3Exception e) {

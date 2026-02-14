@@ -62,7 +62,7 @@ public class TemplateCanvasQueryService {
 			vlocks.add(TemplateCanvasVlockDTO.from(cur, nextMoveMinutes));
 		}
 
-		double totalMoveHours = Math.round(((double) totalMoveMinutes / 60.0) * 100) / 100.0;
+		double totalMoveHours = Math.round(((double)totalMoveMinutes / 60.0) * 100) / 100.0;
 		double totalHours = totalStayHours + totalMoveHours;
 
 		return TemplateCanvasResponseDTO.from(
@@ -73,8 +73,7 @@ public class TemplateCanvasQueryService {
 			totalMoveHours,
 			totalStayHours,
 			cities,
-			vlocks
-		);
+			vlocks);
 	}
 
 	/**

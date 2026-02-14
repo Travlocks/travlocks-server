@@ -13,8 +13,7 @@ public record TemplateCanvasVlockDTO(
 	ConnectionPortType inputPort,
 	ConnectionPortType outputPort,
 	Integer nextMoveMinutes,
-	VlockBriefDTO vlock
-) {
+	VlockBriefDTO vlock) {
 	public static TemplateCanvasVlockDTO from(TemplateVlock cur, int nextMoveMinutes) {
 		return new TemplateCanvasVlockDTO(
 			cur.getId(),
@@ -28,8 +27,6 @@ public record TemplateCanvasVlockDTO(
 			new VlockBriefDTO(
 				cur.getVlock().getId(),
 				cur.getVlock().getName(),
-				cur.getVlock().getVlockCategory().getName()
-			)
-		);
+				cur.getVlock().getVlockCategory().getName()));
 	}
 }
