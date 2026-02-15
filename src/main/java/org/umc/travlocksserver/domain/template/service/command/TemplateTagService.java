@@ -54,7 +54,7 @@ public class TemplateTagService {
 		List<String> cities = cityRepository.findNameByRegionId(region.getId());
 
 		// AI 호출
-		AiTagResponseDTO response = hyperClovaSuggestionClient.requestToAiForTag(String.valueOf(region), fixedInfoTags,
+		AiTagResponseDTO response = hyperClovaSuggestionClient.generateTags(region.getName(), fixedInfoTags,
 			cities, vlocks);
 
 		template.increaseTagVersion();
@@ -67,7 +67,6 @@ public class TemplateTagService {
 
 	private void saveTemplateTags(Template template, List<String> tags, TagType tagType) {
 		for (String t : tags) {
-			System.out.println("이건 saveTemplateTags에서 호출 " + t);
 			Tag tag = tagRepository.findByName(t)
 				.orElse(tagRepository.save(Tag.create(t)));
 

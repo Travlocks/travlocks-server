@@ -7,5 +7,5 @@ import java.util.Map;
 
 public interface AiSuggestionClient {
 
-	Map<Long, Double> requestToAi(Long templateId, List<Vlock> usedVlocksInTemplate, List<Vlock> candidates);
+	Map<Long, Double> suggestVlocks(List<Vlock> usedVlocksInTemplate, List<Vlock> candidates);
 }

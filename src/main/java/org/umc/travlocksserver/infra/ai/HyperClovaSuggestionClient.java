@@ -1,7 +1,7 @@
 package org.umc.travlocksserver.infra.ai;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,11 +11,15 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientRequestException;
 import org.umc.travlocksserver.domain.vlock.entity.Vlock;
+import org.umc.travlocksserver.infra.ai.exception.AiErrorCode;
+import org.umc.travlocksserver.infra.ai.exception.AiException;
+import reactor.core.publisher.Mono;
 import reactor.util.retry.Retry;
 
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -24,6 +28,7 @@ public class HyperClovaSuggestionClient implements AiSuggestionClient {
 
 	private final WebClient hyperClovaClient;
 	private final ObjectMapper objectMapper;
+	private final AiPromptProvider aiPromptProvider;
 
 	@Value("${hyperclova.base-url}")
 	private String baseUrl;
@@ -40,76 +45,93 @@ public class HyperClovaSuggestionClient implements AiSuggestionClient {
 	@Value("${hyperclova.retry.backoff-ms}")
 	private int retryBackoffMs;
 
-	public Map<Long, Double> requestToAi(Long templateId, List<Vlock> usedVlocksInTemplate, List<Vlock> candidates) {
-		String prompt = buildJsonPrompt(usedVlocksInTemplate, candidates);
-		AiRequestDTO request = AiRequestDTO.score(prompt);
+	/**
+	 * 외부 AI API를 통해 추천된 Vlock들을 받아오는 메서드
+	 */
+	public Map<Long, Double> suggestVlocks(List<Vlock> usedVlocksInTemplate, List<Vlock> candidates) {
+		String systemPrompt = aiPromptProvider.getSystemPromptForVlockSuggestion();
+		String userPrompt = aiPromptProvider.buildUserPromptForVlockSuggestion(usedVlocksInTemplate, candidates);
+		AiRequestDTO request = AiRequestDTO.of(systemPrompt, userPrompt);
 
+		AiResponseDTO response = requestToAi(request);
+
+		return parseVlockSuggestionResponse(response, candidates);
+	}
+
+	/**
+	 * 외부 AI API를 통해 생성된 태그들을 받아오는 메서드
+	 */
+	public AiTagResponseDTO generateTags(
+			String region,
+			List<String> fixedTags,
+			List<String> cityCandidates,
+			List<Vlock> vlocksInTemplate
+	) {
+		String systemPrompt = aiPromptProvider.getSystemPromptForTagGeneration();
+		String userPrompt = aiPromptProvider.buildUserPromptForTagGeneration(region, fixedTags, cityCandidates, vlocksInTemplate);
+		AiRequestDTO request = AiRequestDTO.of(systemPrompt, userPrompt);
+
+		AiResponseDTO response = requestToAi(request);
+
+		return parseTagResponse(response);
+	}
+
+	/**
+	 * 외부 AI API에 요청을 보내는 메서드
+	 */
+	private AiResponseDTO requestToAi(AiRequestDTO request) {
 		Retry retry = Retry.backoff(retryMax, Duration.ofMillis(retryBackoffMs))
-			.filter(this::retryable);
+				.filter(this::isRetryable);
 
-		AiResponseDTO res = hyperClovaClient.post()
-			.uri(baseUrl, model)
-			.bodyValue(request)
-			.retrieve()
-			.onStatus(HttpStatusCode::is4xxClientError, r -> r.bodyToMono(String.class)
-				.map(body -> new AiClientException("HyperClova 요청이 거절되었습니다.(4xx)" +
-					"status=" + r.statusCode() +
-					" body=" + body)))
-			.onStatus(HttpStatusCode::is5xxServerError, r -> r.bodyToMono(String.class)
-				.map(body -> new AiClientException("HyperClova 서버에 오류가 발생했습니다.(5xx)" +
-					"status=" + r.statusCode() +
-					" body=" + body)))
-			.bodyToMono(AiResponseDTO.class)
-			.timeout(Duration.ofMillis(timeoutMs))
-			.retryWhen(retry)
-			.block();
-
-		return parseResponse(res, candidates);
+		return hyperClovaClient.post()
+				.uri(baseUrl, model)
+				.bodyValue(request)
+				.retrieve()
+				.onStatus(HttpStatusCode::is4xxClientError, r ->
+						r.bodyToMono(String.class).flatMap(body -> {
+							log.error("AI CLIENT 요청 형식 오류: {}", body);
+							return Mono.error(new AiException(AiErrorCode.AI_INVALID_REQUEST));
+						})
+				)
+				.onStatus(HttpStatusCode::is5xxServerError, r ->
+						r.bodyToMono(String.class).flatMap(body -> {
+							log.error("AI CLIENT 서버 내부 오류: {}", body);
+							return Mono.error(new AiException(AiErrorCode.AI_SERVER_ERROR));
+						})
+				)
+				.bodyToMono(AiResponseDTO.class)
+				.timeout(Duration.ofMillis(timeoutMs))
+				.onErrorMap(TimeoutException.class, e -> new AiException(AiErrorCode.AI_TIMEOUT))
+				.onErrorMap(t -> !(t instanceof AiException), t -> new AiException(AiErrorCode.AI_SERVER_ERROR))
+				.retryWhen(retry)
+				.block();
 	}
 
-	// 재시도할지를 판별하는 메서드 (타임아웃, 네트워크 문제, 서버오류만 재시도)
-	private boolean retryable(Throwable t) {
-		if (t instanceof TimeoutException)
+	/**
+	 * 에러에 대해 재시도 여부를 판별하는 메서드
+	 * - 일시적인 네트워크 장애, 5xx 에러 타임아웃은 재시도
+	 * - 4xx 클라이언트 에러(잘못된 프롬프트, 인증 실패 등)는 재시도도 실패할 것이기 때문에 재시도하지 않음
+	 */
+	private boolean isRetryable(Throwable t) {
+		// 타임아웃이나 네트워크 연결 오류는 재시도
+		if (t instanceof TimeoutException || t instanceof WebClientRequestException) {
 			return true;
-		if (t instanceof WebClientRequestException)
-			return true;
-		String msg = t.getMessage();
-		return msg != null && msg.contains("5xx");
-	}
-
-	private String buildJsonPrompt(List<Vlock> usedVlocksInTemplate, List<Vlock> candidates) {
-		Map<String, Object> payload = new LinkedHashMap<>();
-
-		payload.put("used", usedVlocksInTemplate.stream()
-			.map(v -> Map.of(
-				"name", v.getName(),
-				"category", v.getVlockCategory().getName(),
-				"stayHours", v.getVlockCategory().getStayHours()))
-			.toList());
-
-		payload.put("candidates", candidates.stream()
-			.map(v -> Map.of(
-				"id", v.getId(),
-				"name", v.getName(),
-				"category", v.getVlockCategory().getName(),
-				"stayHours", v.getVlockCategory().getStayHours()))
-			.toList());
-
-		payload.put("criteria", List.of(
-			"일정 흐름을 깨지 않는가",
-			"무난하게 끼워 넣기 좋은가",
-			"맥락상 어색하지 않은가",
-			"무리한 일정은 아닌가?"));
-
-		try {
-			return objectMapper.writeValueAsString(payload); // JSON 문자열로 변경
-		} catch (Exception e) {
-			throw new IllegalStateException("프롬프트 JSON 직렬화에 실패했습니다.", e);
 		}
+
+		// AiClientException인 경우 에러 코드 확인
+		if (t instanceof AiException e) {
+			AiErrorCode code = (AiErrorCode) e.getErrorCode();
+			return code == AiErrorCode.AI_SERVER_ERROR || code == AiErrorCode.AI_TIMEOUT;
+		}
+
+		// 그 외 4xx 에러 등은 재시도 X
+		return false;
 	}
 
-	// ⚪ HyperClova로부터 온 응답을 가공하는 메서드
-	private Map<Long, Double> parseResponse(AiResponseDTO response, List<Vlock> candidates) {
+	/**
+	 * 외부 AI로부터 온 블록 추천 응답을 가공하는 메서드
+	 * */
+	private Map<Long, Double> parseVlockSuggestionResponse(AiResponseDTO response, List<Vlock> candidates) {
 		if (candidates == null || candidates.isEmpty()) {
 			return Map.of();
 		}
@@ -120,43 +142,54 @@ public class HyperClovaSuggestionClient implements AiSuggestionClient {
 			return fallback(candidates);
 		}
 
-		// 1. 코드 블록 제거
-		String s = raw.trim()
-			.replaceAll("^```(json)?\\s*", "")
-			.replaceAll("\\s*```$", "");
-
-		// 2. JSON만 추출
-		int a = s.indexOf('{'); // 첫 {
-		int b = s.lastIndexOf('}'); // 마지막 }
-		if (a >= 0 && b > a) {
-			s = s.substring(a, b + 1);
-		} else {
-			// JSON 형태가 아니면 fallback
-			return fallback(candidates);
-		}
-
-		// 3. JSON 파싱
-		Map<String, Double> parsed;
 		try {
-			parsed = objectMapper.readValue(s, new TypeReference<Map<String, Double>>() {});
+			// 코드 블록 및 불필요한 텍스트 제거
+			String extractedJson = extractJson(raw);
+
+			// JSON 파싱
+			Map<String, Double> parsed = objectMapper.readValue(
+					extractedJson,
+					new TypeReference<Map<String, Double>>() {}
+			);
+
+			return candidates.stream()
+					.collect(Collectors.toMap(
+							Vlock::getId,
+							vlock -> {
+								Double score = parsed.get(String.valueOf(vlock.getId()));
+								if (score == null) {
+									score = 0.5;  // 누락된 후보에는 기본 점수 제공
+								}
+
+								return Math.max(0.0, Math.min(1.0, score));  // 점수를 0~1 사이로 보정
+							},
+							(existing, replacement) -> existing  // 중복된 key 발생 시 기존값 유지
+					));
 		} catch (Exception e) {
+			log.error("AI 응답 파싱 실패: {}", e.getMessage(), e);
 			return fallback(candidates);
 		}
-
-		// 4. 점수 보정 및 결과 반환
-		Map<Long, Double> result = new HashMap<>();
-		for (Vlock v : candidates) {
-			Double score = parsed.get(String.valueOf(v.getId()));
-			if (score == null)
-				score = 0.5; // 누락된 후보 기본 점수 제공
-			score = Math.max(0.0, Math.min(1.0, score)); // 점수를 0~1 사이로 보정
-			result.put(v.getId(), score);
-		}
-
-		return result;
 	}
 
-	// ⚪ AI 응답 또는 파싱 등 실패시 기본값으로 보정해주는 메서드
+	/**
+	 * AI 응답에서 JSON을 추출하는 메서드
+	 * */
+	private String extractJson(String raw) {
+		String cleaned = raw.replaceAll("(?i)```(json)?", "").replaceAll("```", "").trim();  // 마크다운 코드 블록 제거 및 대소문자 무시
+
+		int start = cleaned.indexOf('{');
+		int end = cleaned.lastIndexOf('}');
+
+		if (start == -1 || end == -1 || start >= end) {
+			throw new AiException(AiErrorCode.AI_PARSE_ERROR);
+		}
+
+		return cleaned.substring(start, end + 1);
+	}
+
+	/**
+	 * AI 응답 파싱 등 실패시 기본값으로 블록 추천 점수를 보정해주는 메서드
+	 * */
 	private Map<Long, Double> fallback(List<Vlock> candidates) {
 		Map<Long, Double> fallback = new HashMap<>();
 		for (Vlock vlock : candidates) {
@@ -165,93 +198,25 @@ public class HyperClovaSuggestionClient implements AiSuggestionClient {
 		return fallback;
 	}
 
-	public AiTagResponseDTO requestToAiForTag(
-		String region,
-		List<String> fixedTags,
-		List<String> cityCandidates,
-		List<Vlock> vlocksInTemplate) {
-		String prompt = buildJsonTagPrompt(region, fixedTags, cityCandidates, vlocksInTemplate);
-		AiRequestDTO request = AiRequestDTO.generateTag(prompt);
-
-		Retry retry = Retry.backoff(retryMax, Duration.ofMillis(retryBackoffMs))
-			.filter(this::retryable);
-
-		AiResponseDTO res = hyperClovaClient.post()
-			.uri(baseUrl, model)
-			.bodyValue(request)
-			.retrieve()
-			.onStatus(HttpStatusCode::is4xxClientError, r -> r.bodyToMono(String.class)
-				.map(body -> new AiClientException(
-					"HyperClova 요청이 거절되었습니다.(4xx)" +
-						" status=" + r.statusCode() +
-						" body=" + body)))
-			.onStatus(HttpStatusCode::is5xxServerError, r -> r.bodyToMono(String.class)
-				.map(body -> new AiClientException(
-					"HyperClova 서버에 오류가 발생했습니다.(5xx)" +
-						" status=" + r.statusCode() +
-						" body=" + body)))
-			.bodyToMono(AiResponseDTO.class)
-			.timeout(Duration.ofMillis(timeoutMs))
-			.retryWhen(retry)
-			.block();
-
-		return parseTagResponse(res);
-	}
-
+	/**
+	 * 외부 AI로부터 온 태그 생성 응답을 가공하는 메서드
+	 * */
 	private AiTagResponseDTO parseTagResponse(AiResponseDTO response) {
-		String content = (response == null) ? null : response.content();
+		String raw = (response == null) ? null : response.content();
 
-		try {
-			JsonNode root = objectMapper.readTree(content.trim());
-
-			JsonNode cityNode = root.get("city");
-			JsonNode freeNode = root.get("free");
-
-			if (cityNode == null || !cityNode.isArray()) {
-				throw new AiClientException("city는 배열이어야 합니다.");
-			}
-			if (freeNode == null || !freeNode.isArray()) {
-				throw new AiClientException("free는 배열이어야 합니다.");
-			}
-
-			List<String> cities = new ArrayList<>();
-			for (JsonNode n : cityNode) {
-				cities.add(n.asText());
-			}
-
-			List<String> free = new ArrayList<>();
-			for (JsonNode n : freeNode) {
-				free.add(n.asText());
-			}
-
-			return new AiTagResponseDTO(cities, free);
-		} catch (Exception e) {
-			throw new AiClientException("AI 응답 파싱에 실패했습니다.");
+		if (raw ==  null || raw.isBlank()) {
+			log.error("AI 태그 생성 응답이 비어있습니다.");
+			throw new AiException(AiErrorCode.AI_SERVER_ERROR);
 		}
-	}
-
-	private String buildJsonTagPrompt(
-		String region,
-		List<String> fixedTags,
-		List<String> cityCandidates,
-		List<Vlock> vlocksInTemplate) {
-		Map<String, Object> payload = new LinkedHashMap<>();
-
-		payload.put("region", region);
-		payload.put("fixedTags", fixedTags);
-		payload.put("cityCandidates", cityCandidates);
-
-		payload.put("vlocks", vlocksInTemplate.stream()
-			.map(v -> Map.of(
-				"name", v.getName(),
-				"category", v.getVlockCategory().getName(),
-				"address", v.getAddress()))
-			.toList());
 
 		try {
-			return objectMapper.writeValueAsString(payload); // JSON 문자열로 변경
+			String extractedJson = extractJson(raw);
+			return objectMapper.readValue(extractedJson, AiTagResponseDTO.class);
+		} catch (JsonProcessingException e) {
+			log.error("AI 태그 생성 응답 파싱 실패: {}", e.getMessage(), e);
+			throw new AiException(AiErrorCode.AI_PARSE_ERROR);
 		} catch (Exception e) {
-			throw new IllegalStateException("프롬프트 JSON 직렬화에 실패했습니다.", e);
+			throw new AiException(AiErrorCode.AI_SERVER_ERROR);
 		}
 	}
 }
