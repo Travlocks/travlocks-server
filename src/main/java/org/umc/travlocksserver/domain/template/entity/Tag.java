@@ -17,7 +17,7 @@ public class Tag extends CreatedBaseEntity {
 	@Column(name = "tag_id")
 	private Long id;
 
-	@Column(nullable = false, length = 10)
+	@Column(nullable = false, length = 10, unique = true)
 	private String name;
 
 	public Tag(String name) {

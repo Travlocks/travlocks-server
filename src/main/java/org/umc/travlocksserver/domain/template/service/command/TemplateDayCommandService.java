@@ -313,7 +313,7 @@ public class TemplateDayCommandService {
 		List<Vlock> aiCandidates = pickAiCandidates(filtered, usedVlocksInTemplate, center);
 
 		// AI 적합도 점수
-		Map<Long, Double> aiScores = aiClient.requestToAi(templateId, usedVlocksInTemplate, aiCandidates);
+		Map<Long, Double> aiScores = aiClient.suggestVlocks(usedVlocksInTemplate, aiCandidates);
 
 		// Template에 들어간 vlock들의 카테고리 종류 목록
 		Set<String> categoriesInTemplate = usedVlocksInTemplate.stream()

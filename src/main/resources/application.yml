@@ -91,7 +91,7 @@ suggestion:
 tag:
   cron: "0 5 * * * *"
   grace-minutes: 15
-  lookback-minutes: 60
+  lookback-minutes: 75
 
 kakao:
   rest-api-key: ${KAKAO_REST_API_KEY}

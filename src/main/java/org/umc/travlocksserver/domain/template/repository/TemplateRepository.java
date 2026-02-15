@@ -104,7 +104,8 @@ public interface TemplateRepository extends JpaRepository<Template, Long>, Templ
 	@Query("""
 			SELECT t.id
 			FROM Template t
-			WHERE t.updatedAt between :from and :to
+			WHERE t.updatedAt >= :from
+				AND t.updatedAt < :to
 		""")
 	List<Long> findRecentlyUpdatedTemplateIds(
 		LocalDateTime from,
