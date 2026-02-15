@@ -143,6 +143,3 @@ cookie:
 
 global:
   timezone: Asia/Seoul
-
-server:
-  port: 8081
