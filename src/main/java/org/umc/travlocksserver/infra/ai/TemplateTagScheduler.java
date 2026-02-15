@@ -17,6 +17,8 @@ import java.util.List;
 @Slf4j
 public class TemplateTagScheduler {
 
+	private final AiTagExecutionLogRepository aiTagExecutionLogRepository;
+
 	@Value("${global.timezone}")
 	private String zoneId;
 
@@ -29,8 +31,13 @@ public class TemplateTagScheduler {
 	private final TemplateRepository templateRepository;
 	private final TemplateTagService templateTagService;
 
-	// @Scheduled(cron = "${tag.cron}", zone = "${tag.zone}")
+//	 @Scheduled(cron = "${tag.cron}", zone = "${global.timezone}")
 	public void run() {
+		long start = System.currentTimeMillis();
+
+		int aiCallCount = 0;
+		long totalAiProcessingTimeMs = 0;
+
 		LocalDateTime now = LocalDateTime.now(ZoneId.of(zoneId));
 		LocalDateTime to = now.minusMinutes(graceMinutes);
 		LocalDateTime from = now.minusMinutes(lookBackMinutes);
@@ -39,12 +46,29 @@ public class TemplateTagScheduler {
 
 		for (Long templateId : templateIds) {
 			try {
-				templateTagService.generateTags(templateId, now);
+				aiCallCount++;
+
+				AiResult result = templateTagService.generateTags(templateId, now);
+				totalAiProcessingTimeMs += result.aiLatencyMs();
 			} catch (AiException e) {
 				log.error("AI 서비스 오류로 태그 생성 실패 - 템플릿 ID: {}, 사유: {}", templateId, e.getMessage());
 			} catch (Exception e) {
 				log.error("AI 태그 생성 중 문제가 발생했습니다. - 템플릿 ID: {}, 사유: {}", templateId, e.getMessage());
 			}
 		}
+
+		long end = System.currentTimeMillis();
+
+		AiTagExecutionLog log = AiTagExecutionLog.create(
+				start,
+				end,
+				end - start,
+				templateIds.size(),
+				aiCallCount,
+				totalAiProcessingTimeMs,
+				totalAiProcessingTimeMs / aiCallCount
+		);
+
+		aiTagExecutionLogRepository.save(log);
 	}
 }

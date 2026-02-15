@@ -61,7 +61,7 @@ public class HyperClovaSuggestionClient implements AiSuggestionClient {
 	/**
 	 * 외부 AI API를 통해 생성된 태그들을 받아오는 메서드
 	 */
-	public AiTagResponseDTO generateTags(
+	public AiResult generateTags(
 			String region,
 			List<String> fixedTags,
 			List<String> cityCandidates,
@@ -71,9 +71,12 @@ public class HyperClovaSuggestionClient implements AiSuggestionClient {
 		String userPrompt = aiPromptProvider.buildUserPromptForTagGeneration(region, fixedTags, cityCandidates, vlocksInTemplate);
 		AiRequestDTO request = AiRequestDTO.of(systemPrompt, userPrompt);
 
+		long aiStartTime = System.currentTimeMillis();
 		AiResponseDTO response = requestToAi(request);
+		long aiEndTime = System.currentTimeMillis();
 
-		return parseTagResponse(response);
+		AiResult.AiTagResponseDTO parsed = parseTagResponse(response);
+		return AiResult.of(parsed, aiEndTime - aiStartTime);
 	}
 
 	/**
@@ -201,7 +204,7 @@ public class HyperClovaSuggestionClient implements AiSuggestionClient {
 	/**
 	 * 외부 AI로부터 온 태그 생성 응답을 가공하는 메서드
 	 * */
-	private AiTagResponseDTO parseTagResponse(AiResponseDTO response) {
+	private AiResult.AiTagResponseDTO parseTagResponse(AiResponseDTO response) {
 		String raw = (response == null) ? null : response.content();
 
 		if (raw ==  null || raw.isBlank()) {
@@ -211,7 +214,7 @@ public class HyperClovaSuggestionClient implements AiSuggestionClient {
 
 		try {
 			String extractedJson = extractJson(raw);
-			return objectMapper.readValue(extractedJson, AiTagResponseDTO.class);
+			return objectMapper.readValue(extractedJson, AiResult.AiTagResponseDTO.class);
 		} catch (JsonProcessingException e) {
 			log.error("AI 태그 생성 응답 파싱 실패: {}", e.getMessage(), e);
 			throw new AiException(AiErrorCode.AI_PARSE_ERROR);
