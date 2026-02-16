@@ -1,4 +1,4 @@
-package org.umc.travlocksserver.infra.ai;
+package org.umc.travlocksserver.infra.ai.client;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -11,6 +11,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientRequestException;
 import org.umc.travlocksserver.domain.vlock.entity.Vlock;
+import org.umc.travlocksserver.infra.ai.util.AiPromptProvider;
+import org.umc.travlocksserver.infra.ai.dto.AiRequestDTO;
+import org.umc.travlocksserver.infra.ai.dto.AiResponseDTO;
+import org.umc.travlocksserver.infra.ai.dto.AiTagResponseDTO;
 import org.umc.travlocksserver.infra.ai.exception.AiErrorCode;
 import org.umc.travlocksserver.infra.ai.exception.AiException;
 import reactor.core.publisher.Mono;
@@ -61,7 +65,7 @@ public class HyperClovaSuggestionClient implements AiSuggestionClient {
 	/**
 	 * 외부 AI API를 통해 생성된 태그들을 받아오는 메서드
 	 */
-	public AiResult generateTags(
+	public AiTagResponseDTO generateTags(
 			String region,
 			List<String> fixedTags,
 			List<String> cityCandidates,
@@ -71,12 +75,16 @@ public class HyperClovaSuggestionClient implements AiSuggestionClient {
 		String userPrompt = aiPromptProvider.buildUserPromptForTagGeneration(region, fixedTags, cityCandidates, vlocksInTemplate);
 		AiRequestDTO request = AiRequestDTO.of(systemPrompt, userPrompt);
 
-		long aiStartTime = System.currentTimeMillis();
-		AiResponseDTO response = requestToAi(request);
-		long aiEndTime = System.currentTimeMillis();
+//		AiResponseDTO response = requestToAi(request);
 
-		AiResult.AiTagResponseDTO parsed = parseTagResponse(response);
-		return AiResult.of(parsed, aiEndTime - aiStartTime);
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+		}
+		return new AiTagResponseDTO(Collections.emptyList(), List.of("바다뷰", "힐링"));
+
+//		return parseTagResponse(response);
 	}
 
 	/**
@@ -204,7 +212,7 @@ public class HyperClovaSuggestionClient implements AiSuggestionClient {
 	/**
 	 * 외부 AI로부터 온 태그 생성 응답을 가공하는 메서드
 	 * */
-	private AiResult.AiTagResponseDTO parseTagResponse(AiResponseDTO response) {
+	private AiTagResponseDTO parseTagResponse(AiResponseDTO response) {
 		String raw = (response == null) ? null : response.content();
 
 		if (raw ==  null || raw.isBlank()) {
@@ -214,7 +222,7 @@ public class HyperClovaSuggestionClient implements AiSuggestionClient {
 
 		try {
 			String extractedJson = extractJson(raw);
-			return objectMapper.readValue(extractedJson, AiResult.AiTagResponseDTO.class);
+			return objectMapper.readValue(extractedJson, AiTagResponseDTO.class);
 		} catch (JsonProcessingException e) {
 			log.error("AI 태그 생성 응답 파싱 실패: {}", e.getMessage(), e);
 			throw new AiException(AiErrorCode.AI_PARSE_ERROR);

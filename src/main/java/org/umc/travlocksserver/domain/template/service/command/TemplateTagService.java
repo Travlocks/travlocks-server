@@ -17,10 +17,10 @@ import org.umc.travlocksserver.domain.template.repository.TemplateRepository;
 import org.umc.travlocksserver.domain.template.repository.TemplateTagRepository;
 import org.umc.travlocksserver.domain.template.repository.TemplateVlockRepository;
 import org.umc.travlocksserver.domain.vlock.entity.Vlock;
-import org.umc.travlocksserver.infra.ai.AiResult;
-import org.umc.travlocksserver.infra.ai.HyperClovaSuggestionClient;
+import org.umc.travlocksserver.infra.ai.dto.AiTagResponseDTO;
+import org.umc.travlocksserver.infra.ai.client.HyperClovaSuggestionClient;
 
-import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -35,11 +35,14 @@ public class TemplateTagService {
 	private final TagRepository tagRepository;
 	private final TemplateTagRepository templateTagRepository;
 
-	public AiResult generateTags(Long templateId, LocalDateTime now) {
+	public AiTagResponseDTO generateTags(Long templateId) {
 		Template template = templateRepository.findById(templateId)
 			.orElseThrow(() -> new TemplateException(TemplateErrorCode.TEMPLATE_NOT_FOUND));
 
 		List<Vlock> vlocks = templateVlockRepository.findDistinctVlocksByTemplateId(templateId);
+		if (vlocks == null) {
+			vlocks = Collections.emptyList();
+		}
 
 		Region region = templateRepository.findRegionByTemplateId(templateId).get(0);
 		String travelTheme = String.valueOf(template.getTravelTheme().getContent());
@@ -55,21 +58,23 @@ public class TemplateTagService {
 		List<String> cities = cityRepository.findNameByRegionId(region.getId());
 
 		// AI 호출
-		AiResult response = hyperClovaSuggestionClient.generateTags(region.getName(), fixedInfoTags,
+		AiTagResponseDTO response = hyperClovaSuggestionClient.generateTags(region.getName(), fixedInfoTags,
 			cities, vlocks);
-
-		System.out.println(response);
 
 		template.increaseTagVersion();
 
 		saveTemplateTags(template, List.of(region.getName()), TagType.REGION);
 		saveTemplateTags(template, fixedInfoTags, TagType.FIXED_INFO);
-		saveTemplateTags(template, response.response().cities(), TagType.CITY);
-		saveTemplateTags(template, response.response().free(), TagType.FREE);
+		saveTemplateTags(template, response.cities(), TagType.CITY);
+		saveTemplateTags(template, response.free(), TagType.FREE);
 		return response;
 	}
 
 	private void saveTemplateTags(Template template, List<String> tags, TagType tagType) {
+		if (tags == null || tags.isEmpty()) {
+			return;
+		}
+
 		for (String t : tags) {
 			Tag tag = tagRepository.findByName(t)
 					.orElseGet(() -> {

@@ -17,11 +17,8 @@ spring:
     properties:
       hibernate:
         format_sql: true
+        generate_statistics: true
 
-#logging:
-#  level:
-#    org.hibernate.SQL: debug
-#    org.hibernate.orm.jdbc.bind: trace
   logging:
     level:
       org.hibernate.SQL: WARN
@@ -89,7 +86,7 @@ suggestion:
     max-duplicate-category: 2
 
 tag:
-  cron: "0 5 * * * *"
+  cron: "0 28 * * * *"
   grace-minutes: 15
   lookback-minutes: 75
 
@@ -143,3 +140,6 @@ cookie:
 
 global:
   timezone: Asia/Seoul
+
+server:
+  port: 8081

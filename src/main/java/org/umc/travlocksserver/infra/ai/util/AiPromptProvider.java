@@ -1,4 +1,4 @@
-package org.umc.travlocksserver.infra.ai;
+package org.umc.travlocksserver.infra.ai.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

@@ -1,4 +1,4 @@
-package org.umc.travlocksserver.infra.ai;
+package org.umc.travlocksserver.infra.ai.client;
 
 import org.umc.travlocksserver.domain.vlock.entity.Vlock;
 

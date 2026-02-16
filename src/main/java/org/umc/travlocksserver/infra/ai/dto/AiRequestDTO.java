@@ -1,4 +1,4 @@
-package org.umc.travlocksserver.infra.ai;
+package org.umc.travlocksserver.infra.ai.dto;
 
 import java.util.List;
 

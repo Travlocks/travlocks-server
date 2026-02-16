@@ -1,4 +1,4 @@
-package org.umc.travlocksserver.infra.ai;
+package org.umc.travlocksserver.infra.ai.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -23,18 +23,21 @@ public class AiTagExecutionLog {
 
     private Integer aiCallCount;
 
-    private Long totalAiProcessingTimeMs;
+    private Long avgProcessingTimeMs;
 
-    private Long avgAiProcessingTimeMs;
+    private Long queryCount;
 
-    public AiTagExecutionLog(Long start, Long end, Long totalProcessingTimeMs, Integer templateCount, Integer aiCallCount, Long totalAiProcessingTimeMs, Long avgAiProcessingTimeMs) {
+    private Long fetchCount;
+
+    public AiTagExecutionLog(Long start, Long end, Long totalProcessingTimeMs, Integer templateCount, Integer aiCallCount, Long avgProcessingTimeMs, Long queryCount, Long fetchCount) {
         this.start =  start;
         this.end =  end;
-        this.totalProcessingTimeMs = totalAiProcessingTimeMs;
+        this.totalProcessingTimeMs = totalProcessingTimeMs;
         this.templateCount = templateCount;
         this.aiCallCount = aiCallCount;
-        this.totalAiProcessingTimeMs = totalAiProcessingTimeMs;
-        this.avgAiProcessingTimeMs = avgAiProcessingTimeMs;
+        this.avgProcessingTimeMs = avgProcessingTimeMs;
+        this.queryCount = queryCount;
+        this.fetchCount = fetchCount;
     }
 
     public static AiTagExecutionLog create(
@@ -43,9 +46,10 @@ public class AiTagExecutionLog {
             Long totalProcessingTimeMs,
             Integer templateCount,
             Integer aiCallCount,
-            Long totalAiProcessingTimeMs,
-            Long avgAiProcessingTimeMs
+            Long avgProcessingTimeMs,
+            Long queryCount,
+            Long fetchCount
     ) {
-        return new AiTagExecutionLog(start, end, totalProcessingTimeMs, templateCount, aiCallCount, totalAiProcessingTimeMs, avgAiProcessingTimeMs);
+        return new AiTagExecutionLog(start, end, totalProcessingTimeMs, templateCount, aiCallCount, avgProcessingTimeMs,  queryCount, fetchCount);
     }
 }
