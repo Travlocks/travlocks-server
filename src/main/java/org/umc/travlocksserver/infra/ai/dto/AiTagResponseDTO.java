@@ -10,4 +10,8 @@ public record AiTagResponseDTO(
         cities = cities == null ? List.of() : cities;
         free = free == null ? List.of() : free;
     }
+
+    public static AiTagResponseDTO of(List<String> cities, List<String> free) {
+        return new AiTagResponseDTO(cities, free);
+    }
 }

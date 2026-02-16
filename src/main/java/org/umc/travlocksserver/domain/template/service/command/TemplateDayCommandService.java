@@ -23,7 +23,7 @@ import org.umc.travlocksserver.domain.vlock.service.query.VlockQueryService;
 import org.umc.travlocksserver.global.geo.BoundingBox;
 import org.umc.travlocksserver.global.geo.GeoUtil;
 import org.umc.travlocksserver.global.geo.LatLng;
-import org.umc.travlocksserver.infra.ai.client.HyperClovaSuggestionClient;
+import org.umc.travlocksserver.infra.ai.client.AiSuggestionClient;
 import org.umc.travlocksserver.infra.ai.dto.ScoredCandidate;
 import org.umc.travlocksserver.infra.kakao.KakaoPlaceClient;
 import org.umc.travlocksserver.infra.kakao.KakaoPlace;
@@ -62,7 +62,7 @@ public class TemplateDayCommandService {
 	private final VlockSuggestionCache vlockSuggestionCache;
 
 	private final KakaoPlaceClient kakaoPlaceClient;
-	private final HyperClovaSuggestionClient aiClient;
+	private final AiSuggestionClient aiClient;
 
 	@Value("${suggestion.vlock.popular-pool}")
 	private int popularPool;

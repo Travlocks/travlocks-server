@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -28,6 +29,7 @@ import java.util.stream.Collectors;
 @Component
 @RequiredArgsConstructor
 @Slf4j
+@Profile("!benchmark")
 public class HyperClovaSuggestionClient implements AiSuggestionClient {
 
 	private final WebClient hyperClovaClient;
@@ -65,6 +67,7 @@ public class HyperClovaSuggestionClient implements AiSuggestionClient {
 	/**
 	 * 외부 AI API를 통해 생성된 태그들을 받아오는 메서드
 	 */
+	@Override
 	public AiTagResponseDTO generateTags(
 			String region,
 			List<String> fixedTags,
@@ -75,16 +78,9 @@ public class HyperClovaSuggestionClient implements AiSuggestionClient {
 		String userPrompt = aiPromptProvider.buildUserPromptForTagGeneration(region, fixedTags, cityCandidates, vlocksInTemplate);
 		AiRequestDTO request = AiRequestDTO.of(systemPrompt, userPrompt);
 
-//		AiResponseDTO response = requestToAi(request);
+		AiResponseDTO response = requestToAi(request);
 
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
-		}
-		return new AiTagResponseDTO(Collections.emptyList(), List.of("바다뷰", "힐링"));
-
-//		return parseTagResponse(response);
+		return parseTagResponse(response);
 	}
 
 	/**

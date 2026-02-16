@@ -17,8 +17,8 @@ import org.umc.travlocksserver.domain.template.repository.TemplateRepository;
 import org.umc.travlocksserver.domain.template.repository.TemplateTagRepository;
 import org.umc.travlocksserver.domain.template.repository.TemplateVlockRepository;
 import org.umc.travlocksserver.domain.vlock.entity.Vlock;
+import org.umc.travlocksserver.infra.ai.client.AiSuggestionClient;
 import org.umc.travlocksserver.infra.ai.dto.AiTagResponseDTO;
-import org.umc.travlocksserver.infra.ai.client.HyperClovaSuggestionClient;
 
 import java.util.Collections;
 import java.util.List;
@@ -31,11 +31,11 @@ public class TemplateTagService {
 	private final TemplateRepository templateRepository;
 	private final TemplateVlockRepository templateVlockRepository;
 	private final CityRepository cityRepository;
-	private final HyperClovaSuggestionClient hyperClovaSuggestionClient;
+	private final AiSuggestionClient aiSuggestionClient;
 	private final TagRepository tagRepository;
 	private final TemplateTagRepository templateTagRepository;
 
-	public AiTagResponseDTO generateTags(Long templateId) {
+	public void generateTags(Long templateId) {
 		Template template = templateRepository.findById(templateId)
 			.orElseThrow(() -> new TemplateException(TemplateErrorCode.TEMPLATE_NOT_FOUND));
 
@@ -58,7 +58,7 @@ public class TemplateTagService {
 		List<String> cities = cityRepository.findNameByRegionId(region.getId());
 
 		// AI 호출
-		AiTagResponseDTO response = hyperClovaSuggestionClient.generateTags(region.getName(), fixedInfoTags,
+		AiTagResponseDTO response = aiSuggestionClient.generateTags(region.getName(), fixedInfoTags,
 			cities, vlocks);
 
 		template.increaseTagVersion();
@@ -67,7 +67,6 @@ public class TemplateTagService {
 		saveTemplateTags(template, fixedInfoTags, TagType.FIXED_INFO);
 		saveTemplateTags(template, response.cities(), TagType.CITY);
 		saveTemplateTags(template, response.free(), TagType.FREE);
-		return response;
 	}
 
 	private void saveTemplateTags(Template template, List<String> tags, TagType tagType) {

@@ -1,6 +1,9 @@
 spring:
   application:
     name: "travlocks"
+#  profiles:
+#    active: benchmark
+
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
