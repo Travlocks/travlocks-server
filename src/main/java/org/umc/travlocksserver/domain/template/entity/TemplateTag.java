@@ -30,9 +30,9 @@ public class TemplateTag extends CreatedBaseEntity {
 	private TagType type;
 
 	@Column(name = "version", nullable = false)
-	private Integer version;
+	private Long version;
 
-	public static TemplateTag create(Tag tag, Template template, TagType type, Integer version) {
+	public static TemplateTag create(Tag tag, Template template, TagType type, Long version) {
 		return TemplateTag.builder()
 			.tag(tag)
 			.template(template)

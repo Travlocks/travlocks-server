@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.umc.travlocksserver.domain.template.repository.TemplateRepository;
-import org.umc.travlocksserver.domain.template.service.command.TemplateTagService;
+import org.umc.travlocksserver.domain.template.service.command.TemplateTagCommandService;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -26,7 +26,7 @@ public class TemplateTagScheduler {
 	private int lookBackMinutes;
 
 	private final TemplateRepository templateRepository;
-	private final TemplateTagService templateTagService;
+	private final TemplateTagCommandService templateTagCommandService;
 
 	// @Scheduled(cron = "${tag.cron}", zone = "${tag.zone}")
 	public void run() {
@@ -38,7 +38,7 @@ public class TemplateTagScheduler {
 
 		for (Long templateId : templateIds) {
 			try {
-				templateTagService.generateTags(templateId, now);
+				templateTagCommandService.generateTags(templateId, now);
 			} catch (AiClientException ae) {
 				throw new AiClientException("AI 서버에 문제가 발생했습니다.");
 			} catch (Exception e) {
