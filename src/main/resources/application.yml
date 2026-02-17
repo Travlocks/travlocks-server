@@ -1,8 +1,8 @@
 spring:
   application:
     name: "travlocks"
-#  profiles:
-#    active: benchmark
+  profiles:
+    active: benchmark
 
 
   datasource:
