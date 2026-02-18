@@ -59,7 +59,7 @@ public class MemberSignupService {
 			.profileImageUrl(profileImageUrl)
 			.vlockCount(0)
 			.templateCount(0)
-			.starCount(0)
+			.favoriteCount(0)
 			.build();
 
 		Member savedMember = memberRepository.save(member);
