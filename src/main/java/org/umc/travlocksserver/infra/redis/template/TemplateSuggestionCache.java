@@ -10,27 +10,27 @@ import java.time.Duration;
 
 @Repository
 @RequiredArgsConstructor
-public class TemplateRecommendationCache {
+public class TemplateSuggestionCache {
 
 	private final RedisTemplate<String, Object> redis;
 	private final ObjectMapper objectMapper;
 
-	@Value("${cache.recommendation.templates.cache-ttl-minutes}")
+	@Value("${cache.suggestion.templates.cache-ttl-minutes}")
 	private long ttlMinutes;
 
-	public CachedTemplateRecommendations get(Long memberId) {
+	public CachedTemplateSuggestions get(Long memberId) {
 		Object object = redis.opsForValue().get(key(memberId));
 		if (object == null) {
 			return null;
 		}
-		return objectMapper.convertValue(object, CachedTemplateRecommendations.class);
+		return objectMapper.convertValue(object, CachedTemplateSuggestions.class);
 	}
 
-	public void set(Long memberId, CachedTemplateRecommendations value) {
+	public void set(Long memberId, CachedTemplateSuggestions value) {
 		redis.opsForValue().set(key(memberId), value, Duration.ofMinutes(ttlMinutes));
 	}
 
 	private String key(Long memberId) {
-		return "recommendation:templates:v1:member:" + memberId;
+		return "suggestion:templates:v1:member:" + memberId;
 	}
 }

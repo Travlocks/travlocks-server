@@ -115,13 +115,18 @@ hyperclova:
     backoff-ms: 200
 
 cache:
-  recommendation:
+  suggestion:
     templates:
       cache-ttl-minutes: 15
     vlocks:
       cache-ttl-minutes: 60
   categories:
     cache-ttl-minutes: 1440
+
+template:
+  limit:
+    recent: 5
+    suggestion: 10
 
 tmap:
   api:
@@ -143,4 +148,3 @@ cookie:
 
 global:
   timezone: Asia/Seoul
-

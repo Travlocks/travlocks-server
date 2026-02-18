@@ -34,7 +34,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
-import org.umc.travlocksserver.domain.template.dto.response.TemplateRecommendationsDTO;
+import org.umc.travlocksserver.domain.template.dto.response.TemplateSuggestionsDTO;
 import org.umc.travlocksserver.domain.member.entity.Member;
 import org.umc.travlocksserver.domain.template.dto.response.TemplateDetailResponseDTO;
 import org.umc.travlocksserver.domain.template.dto.request.TemplateVlockAddRequestDTO;
@@ -179,7 +179,7 @@ public interface TemplateControllerDocs {
 	@ApiResponses({
 		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "AI 템플릿 추천이 완료되었습니다.")
 	})
-	ResponseEntity<SuccessResponse<TemplateRecommendationsDTO>> getRecommendedTemplates(
+	ResponseEntity<SuccessResponse<TemplateSuggestionsDTO>> getSuggestedTemplates(
 		@AuthenticationPrincipal
 		Long memberId);
 
