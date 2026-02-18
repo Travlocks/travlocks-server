@@ -15,7 +15,6 @@ import org.umc.travlocksserver.global.code.BaseCode;
 import org.umc.travlocksserver.global.code.ErrorCode;
 import org.umc.travlocksserver.global.exception.GeneralException;
 import org.umc.travlocksserver.global.response.ErrorResponse;
-import org.umc.travlocksserver.infra.ai.AiClientException;
 
 // ✨ 애플리케이션 전체에서 발생하는 예외를 catch 해서 통일된 응답(JSON)으로 반환하는 역할을 하는 클래스
 @Slf4j
@@ -30,15 +29,6 @@ public class GlobalExceptionHandler {
 		return ResponseEntity
 			.status(errorCode.getStatus())
 			.body(new ErrorResponse(errorCode));
-	}
-
-	// ⚪ 외부 AI 예외 처리
-	@ExceptionHandler(AiClientException.class)
-	public ResponseEntity<ErrorResponse> handleAiClientException(AiClientException e) {
-		log.error("AI 연동에 실패했습니다.", e);
-		return ResponseEntity
-			.status(HttpStatus.SERVICE_UNAVAILABLE)
-			.body(new ErrorResponse(ErrorCode.AI_SERVICE_UNAVAILABLE));
 	}
 
 	// ⚪ 요청 헤더 누락 예외 처리

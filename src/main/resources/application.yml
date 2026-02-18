@@ -1,6 +1,9 @@
 spring:
   application:
     name: "travlocks"
+  profiles:
+    active: benchmark
+
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -17,11 +20,8 @@ spring:
     properties:
       hibernate:
         format_sql: true
+        generate_statistics: true
 
-#logging:
-#  level:
-#    org.hibernate.SQL: debug
-#    org.hibernate.orm.jdbc.bind: trace
   logging:
     level:
       org.hibernate.SQL: WARN
@@ -82,16 +82,16 @@ suggestion:
   vlock:
     size: 3
     min-pool: 50
-    popular-pool: 100  # Day에 있는 Vlock이 0개일 때 DB에서 가져올 Vlock의 최대 추천 후보 수
+    popular-pool: 30  # Day에 있는 Vlock이 0개일 때 DB에서 가져올 Vlock의 최대 추천 후보 수
     box-pool: 300
     pool-size: 30
     ai-candidate-pool: 40
     max-duplicate-category: 2
 
 tag:
-  cron: "0 5 * * * *"
+  cron: "0 28 * * * *"
   grace-minutes: 15
-  lookback-minutes: 60
+  lookback-minutes: 75
 
 kakao:
   rest-api-key: ${KAKAO_REST_API_KEY}
@@ -143,3 +143,4 @@ cookie:
 
 global:
   timezone: Asia/Seoul
+

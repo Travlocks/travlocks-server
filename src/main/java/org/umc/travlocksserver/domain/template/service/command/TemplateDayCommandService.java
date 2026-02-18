@@ -23,8 +23,8 @@ import org.umc.travlocksserver.domain.vlock.service.query.VlockQueryService;
 import org.umc.travlocksserver.global.geo.BoundingBox;
 import org.umc.travlocksserver.global.geo.GeoUtil;
 import org.umc.travlocksserver.global.geo.LatLng;
-import org.umc.travlocksserver.infra.ai.HyperClovaSuggestionClient;
-import org.umc.travlocksserver.infra.ai.ScoredCandidate;
+import org.umc.travlocksserver.infra.ai.client.AiSuggestionClient;
+import org.umc.travlocksserver.infra.ai.dto.ScoredCandidate;
 import org.umc.travlocksserver.infra.kakao.KakaoPlaceClient;
 import org.umc.travlocksserver.infra.kakao.KakaoPlace;
 import org.umc.travlocksserver.infra.redis.vlock.CachedVlockSuggestions;
@@ -62,7 +62,7 @@ public class TemplateDayCommandService {
 	private final VlockSuggestionCache vlockSuggestionCache;
 
 	private final KakaoPlaceClient kakaoPlaceClient;
-	private final HyperClovaSuggestionClient aiClient;
+	private final AiSuggestionClient aiClient;
 
 	@Value("${suggestion.vlock.popular-pool}")
 	private int popularPool;
@@ -313,7 +313,7 @@ public class TemplateDayCommandService {
 		List<Vlock> aiCandidates = pickAiCandidates(filtered, usedVlocksInTemplate, center);
 
 		// AI 적합도 점수
-		Map<Long, Double> aiScores = aiClient.requestToAi(templateId, usedVlocksInTemplate, aiCandidates);
+		Map<Long, Double> aiScores = aiClient.suggestVlocks(usedVlocksInTemplate, aiCandidates);
 
 		// Template에 들어간 vlock들의 카테고리 종류 목록
 		Set<String> categoriesInTemplate = usedVlocksInTemplate.stream()

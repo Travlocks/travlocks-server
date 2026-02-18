@@ -7,7 +7,7 @@ import org.umc.travlocksserver.global.entity.CreatedBaseEntity;
 
 @Entity
 @Getter
-@Builder(access = AccessLevel.PRIVATE)
+@Builder(access = AccessLevel.PROTECTED)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Table(name = "notifications", indexes = {
