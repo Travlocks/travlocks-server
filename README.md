@@ -128,49 +128,62 @@ Travlocks는
 ## 📂 프로젝트 구조
 
 ```
-📦travlockse-server
-┣ 📂.github
-┃ ┣ 📂ISSUE_TEMPLATE
-┃ ┣ 📜pull_request_template.md
-┃ ┗ 📂workflows
-┣ 📂src/main/java/com.travlocks
-┃ ┣ 📂 domain
-┃ ┃ ┣ 📂 feature
-┃ ┃ ┃ ┣ 📂 constant
-┃ ┃ ┃ ┃ ┣ 📜 SuccessCode
-┃ ┃ ┃ ┃ ┗ 📜 ErrorCode
-┃ ┃ ┃ ┣ 📂 controller
-┃ ┃ ┃ ┣ 📂 dto
-┃ ┃ ┃ ┣ 📂 entity
-┃ ┃ ┃ ┣ 📂 enums
-┃ ┃ ┃ ┣ 📂 exception
-┃ ┃ ┃ ┗ 📂 service
-┃ ┣ 📂 global
-┃ ┃ ┣ 📂 aws
-┃ ┃ ┣ 📂 code
-┃ ┃ ┣ 📂 common
-┃ ┃ ┣ 📂 confing
-┃ ┃ ┣ 📂 entity
-┃ ┃ ┣ 📂 exception
-┃ ┃ ┣ 📂 jwt
-┃ ┃ ┣ 📂 mail
-┃ ┃ ┣ 📂 response
-┃ ┃ ┗ 📂 security
-┃ ┗ 📂 infra
-┃   ┣ 📂 kakao
-┃   ┗ 📂 redis
-┣ 📂 resources
-┃ ┣ 📂 mail
-┃ ┗ 📜 application.yml
-┣ 📜 .env
-┣ 📜 .gitignore
-┣ 📜 build.gradle
-┣ 📜 docker-compose.yml
-┣ 📜 Dockerfile
-┗ 📜 settings.gradle
+📦 travlocks-server
+├── 📂 .github
+│   ├── 📂 ISSUE_TEMPLATE
+│   ├── 📜 pull_request_template.md
+│   └── 📂 workflows                    # CI/CD 관련 설정
+│
+├── 📂 src/main/java/com.travlocks
+│   ├── 📂 domain                       # 도메인별 비즈니스 로직
+│   │   └── 📂 {도메인명}
+│   │       ├── 📂 constant
+│   │       ├── 📂 controller
+│   │       ├── 📂 dto
+│   │       ├── 📂 entity
+│   │       ├── 📂 enums
+│   │       ├── 📂 exception
+│   │       └── 📂 service
+│   │
+│   ├── 📂 global                       # 전역 설정 및 공통 기능
+│   │   ├── 📂 annotation               # 커스텀 어노테이션
+│   │   ├── 📂 aws                      # AWS 연동
+│   │   ├── 📂 code                     # 응답 코드 정의
+│   │   ├── 📂 common                   # 공통 유틸리티
+│   │   ├── 📂 config                   # 각종 설정 클래스
+│   │   ├── 📂 entity
+│   │   ├── 📂 exception
+│   │   ├── 📂 external
+│   │   ├── 📂 geo
+│   │   ├── 📂 jwt                      # JWT 토큰 처리
+│   │   ├── 📂 mail
+│   │   ├── 📂 profile
+│   │   ├── 📂 response                 # API 응답 공통 형식
+│   │   ├── 📂 security                 # Security 관련 설정
+│   │   └── 📂 util
+│   │
+│   └── 📂 infra
+│       ├── 📂 ai
+│       ├── 📂 kakao
+│       └── 📂 redis
+│
+├── 📂 resources
+│   ├── 📂 mail
+│   └── 📜 application.yml
+│
+├── 📜 .gitignore
+├── 📜 build.gradle
+├── 📜 docker-compose.yml
+├── 📜 Dockerfile
+└── 📜 settings.gradle 
 ```
 
-## 📂 시스템 아키텍처
-<img width="1116" height="676" alt="image" src="https://github.com/user-attachments/assets/64f90add-2c35-45f1-adc3-318e2375c9b1" />
+## 📎 데이터 모델링
+<img width="2812" height="1756" alt="image" src="https://github.com/user-attachments/assets/aaab38c4-3850-4cf2-816d-b9ce54ba88eb" />
+
+
+## ➰ 시스템 아키텍처
+<img width="2104" height="1320" alt="image" src="https://github.com/user-attachments/assets/590c786a-be20-4868-a26b-894281d9c475" />
+
 
 </div>
