@@ -30,10 +30,13 @@ import java.util.List;
 @Slf4j
 public class TemplateQueryService {
 
-	private static final int RECENT_TEMPLATE_LIMIT = 5;
-	private static final int RECOMMEND_TEMPLATE_LIMIT = 10;
+	@Value("${template.limit.recent}")
+	private int recentTemplateLimit;
 
 	private final TemplateRecommendationCache cache;
+	@Value("${template.limit.suggestion}")
+	private int suggestionTemplateLimit;
+
 	private final PreferredTravelThemeRepository preferredTravelThemeRepository;
 	private final TemplateRepository templateRepository;
 	private final FavoriteRepository favoriteRepository;
@@ -62,7 +65,7 @@ public class TemplateQueryService {
 
 		// 최근 5개 템플릿의 TravleThemeID 뽑고 Distinct
 		List<Long> recentThemeIds = templateRepository.findRecentThemeIdsByMemberId(memberId,
-			PageRequest.of(0, RECENT_TEMPLATE_LIMIT));
+			PageRequest.of(0, recentTemplateLimit));
 
 		// 이미 리믹스한 템플릿 ID들 조회 (추천에서 제외하기 위함)
 		List<Long> excludedTemplateIds = templateRepository.findRemixedTemplateIdsByMemberId(memberId);
@@ -70,6 +73,7 @@ public class TemplateQueryService {
 		// 개인화 추천
 		List<TemplateRecommendationCardDTO> result = templateRepository.recommendPersonalized(preferredThemeIds,
 			recentThemeIds, excludedTemplateIds, RECOMMEND_TEMPLATE_LIMIT);
+			recentThemeIds, excludedTemplateIds, suggestionTemplateLimit);
 
 		return result;
 	}
