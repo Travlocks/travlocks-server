@@ -3,8 +3,10 @@ package org.umc.travlocksserver.domain.auth.service.support;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.umc.travlocksserver.domain.auth.code.AuthErrorCode;
 import org.umc.travlocksserver.domain.auth.entity.OAuthAccount;
 import org.umc.travlocksserver.domain.auth.enums.OAuthProvider;
+import org.umc.travlocksserver.domain.auth.exception.AuthException;
 import org.umc.travlocksserver.domain.auth.repository.OAuthAccountRepository;
 import org.umc.travlocksserver.domain.member.code.MemberErrorCode;
 import org.umc.travlocksserver.domain.member.entity.Member;
@@ -27,14 +29,25 @@ public class OAuthMemberFactory {
 		boolean emailVerified) {
 		return oauthAccountRepository.findByProviderAndProviderId(provider, providerUserId)
 			.map(OAuthAccount::getMember)
+                .map(member -> {
+                    if (member.getStatus() == MemberStatus.DELETED) {
+                        throw new AuthException(AuthErrorCode.DELETED_ACCOUNT);
+                    }
+                    return member;
+                })
 			.orElseGet(() -> createOnboardingMember(provider, providerUserId, email, emailVerified));
 	}
 
 	private Member createOnboardingMember(OAuthProvider provider, String providerUserId, String email,
 		boolean emailVerified) {
-		if (email != null && memberRepository.existsByEmail(email)) {
-			throw new MemberException(MemberErrorCode.EMAIL_ALREADY_EXISTS);
-		}
+        if (email != null && !email.isBlank()) {
+            memberRepository.findByEmail(email).ifPresent(existing -> {
+                if (existing.getStatus() == MemberStatus.DELETED) {
+                    throw new AuthException(AuthErrorCode.DELETED_ACCOUNT); // or ACCOUNT_NOT_FOUND
+                }
+                throw new MemberException(MemberErrorCode.EMAIL_ALREADY_EXISTS);
+            });
+        }
 
 		Member member = Member.builder()
 			.email(email)

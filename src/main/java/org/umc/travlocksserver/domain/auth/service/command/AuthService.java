@@ -16,6 +16,7 @@ import org.umc.travlocksserver.domain.auth.exception.AuthException;
 import org.umc.travlocksserver.domain.auth.code.AuthErrorCode;
 import org.umc.travlocksserver.domain.auth.repository.RefreshTokenRedisRepository;
 import org.umc.travlocksserver.domain.member.entity.Member;
+import org.umc.travlocksserver.domain.member.enums.MemberStatus;
 import org.umc.travlocksserver.domain.member.repository.MemberRepository;
 import org.umc.travlocksserver.global.jwt.JwtTokenProvider;
 
@@ -41,6 +42,10 @@ public class AuthService {
 		Member member = memberRepository.findByEmail(request.email())
 			.orElseThrow(() -> new AuthException(AuthErrorCode.INVALID_CREDENTIALS));
 
+        if (member.getStatus() == MemberStatus.DELETED) {
+            throw new AuthException(AuthErrorCode.DELETED_ACCOUNT);
+        }
+
 		if (!member.matchesPassword(passwordEncoder, request.password())) {
 			throw new AuthException(AuthErrorCode.INVALID_CREDENTIALS);
 		}
@@ -53,6 +58,10 @@ public class AuthService {
 			tokens.accessTokenExpiresIn());
 	}
 
+
+    /**
+     * AccessToken 재발급
+     */
 	public AuthRefreshResponseDTO refreshAccessToken(HttpServletRequest request) {
 		String refreshToken = extractRefreshTokenFromCookie(request);
 		if (refreshToken == null) {
