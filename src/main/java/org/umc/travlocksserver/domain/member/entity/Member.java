@@ -87,10 +87,9 @@ public class Member extends SoftDeleteBaseEntity {
 		this.status = MemberStatus.ACTIVE;
 	}
 
-	public void withdrawAndAnonymize(String anonymizedEmail, String anonymizedNickname) {
+	public void withdrawAndAnonymize(String anonymizedNickname) {
 		this.status = MemberStatus.DELETED;
 		this.softDelete();
-		this.email = anonymizedEmail;
 		this.nickname = anonymizedNickname;
 		this.introduction = null;
 		this.passwordHash = null;
