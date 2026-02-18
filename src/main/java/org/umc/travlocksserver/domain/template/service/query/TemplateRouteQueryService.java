@@ -103,8 +103,26 @@ public class TemplateRouteQueryService {
 		Vlock toVlock = vlockRepository.findById(toVlockId)
 			.orElseThrow(() -> new VlockException(VlockErrorCode.END_VLOCK_NOT_FOUND));
 
-		// 이동 수단에 맞는 경로 계산
-		TmapDTO.RouteInfo routeInfo = calculateRoute(fromVlock, toVlock, transportType);
+		// 좌표가 유효하지 않은 값이면(더미/범위 밖) TMAP 호출 없이 fallback
+		if (!isValidKoreaCoord(fromVlock.getLongitude(), fromVlock.getLatitude())
+			|| !isValidKoreaCoord(toVlock.getLongitude(), toVlock.getLatitude())) {
+
+			log.warn("유효하지 않은 좌표로 경로 계산 스킵: from=({}, {}), to=({}, {})",
+				fromVlock.getLongitude(), fromVlock.getLatitude(),
+				toVlock.getLongitude(), toVlock.getLatitude());
+
+			return fallbackRoute(fromVlockId, toVlockId, transportType);
+		}
+
+		// TMAP 호출 실패해도 해당 구간만 fallback
+		final TmapDTO.RouteInfo routeInfo;
+		try {
+			routeInfo = calculateRoute(fromVlock, toVlock, transportType);
+		} catch (RuntimeException e) {
+			log.warn("TMAP 경로 계산 실패 - 해당 구간만 polyline 없이 반환: {} -> {} ({}), reason={}",
+				fromVlockId, toVlockId, transportType, e.getMessage());
+			return fallbackRoute(fromVlockId, toVlockId, transportType);
+		}
 
 		MoveTime moveTime = MoveTime.builder()
 			.fromVlock(fromVlock)
@@ -118,6 +136,32 @@ public class TemplateRouteQueryService {
 		moveTimeRepository.save(moveTime);
 
 		return toResponseDTO(moveTime);
+	}
+
+	private TemplateDayRouteResponseDTO fallbackRoute(Long fromVlockId, Long toVlockId, TransportType transportType) {
+		// moveTimeId null, 시간/거리 0, polyline 좌표는 빈 배열로 반환
+		return new TemplateDayRouteResponseDTO(
+			null,
+			fromVlockId,
+			toVlockId,
+			0,
+			0,
+			transportType,
+			List.of()
+		);
+	}
+
+	/**
+	 * 한국 내 좌표 검증
+	 */
+	private boolean isValidKoreaCoord(Double lon, Double lat) {
+		if (lon == null || lat == null)
+			return false;
+		// 위경도 기본 범위
+		if (lon < -180 || lon > 180 || lat < -90 || lat > 90)
+			return false;
+		// 한국 대략 범위
+		return (lon >= 124.0 && lon <= 132.0) && (lat >= 33.0 && lat <= 39.5);
 	}
 
 	/**
