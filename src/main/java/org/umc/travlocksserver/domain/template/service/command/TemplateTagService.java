@@ -1,6 +1,7 @@
 package org.umc.travlocksserver.domain.template.service.command;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.umc.travlocksserver.domain.location.entity.Region;
@@ -16,10 +17,10 @@ import org.umc.travlocksserver.domain.template.repository.TemplateRepository;
 import org.umc.travlocksserver.domain.template.repository.TemplateTagRepository;
 import org.umc.travlocksserver.domain.template.repository.TemplateVlockRepository;
 import org.umc.travlocksserver.domain.vlock.entity.Vlock;
-import org.umc.travlocksserver.infra.ai.AiTagResponseDTO;
-import org.umc.travlocksserver.infra.ai.HyperClovaSuggestionClient;
+import org.umc.travlocksserver.infra.ai.client.AiSuggestionClient;
+import org.umc.travlocksserver.infra.ai.dto.AiTagResponseDTO;
 
-import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -30,15 +31,18 @@ public class TemplateTagService {
 	private final TemplateRepository templateRepository;
 	private final TemplateVlockRepository templateVlockRepository;
 	private final CityRepository cityRepository;
-	private final HyperClovaSuggestionClient hyperClovaSuggestionClient;
+	private final AiSuggestionClient aiSuggestionClient;
 	private final TagRepository tagRepository;
 	private final TemplateTagRepository templateTagRepository;
 
-	public void generateTags(Long templateId, LocalDateTime now) {
+	public void generateTags(Long templateId) {
 		Template template = templateRepository.findById(templateId)
 			.orElseThrow(() -> new TemplateException(TemplateErrorCode.TEMPLATE_NOT_FOUND));
 
 		List<Vlock> vlocks = templateVlockRepository.findDistinctVlocksByTemplateId(templateId);
+		if (vlocks == null) {
+			vlocks = Collections.emptyList();
+		}
 
 		Region region = templateRepository.findRegionByTemplateId(templateId).get(0);
 		String travelTheme = String.valueOf(template.getTravelTheme().getContent());
@@ -54,7 +58,7 @@ public class TemplateTagService {
 		List<String> cities = cityRepository.findNameByRegionId(region.getId());
 
 		// AI 호출
-		AiTagResponseDTO response = hyperClovaSuggestionClient.requestToAiForTag(String.valueOf(region), fixedInfoTags,
+		AiTagResponseDTO response = aiSuggestionClient.generateTags(region.getName(), fixedInfoTags,
 			cities, vlocks);
 
 		template.increaseTagVersion();
@@ -66,10 +70,20 @@ public class TemplateTagService {
 	}
 
 	private void saveTemplateTags(Template template, List<String> tags, TagType tagType) {
+		if (tags == null || tags.isEmpty()) {
+			return;
+		}
+
 		for (String t : tags) {
-			System.out.println("이건 saveTemplateTags에서 호출 " + t);
 			Tag tag = tagRepository.findByName(t)
-				.orElse(tagRepository.save(Tag.create(t)));
+					.orElseGet(() -> {
+						try {
+							return tagRepository.save(Tag.create(t));
+						} catch (DataIntegrityViolationException e) {
+							return tagRepository.findByName(t)
+									.orElseThrow();
+						}
+					});
 
 			TemplateTag templateTag = TemplateTag.create(
 				tag,
