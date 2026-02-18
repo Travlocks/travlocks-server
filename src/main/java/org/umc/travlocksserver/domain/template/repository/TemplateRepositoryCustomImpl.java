@@ -11,8 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import org.umc.travlocksserver.domain.location.entity.QCity;
 import org.umc.travlocksserver.domain.location.entity.QRegion;
-import org.umc.travlocksserver.domain.template.dto.response.QTemplateRecommendationCardDTO;
-import org.umc.travlocksserver.domain.template.dto.response.TemplateRecommendationCardDTO;
+import org.umc.travlocksserver.domain.template.dto.response.QTemplateSuggestionCardDTO;
+import org.umc.travlocksserver.domain.template.dto.response.TemplateSuggestionCardDTO;
 import org.umc.travlocksserver.domain.template.entity.QTemplate;
 import org.umc.travlocksserver.domain.template.entity.QTemplateCity;
 import org.umc.travlocksserver.domain.traveltheme.entity.QTravelTheme;
@@ -39,7 +39,7 @@ public class TemplateRepositoryCustomImpl implements TemplateRepositoryCustom {
 	* - 리믹스 점수: 0~30점 (가중치 15)
 	* - 즐겨찾기 점수: 0~10점 (가중치 10)
 	*/
-	public List<TemplateRecommendationCardDTO> recommendPersonalized(
+	public List<TemplateSuggestionCardDTO> suggestPersonalized(
 		List<Long> preferredThemeIds,
 		List<Long> recentThemeIds,
 		List<Long> excludedTemplateIds,
@@ -56,7 +56,7 @@ public class TemplateRepositoryCustomImpl implements TemplateRepositoryCustom {
 		NumberExpression<Double> totalScore = calculateTotalScore(t, preferredThemeIds, recentThemeIds);
 
 		return query
-			.select(new QTemplateRecommendationCardDTO(
+			.select(new QTemplateSuggestionCardDTO(
 				t.id,
 				t.coverImageUrl,
 				t.title,

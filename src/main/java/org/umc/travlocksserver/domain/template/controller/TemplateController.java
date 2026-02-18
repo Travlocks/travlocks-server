@@ -61,12 +61,12 @@ public class TemplateController implements TemplateControllerDocs {
 	private final TemplateCommandService templateCommandService;
 	private final TemplateSummaryQueryService templateSummaryQueryService;
 
-	@GetMapping("/recommendations")
-	public ResponseEntity<SuccessResponse<TemplateRecommendationsDTO>> getRecommendedTemplates(
+	@GetMapping("/suggestions")
+	public ResponseEntity<SuccessResponse<TemplateSuggestionsDTO>> getSuggestedTemplates(
 		@AuthenticationPrincipal
 		Long memberId) {
-		TemplateRecommendationsDTO response = templateQueryService.getRecommendedTemplates(memberId);
-		return ResponseEntity.ok(SuccessResponse.ok(TemplateSuccessCode.TEMPLATE_RECOMMEND_SUCCESS, response));
+		TemplateSuggestionsDTO response = templateQueryService.getSuggestedTemplates(memberId);
+		return ResponseEntity.ok(SuccessResponse.ok(TemplateSuccessCode.TEMPLATE_SUGGESTION_SUCCESS, response));
 	}
 
 	@GetMapping("/popular")

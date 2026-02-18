@@ -15,7 +15,7 @@ public class VlockSuggestionCache {
 	private final RedisTemplate<String, Object> redis;
 	private final ObjectMapper objectMapper;
 
-	@Value("${cache.recommendation.vlocks.cache-ttl-minutes}")
+	@Value("${cache.suggestion.vlocks.cache-ttl-minutes}")
 	private long ttlMinutes;
 
 	public CachedVlockSuggestions get(Long templateId) {

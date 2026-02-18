@@ -3,7 +3,7 @@ package org.umc.travlocksserver.domain.template.dto.response;
 import com.querydsl.core.annotations.QueryProjection;
 import org.umc.travlocksserver.domain.template.enums.TripDays;
 
-public record TemplateRecommendationCardDTO(
+public record TemplateSuggestionCardDTO(
 	Long templateId,
 	String coverImgUrl,
 	String title,
@@ -13,7 +13,7 @@ public record TemplateRecommendationCardDTO(
 	String tripTheme,
 	Double totalScore) {
 	@QueryProjection
-	public TemplateRecommendationCardDTO(
+	public TemplateSuggestionCardDTO(
 		Long templateId,
 		String coverImgUrl,
 		String title,

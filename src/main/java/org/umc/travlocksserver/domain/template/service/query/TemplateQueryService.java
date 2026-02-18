@@ -2,6 +2,7 @@ package org.umc.travlocksserver.domain.template.service.query;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -9,8 +10,8 @@ import org.umc.travlocksserver.domain.favorite.repository.FavoriteRepository;
 import org.umc.travlocksserver.domain.template.code.TemplateErrorCode;
 import org.umc.travlocksserver.domain.template.dto.response.PopularTemplateResponse;
 import org.umc.travlocksserver.domain.template.dto.response.TemplateDetailResponseDTO;
-import org.umc.travlocksserver.domain.template.dto.response.TemplateRecommendationCardDTO;
-import org.umc.travlocksserver.domain.template.dto.response.TemplateRecommendationsDTO;
+import org.umc.travlocksserver.domain.template.dto.response.TemplateSuggestionCardDTO;
+import org.umc.travlocksserver.domain.template.dto.response.TemplateSuggestionsDTO;
 import org.umc.travlocksserver.domain.template.dto.response.TemplateExploreResponseDTO;
 import org.umc.travlocksserver.domain.template.dto.response.*;
 import org.umc.travlocksserver.domain.template.entity.Template;
@@ -19,8 +20,8 @@ import org.umc.travlocksserver.domain.template.exception.TemplateException;
 import org.umc.travlocksserver.domain.template.repository.TemplateExploreRepositoryCustom;
 import org.umc.travlocksserver.domain.template.repository.TemplateRepository;
 import org.umc.travlocksserver.domain.traveltheme.repository.PreferredTravelThemeRepository;
-import org.umc.travlocksserver.infra.redis.template.CachedTemplateRecommendations;
-import org.umc.travlocksserver.infra.redis.template.TemplateRecommendationCache;
+import org.umc.travlocksserver.infra.redis.template.CachedTemplateSuggestions;
+import org.umc.travlocksserver.infra.redis.template.TemplateSuggestionCache;
 
 import java.util.List;
 
@@ -33,33 +34,31 @@ public class TemplateQueryService {
 	@Value("${template.limit.recent}")
 	private int recentTemplateLimit;
 
-	private final TemplateRecommendationCache cache;
 	@Value("${template.limit.suggestion}")
 	private int suggestionTemplateLimit;
 
+	private final TemplateSuggestionCache cache;
 	private final PreferredTravelThemeRepository preferredTravelThemeRepository;
 	private final TemplateRepository templateRepository;
 	private final FavoriteRepository favoriteRepository;
 	private final TemplateExploreRepositoryCustom templateExploreRepositoryCustom;
 
-	public TemplateRecommendationsDTO getRecommendedTemplates(Long memberId) {
-		CachedTemplateRecommendations cached = cache.get(memberId);
+	public TemplateSuggestionsDTO getSuggestedTemplates(Long memberId) {
+		CachedTemplateSuggestions cached = cache.get(memberId);
 
 		// Cache hit -> Caching된 추천 리스트 반환
 		if (cached != null) {
-			log.info("캐싱된 데이터 반환");
-			return TemplateRecommendationsDTO.from(cached);
+			return TemplateSuggestionsDTO.from(cached);
 		}
 
 		// Cache miss -> 추천
-		log.info("새로운 추천 데이터 생성");
-		List<TemplateRecommendationCardDTO> templates = recommendTemplates(memberId);
-		CachedTemplateRecommendations recommendedTemplates = CachedTemplateRecommendations.from(templates);
-		cache.set(memberId, recommendedTemplates);
-		return TemplateRecommendationsDTO.from(recommendedTemplates);
+		List<TemplateSuggestionCardDTO> templates = suggestTemplates(memberId);
+		CachedTemplateSuggestions suggestedTemplates = CachedTemplateSuggestions.from(templates);
+		cache.set(memberId, suggestedTemplates);
+		return TemplateSuggestionsDTO.from(suggestedTemplates);
 	}
 
-	private List<TemplateRecommendationCardDTO> recommendTemplates(Long memberId) {
+	private List<TemplateSuggestionCardDTO> suggestTemplates(Long memberId) {
 		// 회원 선호 테마 ID들 조회
 		List<Long> preferredThemeIds = preferredTravelThemeRepository.findPreferredThemeIdsByMemberId(memberId);
 
@@ -71,8 +70,7 @@ public class TemplateQueryService {
 		List<Long> excludedTemplateIds = templateRepository.findRemixedTemplateIdsByMemberId(memberId);
 
 		// 개인화 추천
-		List<TemplateRecommendationCardDTO> result = templateRepository.recommendPersonalized(preferredThemeIds,
-			recentThemeIds, excludedTemplateIds, RECOMMEND_TEMPLATE_LIMIT);
+		List<TemplateSuggestionCardDTO> result = templateRepository.suggestPersonalized(preferredThemeIds,
 			recentThemeIds, excludedTemplateIds, suggestionTemplateLimit);
 
 		return result;
