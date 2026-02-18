@@ -38,6 +38,7 @@ public class TemplateQueryService {
 	private final TemplateRepository templateRepository;
 	private final FavoriteRepository favoriteRepository;
 	private final TemplateExploreRepositoryCustom templateExploreRepositoryCustom;
+	private final TemplateTagQueryService templateTagQueryService;
 
 	public TemplateRecommendationsDTO getRecommendedTemplates(Long memberId) {
 		CachedTemplateRecommendations cached = cache.get(memberId);
@@ -110,9 +111,7 @@ public class TemplateQueryService {
 		}
 
 		// 태그 목록
-		List<String> tags = template.getTemplateTags().stream()
-			.map(tt -> tt.getTag().getName())
-			.toList();
+		List<String> tags = templateTagQueryService.getTemplateTags(templateId,template.getTagVersion());
 
 		// 블록 목록
 		List<TemplateDetailResponseDTO.VlockDTO> blocks = template.getTemplateDays().stream()

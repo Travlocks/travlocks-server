@@ -1,7 +1,6 @@
 package org.umc.travlocksserver.domain.template.service.command;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.umc.travlocksserver.domain.location.entity.Region;
@@ -18,15 +17,15 @@ import org.umc.travlocksserver.domain.template.repository.TemplateTagRepository;
 import org.umc.travlocksserver.domain.template.repository.TemplateVlockRepository;
 import org.umc.travlocksserver.domain.vlock.entity.Vlock;
 import org.umc.travlocksserver.infra.ai.client.AiSuggestionClient;
+import org.umc.travlocksserver.infra.ai.client.HyperClovaSuggestionClient;
 import org.umc.travlocksserver.infra.ai.dto.AiTagResponseDTO;
 
-import java.util.Collections;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class TemplateTagService {
+public class TemplateTagCommandService {
 
 	private final TemplateRepository templateRepository;
 	private final TemplateVlockRepository templateVlockRepository;
@@ -40,9 +39,6 @@ public class TemplateTagService {
 			.orElseThrow(() -> new TemplateException(TemplateErrorCode.TEMPLATE_NOT_FOUND));
 
 		List<Vlock> vlocks = templateVlockRepository.findDistinctVlocksByTemplateId(templateId);
-		if (vlocks == null) {
-			vlocks = Collections.emptyList();
-		}
 
 		Region region = templateRepository.findRegionByTemplateId(templateId).get(0);
 		String travelTheme = String.valueOf(template.getTravelTheme().getContent());
@@ -70,20 +66,10 @@ public class TemplateTagService {
 	}
 
 	private void saveTemplateTags(Template template, List<String> tags, TagType tagType) {
-		if (tags == null || tags.isEmpty()) {
-			return;
-		}
-
 		for (String t : tags) {
+			System.out.println("이건 saveTemplateTags에서 호출 " + t);
 			Tag tag = tagRepository.findByName(t)
-					.orElseGet(() -> {
-						try {
-							return tagRepository.save(Tag.create(t));
-						} catch (DataIntegrityViolationException e) {
-							return tagRepository.findByName(t)
-									.orElseThrow();
-						}
-					});
+				.orElse(tagRepository.save(Tag.create(t)));
 
 			TemplateTag templateTag = TemplateTag.create(
 				tag,

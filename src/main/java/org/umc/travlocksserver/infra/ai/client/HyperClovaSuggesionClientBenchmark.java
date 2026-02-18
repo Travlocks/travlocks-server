@@ -12,9 +12,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-@Profile("benchmark")
 @Component
 @RequiredArgsConstructor
+@Profile("benchmark")
 public class HyperClovaSuggesionClientBenchmark implements AiSuggestionClient {
 
     private final AiPromptProvider aiPromptProvider;
