@@ -3,6 +3,8 @@ package org.umc.travlocksserver.domain.member.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.umc.travlocksserver.domain.favorite.code.FavoriteErrorCode;
+import org.umc.travlocksserver.domain.favorite.exception.FavoriteException;
 import org.umc.travlocksserver.domain.member.enums.MemberStatus;
 import org.umc.travlocksserver.domain.template.code.TemplateErrorCode;
 import org.umc.travlocksserver.domain.template.exception.TemplateException;
@@ -102,5 +104,16 @@ public class Member extends SoftDeleteBaseEntity {
 			throw new TemplateException(TemplateErrorCode.TEMPLATE_COUNT_BELOW_ZERO);
 		}
 		this.templateCount = this.templateCount - 1;
+	}
+
+	public void increaseFavoriteCount() {
+		this.favoriteCount = this.favoriteCount + 1;
+	}
+
+	public void decreaseFavoriteCount() {
+		if (this.favoriteCount <= 0) {
+			throw new FavoriteException(FavoriteErrorCode.FAVORITE_COUNT_BELOW_ZERO);
+		}
+		this.favoriteCount = this.favoriteCount - 1;
 	}
 }
