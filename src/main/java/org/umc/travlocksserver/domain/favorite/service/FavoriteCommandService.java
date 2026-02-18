@@ -55,6 +55,8 @@ public class FavoriteCommandService {
 
 		//템플릿 즐겨찾기 수 증가
 		template.increaseFavoriteCount();
+		// 멤버 즐겨찾기 수 증가
+		member.increaseFavoriteCount();
 
 		eventPublisher.publishEvent(new TemplateActivityEvent(
 			template.getOwner().getId(),
@@ -75,11 +77,14 @@ public class FavoriteCommandService {
 
 		// 템플릿 조회
 		Template template = favorite.getTemplate();
+		Member member = favorite.getMember();
 
 		// Favorite 삭제
 		favoriteRepository.delete(favorite);
 
 		// 템플릿 즐겨찾기 수 감소
 		template.decreaseFavoriteCount();
+		// 멤버 즐겨찾기 수 감소
+		member.decreaseFavoriteCount();
 	}
 }

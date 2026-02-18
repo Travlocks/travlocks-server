@@ -60,7 +60,7 @@ public class MemberMyPageQueryService {
 			new MemberMyPageResponseDTO.Counts(
 				member.getVlockCount(),
 				member.getTemplateCount(),
-				member.getStarCount()),
+				member.getFavoriteCount()),
 			new MemberMyPageResponseDTO.Recent(vlocks, templates));
 	}
 

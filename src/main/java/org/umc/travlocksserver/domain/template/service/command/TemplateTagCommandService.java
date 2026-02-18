@@ -16,25 +16,25 @@ import org.umc.travlocksserver.domain.template.repository.TemplateRepository;
 import org.umc.travlocksserver.domain.template.repository.TemplateTagRepository;
 import org.umc.travlocksserver.domain.template.repository.TemplateVlockRepository;
 import org.umc.travlocksserver.domain.vlock.entity.Vlock;
-import org.umc.travlocksserver.infra.ai.AiTagResponseDTO;
-import org.umc.travlocksserver.infra.ai.HyperClovaSuggestionClient;
+import org.umc.travlocksserver.infra.ai.client.AiSuggestionClient;
+import org.umc.travlocksserver.infra.ai.client.HyperClovaSuggestionClient;
+import org.umc.travlocksserver.infra.ai.dto.AiTagResponseDTO;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class TemplateTagService {
+public class TemplateTagCommandService {
 
 	private final TemplateRepository templateRepository;
 	private final TemplateVlockRepository templateVlockRepository;
 	private final CityRepository cityRepository;
-	private final HyperClovaSuggestionClient hyperClovaSuggestionClient;
+	private final AiSuggestionClient aiSuggestionClient;
 	private final TagRepository tagRepository;
 	private final TemplateTagRepository templateTagRepository;
 
-	public void generateTags(Long templateId, LocalDateTime now) {
+	public void generateTags(Long templateId) {
 		Template template = templateRepository.findById(templateId)
 			.orElseThrow(() -> new TemplateException(TemplateErrorCode.TEMPLATE_NOT_FOUND));
 
@@ -54,7 +54,7 @@ public class TemplateTagService {
 		List<String> cities = cityRepository.findNameByRegionId(region.getId());
 
 		// AI 호출
-		AiTagResponseDTO response = hyperClovaSuggestionClient.requestToAiForTag(String.valueOf(region), fixedInfoTags,
+		AiTagResponseDTO response = aiSuggestionClient.generateTags(region.getName(), fixedInfoTags,
 			cities, vlocks);
 
 		template.increaseTagVersion();

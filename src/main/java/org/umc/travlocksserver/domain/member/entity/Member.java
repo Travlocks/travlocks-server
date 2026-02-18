@@ -3,6 +3,8 @@ package org.umc.travlocksserver.domain.member.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.umc.travlocksserver.domain.favorite.code.FavoriteErrorCode;
+import org.umc.travlocksserver.domain.favorite.exception.FavoriteException;
 import org.umc.travlocksserver.domain.member.enums.MemberStatus;
 import org.umc.travlocksserver.domain.template.code.TemplateErrorCode;
 import org.umc.travlocksserver.domain.template.exception.TemplateException;
@@ -53,8 +55,8 @@ public class Member extends SoftDeleteBaseEntity {
 	@Column(name = "template_count", nullable = false)
 	private int templateCount;
 
-	@Column(name = "star_count", nullable = false)
-	private int starCount;
+	@Column(name = "favorite_count", nullable = false)
+	private int favoriteCount;
 
 	public static Member of(Long id) {
 		Member member = new Member();
@@ -94,7 +96,7 @@ public class Member extends SoftDeleteBaseEntity {
 		this.passwordHash = null;
 		this.vlockCount = 0;
 		this.templateCount = 0;
-		this.starCount = 0;
+		this.favoriteCount = 0;
 	}
 
 	public void decreaseTemplateCount() {
@@ -102,5 +104,16 @@ public class Member extends SoftDeleteBaseEntity {
 			throw new TemplateException(TemplateErrorCode.TEMPLATE_COUNT_BELOW_ZERO);
 		}
 		this.templateCount = this.templateCount - 1;
+	}
+
+	public void increaseFavoriteCount() {
+		this.favoriteCount = this.favoriteCount + 1;
+	}
+
+	public void decreaseFavoriteCount() {
+		if (this.favoriteCount <= 0) {
+			throw new FavoriteException(FavoriteErrorCode.FAVORITE_COUNT_BELOW_ZERO);
+		}
+		this.favoriteCount = this.favoriteCount - 1;
 	}
 }

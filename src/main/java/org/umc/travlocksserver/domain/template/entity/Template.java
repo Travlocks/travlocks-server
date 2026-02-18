@@ -91,7 +91,7 @@ public class Template extends SoftDeleteBaseEntity {
 
 	@Builder.Default
 	@Column(nullable = false)
-	private int tagVersion = 0;
+	private Long tagVersion = 0L;
 
 	public void increaseRemixCount() {
 		this.remixCount = (this.remixCount == null ? 0 : this.remixCount) + 1;
@@ -125,15 +125,12 @@ public class Template extends SoftDeleteBaseEntity {
 			.remixCount(0)
 			.ratingCount(0)
 			.avgRating(0.0)
-			.tagVersion(0)
+			.tagVersion(0L)
 			.build();
 	}
 
 	@OneToMany(mappedBy = "template")
 	private List<TemplateDay> templateDays = new ArrayList<>();
-
-	@OneToMany(mappedBy = "template")
-	private List<TemplateTag> templateTags = new ArrayList<>();
 
 	@OneToMany(mappedBy = "template")
 	private List<TemplateCity> templateCities = new ArrayList<>();
