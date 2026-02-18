@@ -24,6 +24,7 @@ public class TemplateCommandService {
 	private final S3Provider s3Provider;
 	private final TemplateQueryService templateQueryService;
 	private final MemberQueryService memberQueryService;
+	private final TemplateTagCommandService templateTagCommandService;
 
 	public TemplateSaveResponseDTO saveTemplate(
 		Long memberId,
@@ -56,6 +57,11 @@ public class TemplateCommandService {
 			request.description(),
 			newImageUrl,
 			request.isPublic());
+
+		// 5. 최초 저장 시 태그 생성 (블록 3개 미만인 경우 AI 태그 외 고정 태그만 생성)
+		if (template.getTagVersion() == 0) {
+			templateTagCommandService.generateTags(templateId);
+		}
 
 		return TemplateSaveResponseDTO.from(template);
 	}
