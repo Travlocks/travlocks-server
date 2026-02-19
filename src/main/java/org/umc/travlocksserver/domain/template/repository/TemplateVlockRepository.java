@@ -19,7 +19,9 @@ public interface TemplateVlockRepository extends JpaRepository<TemplateVlock, Lo
 			select tv
 			from TemplateVlock tv
 			join fetch tv.vlock v
+			join v.vlockCategory vc
 			where tv.templateDay.id = :templateDayId
+					and vc.name != "숙소"
 			order by tv.orderNo asc
 		""")
 	List<TemplateVlock> findAllByTemplateDayIdFetchVlock(Long templateDayId);
