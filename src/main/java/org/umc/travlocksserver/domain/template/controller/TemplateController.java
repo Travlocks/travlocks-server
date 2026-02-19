@@ -3,6 +3,8 @@ package org.umc.travlocksserver.domain.template.controller;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
@@ -29,6 +31,7 @@ import org.umc.travlocksserver.domain.template.dto.response.PopularTemplateRespo
 import org.umc.travlocksserver.domain.template.service.query.TemplateRouteQueryService;
 import org.umc.travlocksserver.domain.template.dto.response.TemplateDetailResponseDTO;
 import org.umc.travlocksserver.global.annotation.LoginUser;
+import org.umc.travlocksserver.global.response.PageResponseDTO;
 import org.umc.travlocksserver.global.response.SuccessResponse;
 import org.umc.travlocksserver.domain.template.dto.request.TemplateVlockAddRequestDTO;
 import org.umc.travlocksserver.domain.template.dto.request.TemplateVlockReorderRequestDTO;
@@ -265,19 +268,22 @@ public class TemplateController implements TemplateControllerDocs {
 	}
 
 	@GetMapping("/explore")
-	public ResponseEntity<SuccessResponse<List<TemplateExploreResponseDTO>>> exploreTemplates(
+	public ResponseEntity<SuccessResponse<PageResponseDTO<TemplateExploreResponseDTO>>> exploreTemplates(
 		String keyword,
 		List<String> cities,
 		List<String> themes,
 		List<TripDays> tripDays,
 		List<String> transportTypes,
 		String sort,
-		int page) {
+		@RequestParam(defaultValue = "0") int page) {
+
+		Pageable pageable = PageRequest.of(page, 9);
+
+		PageResponseDTO<TemplateExploreResponseDTO> response = templateQueryService.exploreTemplatesWithPage(
+				keyword, cities, themes, tripDays, transportTypes, sort, pageable);
+
 		return ResponseEntity.ok(
-			SuccessResponse.ok(
-				TemplateSuccessCode.TEMPLATE_EXPLORE_SUCCESS,
-				templateQueryService.exploreTemplates(
-					keyword, cities, themes, tripDays, transportTypes, sort, page)));
+				SuccessResponse.ok(TemplateSuccessCode.TEMPLATE_EXPLORE_SUCCESS, response));
 	}
 
 	@GetMapping("/recent")

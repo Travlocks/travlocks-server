@@ -19,6 +19,7 @@ import org.umc.travlocksserver.domain.template.enums.TransportType;
 import org.umc.travlocksserver.domain.template.dto.response.*;
 import org.umc.travlocksserver.domain.template.enums.TripDays;
 import org.umc.travlocksserver.global.response.ErrorResponse;
+import org.umc.travlocksserver.global.response.PageResponseDTO;
 import org.umc.travlocksserver.global.response.SuccessResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.http.MediaType;
@@ -284,7 +285,7 @@ public interface TemplateControllerDocs {
 		""")
 	@ApiResponse(responseCode = "200", description = "템플릿 탐색 성공", content = @Content(mediaType = "application/json", schema = @Schema(implementation = SuccessResponse.class)))
 	@ApiResponse(responseCode = "400", description = "템플릿 탐색 실패 (잘못된 요청)", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)))
-	ResponseEntity<SuccessResponse<List<TemplateExploreResponseDTO>>> exploreTemplates(
+	ResponseEntity<SuccessResponse<PageResponseDTO<TemplateExploreResponseDTO>>> exploreTemplates(
 		@RequestParam(required = false)
 		String keyword,
 		@RequestParam(required = false)
