@@ -74,9 +74,9 @@ public class VlockExternalCommandService {
 
         for (CityProjectionDTO city : cities) {
             List<KakaoPlace> results = new ArrayList<>();
-//            results.addAll(fetchKakaoPlaces(city.cityName() + " 관광지", x, y, radiusM));
-//            results.addAll(fetchKakaoPlaces(city.cityName() + " 맛집", x, y, radiusM));
-//            results.addAll(fetchKakaoPlaces(city.cityName() + " 카페", x, y, radiusM));
+            results.addAll(fetchKakaoPlaces(city.cityName() + " 관광지", x, y, radiusM));
+            results.addAll(fetchKakaoPlaces(city.cityName() + " 맛집", x, y, radiusM));
+            results.addAll(fetchKakaoPlaces(city.cityName() + " 카페", x, y, radiusM));
             results.addAll(fetchKakaoPlaces(city.cityName() + " 숙소", x, y, radiusM));
 
             List<KakaoPlace> deduplicated = deduplicateByPlaceId(results);
@@ -151,6 +151,7 @@ public class VlockExternalCommandService {
             case "카페" -> "카페";
             case "관광명소" -> "관광지";
             case "문화시설" -> "문화";
+            case "숙박" -> "숙소";
             default -> "기타";
         };
 
