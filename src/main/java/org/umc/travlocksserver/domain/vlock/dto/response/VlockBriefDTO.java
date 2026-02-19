@@ -8,11 +8,15 @@ public record VlockBriefDTO(
 	String category,
 	String coverImgUrl
 ) {
-	public static VlockBriefDTO from(Vlock vlock) {
+	public static VlockBriefDTO from(Vlock vlock, String s3Domain) {
+		String coverImgUrl = vlock.getCoverImgUrl();
+		if (coverImgUrl == null || coverImgUrl.isBlank()) {
+			coverImgUrl = s3Domain + vlock.getVlockCategory().getDefaultCreationImageKey();
+		}
 		return new VlockBriefDTO(
 			vlock.getId(),
 			vlock.getName(),
 			vlock.getVlockCategory().getName(),
-			vlock.getCoverImgUrl());
+			coverImgUrl);
 	}
 }
