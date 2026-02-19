@@ -1,5 +1,6 @@
 package org.umc.travlocksserver.domain.template.repository;
 
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -116,7 +117,22 @@ public class TemplateExploreRepositoryCustomImpl implements TemplateExploreRepos
 		if (cityNames == null || cityNames.isEmpty()) {
 			return null;
 		}
-		return tc.city.name.in(cityNames);
+		BooleanBuilder builder = new BooleanBuilder();
+
+		for (String cityName : cityNames) {
+			switch (cityName) {
+				case "서울" -> builder.or(tc.city.id.between(101, 111));
+				case "경기" -> builder.or(tc.city.id.between(201, 210));
+				case "인천" -> builder.or(tc.city.id.between(301, 307));
+				case "강원" -> builder.or(tc.city.id.between(401, 410));
+				case "충청" -> builder.or(tc.city.id.between(501, 510));
+				case "전라" -> builder.or(tc.city.id.between(601, 610));
+				case "경상" -> builder.or(tc.city.id.between(701, 710));
+				case "제주" -> builder.or(tc.city.id.between(801, 809));
+			}
+		}
+
+		return builder;
 	}
 
 	private com.querydsl.core.types.Predicate travelThemesIn(List<String> travelThemes, QTravelTheme tt) {
