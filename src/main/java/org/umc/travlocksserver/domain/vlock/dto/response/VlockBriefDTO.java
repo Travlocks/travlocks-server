@@ -11,7 +11,7 @@ public record VlockBriefDTO(
 	public static VlockBriefDTO from(Vlock vlock, String s3Domain) {
 		String coverImgUrl = vlock.getCoverImgUrl();
 		if (coverImgUrl == null || coverImgUrl.isBlank()) {
-			coverImgUrl = s3Domain + vlock.getVlockCategory().getDefaultCreationImageKey();
+			coverImgUrl = s3Domain + vlock.getVlockCategory().getDefaultCategoryImageKey();
 		}
 		return new VlockBriefDTO(
 			vlock.getId(),
