@@ -1,6 +1,5 @@
 package org.umc.travlocksserver.domain.vlock.repository;
 
-import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
@@ -93,6 +92,5 @@ public interface VlockRepository extends JpaRepository<Vlock, Long>, VlockReposi
 	List<Vlock> searchByKeyword(@Param("keyword")
 	String keyword, Pageable pageable);
 
-	@Lock(LockModeType.PESSIMISTIC_WRITE)
-	boolean existsByExternalPlaceIdAndIsPublicTrue(String externalPlaceId);
+//	boolean existsByExternalPlaceIdAndIsPublicTrue(String externalPlaceId);
 }
