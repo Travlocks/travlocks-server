@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.umc.travlocksserver.domain.template.dto.response.VlockSuggestionsResponseDTO;
 import org.umc.travlocksserver.domain.template.entity.Template;
@@ -13,21 +12,18 @@ import org.umc.travlocksserver.domain.template.entity.TemplateDay;
 import org.umc.travlocksserver.domain.template.enums.TransportType;
 import org.umc.travlocksserver.domain.template.exception.TemplateDayException;
 import org.umc.travlocksserver.domain.template.code.TemplateDayErrorCode;
-import org.umc.travlocksserver.domain.template.projection.CityProjectionDTO;
 import org.umc.travlocksserver.domain.template.repository.TemplateDayRepository;
 import org.umc.travlocksserver.domain.template.service.query.TemplateCityQueryService;
 import org.umc.travlocksserver.domain.template.service.query.TemplateQueryService;
 import org.umc.travlocksserver.domain.template.service.query.TemplateVlockQueryService;
 import org.umc.travlocksserver.domain.vlock.entity.Vlock;
-import org.umc.travlocksserver.domain.vlock.service.command.VlockCommandService;
+import org.umc.travlocksserver.domain.vlock.service.command.VlockExternalCommandService;
 import org.umc.travlocksserver.domain.vlock.service.query.VlockQueryService;
 import org.umc.travlocksserver.global.geo.BoundingBox;
 import org.umc.travlocksserver.global.geo.GeoUtil;
 import org.umc.travlocksserver.global.geo.LatLng;
 import org.umc.travlocksserver.infra.ai.client.AiSuggestionClient;
 import org.umc.travlocksserver.infra.ai.dto.ScoredCandidate;
-import org.umc.travlocksserver.infra.kakao.KakaoPlaceClient;
-import org.umc.travlocksserver.infra.kakao.KakaoPlace;
 import org.umc.travlocksserver.infra.redis.vlock.CachedVlockSuggestions;
 import org.umc.travlocksserver.infra.redis.vlock.VlockSuggestionCache;
 
@@ -55,14 +51,13 @@ public class TemplateDayCommandService {
 	private final VlockRepository vlockRepository;
 
 	private final TemplateCityQueryService templateCityQueryService;
-	private final VlockCommandService vlockCommandService;
+	private final VlockExternalCommandService vlockExternalCommandService;
 	private final TemplateVlockQueryService templateVlockQueryService;
 	private final VlockQueryService vlockQueryService;
 	private final TemplateQueryService templateQueryService;
 
 	private final VlockSuggestionCache vlockSuggestionCache;
 
-	private final KakaoPlaceClient kakaoPlaceClient;
 	private final AiSuggestionClient aiClient;
 
 	@Value("${suggestion.vlock.popular-pool}")
@@ -79,9 +74,6 @@ public class TemplateDayCommandService {
 
 	@Value("${suggestion.vlock.pool-size}")
 	private int poolSize;
-
-	@Value("${kakao.keyword-search.size}")
-	private int kakaoKeywordSearchSize;
 
 	@Value("${suggestion.vlock.size}")
 	private int vlockSuggestionSize;
@@ -301,7 +293,7 @@ public class TemplateDayCommandService {
 
 		// 블록 추천 후보 수가 minPool 이하면 외부 API(카카오맵)에서 가져와서 저장
 		if (candidates.size() < minPool) {
-			fetchFromExternal(templateId, null, null);
+			vlockExternalCommandService.fetchFromExternal(templateId, null, null);
 			candidates = vlockQueryService.getPopularByCityIds(cityIdsOfTemplate, PageRequest.of(0, popularPool));
 		}
 
@@ -561,51 +553,6 @@ public class TemplateDayCommandService {
 		return vlockCandidatesInBox.stream()
 			.filter(v -> GeoUtil.haversineKm(center, new LatLng(v.getLatitude(), v.getLongitude())) <= radiusKm)
 			.toList();
-	}
-
-	/**
-	 * 카카오맵 API로부터 Vlock들을 추가하는 메서드
-	 */
-	@Transactional(propagation = Propagation.NOT_SUPPORTED)
-    protected void fetchFromExternal(Long templateId, LatLng center, Integer radiusKm) {
-		List<CityProjectionDTO> cities = templateCityQueryService.getCitiesByTemplateId(templateId);
-		if (cities.isEmpty())
-			return;
-
-		Double x = (center == null) ? null : center.lng();
-		Double y = (center == null) ? null : center.lat();
-		Integer radiusM = (center == null) ? null : radiusKm * 1000;
-
-		for (CityProjectionDTO city : cities) {
-			List<KakaoPlace> results = new ArrayList<>();
-			results.addAll(fetchKakaoPlaces(city.cityName() + " 관광지", x, y, radiusM));
-			results.addAll(fetchKakaoPlaces(city.cityName() + " 맛집", x, y, radiusM));
-			results.addAll(fetchKakaoPlaces(city.cityName() + " 카페", x, y, radiusM));
-
-			List<KakaoPlace> deduplicated = deduplicateByPlaceId(results);
-
-			vlockCommandService.upsertVlocksFromExternal(city.cityId(), deduplicated);
-		}
-	}
-
-	/**
-	 * KakaoPlaceId 기준으로 중복되는 결과를 삭제하는 메서드
-	 */
-	private List<KakaoPlace> deduplicateByPlaceId(List<KakaoPlace> places) {
-		Map<String, KakaoPlace> result = new LinkedHashMap<>();
-		for (KakaoPlace place : places) {
-			if (place.placeId() == null)
-				continue;
-			result.put(place.placeId(), place);
-		}
-		return new ArrayList<>(result.values());
-	}
-
-	/**
-	 * 외부(카카오맵) API를 통해 키워드 검색 후 내부 KakaoPlaceDTO로 변환하는 메서드
-	 */
-	private List<KakaoPlace> fetchKakaoPlaces(String query, Double lng, Double lat, Integer radiusM) {
-		return kakaoPlaceClient.searchPlaces(query, lng, lat, radiusM, kakaoKeywordSearchSize);
 	}
 
 	/**

@@ -2,7 +2,6 @@ package org.umc.travlocksserver.domain.vlock.service.command;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.umc.travlocksserver.domain.location.constant.CityErrorCode;
@@ -23,16 +22,12 @@ import org.umc.travlocksserver.domain.vlock.dto.request.VlockUpdateRequestDTO;
 import org.umc.travlocksserver.domain.vlock.dto.response.VlockResponseDTO;
 import org.umc.travlocksserver.domain.vlock.entity.Vlock;
 import org.umc.travlocksserver.domain.vlock.entity.VlockCategory;
-import org.umc.travlocksserver.domain.vlock.exception.VlockCategoryException;
 import org.umc.travlocksserver.domain.vlock.exception.VlockException;
 import org.umc.travlocksserver.domain.vlock.repository.VlockCategoryRepository;
 import org.umc.travlocksserver.domain.vlock.repository.VlockRepository;
 import org.umc.travlocksserver.domain.vlock.service.query.VlockCategoryQueryService;
 import org.umc.travlocksserver.global.aws.S3Properties;
 import org.umc.travlocksserver.global.aws.S3Provider;
-import org.umc.travlocksserver.infra.kakao.KakaoPlace;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -47,7 +42,6 @@ public class VlockCommandService {
 	private final CityQueryService cityQueryService;
 	private final S3Provider s3Provider;
 	private final S3Properties s3Properties;
-	private final VlockSaveCommandService vlockSaveCommandService;
 
 	public VlockResponseDTO createVlock(Long memberId, VlockRequestDTO request, MultipartFile coverImg) {
 		String imageUrl = uploadImageIfPresent(coverImg);
@@ -104,60 +98,6 @@ public class VlockCommandService {
 		}
 
 		vlock.softDelete();
-	}
-
-	// ⚪ 외부(카카오맵) API를 통해 블록을 삽입하는 메서드 (추천시 블록에 데이터가 너무 적을 경우 사용)
-	@Transactional(propagation = Propagation.NOT_SUPPORTED)
-	public void upsertVlocksFromExternal(Long cityId, List<KakaoPlace> places) {
-		City city = cityQueryService.getReferenceById(cityId);
-
-		for (KakaoPlace place : places) {
-			if (place.placeId() == null || place.placeId().isBlank())
-				continue;
-
-			VlockCategory category = mapCategory(place.categoryName());
-			vlockSaveCommandService.saveVlocksFromExternal(place, category, city);
-
-//			boolean exists = vlockRepository.existsByExternalPlaceIdAndIsPublicTrue(place.placeId());
-//
-//			if (exists) {
-//				continue;
-//			}
-//
-//			try {
-//				VlockCategory category = mapCategory(place.categoryName());
-//
-//				Vlock vlock = Vlock.createByExternal(
-//					place.placeId(),
-//					category,
-//					city,
-//					place.name(),
-//					place.latitude(),
-//					place.longitude(),
-//					place.address()
-//				);
-//
-//				vlockRepository.save(vlock);
-//			} catch(DataIntegrityViolationException e) {
-//				// UNIQUE 충돌 -> 이미 존재하는 블록 -> 무시
-//			}
-		}
-	}
-
-	// ⚪ 외부(카카오맵) API를 통해 가져온 카테고리를 우리 서비스 내의 카테고리로 매핑하는 메서드
-	private VlockCategory mapCategory(String name) {
-		String mappedName = switch (name) {
-			case "음식점" -> "식당";
-			case "카페" -> "카페";
-			case "관광명소" -> "관광지";
-			case "문화시설" -> "문화";
-			default -> "기타";
-		};
-
-		return vlockCategoryQueryService.getByName(mappedName)
-			.orElseGet(() -> vlockCategoryQueryService.getByName("기타")
-				.orElseThrow(
-					() -> new VlockCategoryException(VlockCategoryErrorCode.DEFAULT_VLOCK_CATEGORY_NOT_FOUND)));
 	}
 
 	private void validateMemberExists(Long memberId) {
