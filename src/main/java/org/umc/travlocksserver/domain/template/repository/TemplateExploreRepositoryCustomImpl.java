@@ -4,6 +4,8 @@ import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import org.umc.travlocksserver.domain.template.dto.response.TemplateExploreResponseDTO;
 import org.umc.travlocksserver.domain.template.dto.response.QTemplateExploreResponseDTO;
@@ -24,14 +26,14 @@ public class TemplateExploreRepositoryCustomImpl implements TemplateExploreRepos
 	private static final int PAGE_SIZE = 9; // 한 페이지당 9개로 고정
 
 	@Override
-	public List<TemplateExploreResponseDTO> findExploreTemplates(
+	public Page<TemplateExploreResponseDTO> findExploreTemplatesWithPage(
 		String keyword,
 		List<String> cityNames,
 		List<String> travelThemes,
 		List<TripDays> tripDays,
 		List<String> transportTypes,
 		String sort,
-		int offset) {
+		Pageable pageable) {
 		QTemplate t = QTemplate.template;
 		QMember m = QMember.member;
 		QTravelTheme tt = QTravelTheme.travelTheme;
@@ -41,7 +43,7 @@ public class TemplateExploreRepositoryCustomImpl implements TemplateExploreRepos
 		OrderSpecifier<?> orderSpecifier = getOrderSpecifier(t, sort);
 
 		// QueryDSL 쿼리 작성
-		return queryFactory
+		var query = queryFactory
 			.select(
 				new QTemplateExploreResponseDTO(
 					t.id,
@@ -51,7 +53,9 @@ public class TemplateExploreRepositoryCustomImpl implements TemplateExploreRepos
 					m.nickname,
 					tt.content,
 					t.avgRating,
-					t.remixCount))
+					t.remixCount,
+					t.createdAt ))
+			.distinct()
 			.from(t)
 			.join(t.owner, m)
 			.join(t.travelTheme, tt)
@@ -63,11 +67,17 @@ public class TemplateExploreRepositoryCustomImpl implements TemplateExploreRepos
 				travelThemesIn(travelThemes, tt),
 				tripDaysIn(tripDays, t),
 				transportTypesIn(transportTypes, t))
-				.groupBy(t.id)
-				.offset(offset)
-			.limit(PAGE_SIZE)
-			.orderBy(orderSpecifier)
-			.fetch();
+      .groupBy(t.id)
+			.offset((pageable.getOffset()))
+			.limit(pageable.getPageSize())
+			.orderBy(orderSpecifier);
+
+		var results = query.fetchResults();
+
+		return new org.springframework.data.domain.PageImpl<>(
+				results.getResults(),
+				pageable,
+				results.getTotal());
 	}
 
 	private com.querydsl.core.types.Predicate tripDaysIn(List<TripDays> tripDays, QTemplate t) {

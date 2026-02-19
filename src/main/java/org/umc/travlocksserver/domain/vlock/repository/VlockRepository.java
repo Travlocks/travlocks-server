@@ -93,4 +93,11 @@ public interface VlockRepository extends JpaRepository<Vlock, Long>, VlockReposi
 	String keyword, Pageable pageable);
 
 //	boolean existsByExternalPlaceIdAndIsPublicTrue(String externalPlaceId);
+	@Query("""
+		SELECT v
+		FROM Vlock v
+			JOIN FETCH v.vlockCategory c
+		WHERE v.id IN :vlockIds
+	""")
+	List<Vlock> findAllWithCategoryByVlockIds(List<Long> vlockIds);
 }

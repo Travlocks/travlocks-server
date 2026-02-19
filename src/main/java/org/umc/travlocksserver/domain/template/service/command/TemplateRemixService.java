@@ -142,6 +142,10 @@ public class TemplateRemixService {
 				.vlock(ov.getVlock())
 				.orderNo(ov.getOrderNo())
 				.stayHours(ov.getStayHours())
+				.canvasX(ov.getCanvasX())
+				.canvasY(ov.getCanvasY())
+				.inputPort(ov.getInputPort())
+				.outputPort(ov.getOutputPort())
 				.build())
 			.toList();
 

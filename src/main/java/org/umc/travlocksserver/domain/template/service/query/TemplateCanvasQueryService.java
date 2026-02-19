@@ -17,6 +17,7 @@ import org.umc.travlocksserver.domain.template.repository.TemplateCityRepository
 import org.umc.travlocksserver.domain.template.repository.TemplateDayRepository;
 import org.umc.travlocksserver.domain.template.repository.TemplateRepository;
 import org.umc.travlocksserver.domain.template.repository.TemplateVlockRepository;
+import org.umc.travlocksserver.global.aws.S3Properties;
 
 import lombok.RequiredArgsConstructor;
 
@@ -31,6 +32,8 @@ public class TemplateCanvasQueryService {
 	private final TemplateCityRepository templateCityRepository;
 
 	private final TemplateRouteQueryService templateRouteQueryService;
+
+	private final S3Properties s3Properties;
 
 	public TemplateCanvasResponseDTO getTemplateCanvas(Long templateId, Integer dayNo) {
 
@@ -59,7 +62,7 @@ public class TemplateCanvasQueryService {
 			totalStayHours += cur.getStayHours();
 			totalMoveMinutes += nextMoveMinutes;
 
-			vlocks.add(TemplateCanvasVlockDTO.from(cur, nextMoveMinutes));
+			vlocks.add(TemplateCanvasVlockDTO.from(cur, nextMoveMinutes, s3Properties.domain()));
 		}
 
 		double totalMoveHours = Math.round(((double)totalMoveMinutes / 60.0) * 100) / 100.0;

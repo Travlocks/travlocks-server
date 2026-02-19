@@ -3,7 +3,9 @@ package org.umc.travlocksserver.domain.template.service.query;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.umc.travlocksserver.domain.favorite.repository.FavoriteRepository;
@@ -20,6 +22,7 @@ import org.umc.travlocksserver.domain.template.exception.TemplateException;
 import org.umc.travlocksserver.domain.template.repository.TemplateExploreRepositoryCustom;
 import org.umc.travlocksserver.domain.template.repository.TemplateRepository;
 import org.umc.travlocksserver.domain.traveltheme.repository.PreferredTravelThemeRepository;
+import org.umc.travlocksserver.global.response.PageResponseDTO;
 import org.umc.travlocksserver.infra.redis.template.CachedTemplateSuggestions;
 import org.umc.travlocksserver.infra.redis.template.TemplateSuggestionCache;
 import org.umc.travlocksserver.domain.template.entity.TemplateDay;
@@ -151,29 +154,23 @@ public class TemplateQueryService {
 			isFavorited);
 	}
 
-	public List<TemplateExploreResponseDTO> exploreTemplates(
+	public PageResponseDTO<TemplateExploreResponseDTO> exploreTemplatesWithPage(
 		String keyword,
 		List<String> cities,
 		List<String> themes,
 		List<TripDays> tripDays,
 		List<String> transportTypes,
 		String sort,
-		int page) {
+		Pageable pageable) {
 
-		List<TemplateExploreResponseDTO> result = templateExploreRepositoryCustom.findExploreTemplates(
-			keyword,
-			cities,
-			themes,
-			tripDays,
-			transportTypes,
-			sort,
-			page * 9);
+		Page<TemplateExploreResponseDTO> result = templateExploreRepositoryCustom.findExploreTemplatesWithPage(
+				keyword, cities, themes, tripDays, transportTypes, sort, pageable);
 
 		if (result.isEmpty()) {
 			throw new TemplateException(TemplateErrorCode.TEMPLATE_NO_MATCH);
 		}
 
-		return result;
+		return PageResponseDTO.from(result);
 	}
 
 	/**
