@@ -54,6 +54,7 @@ public class TemplateExploreRepositoryCustomImpl implements TemplateExploreRepos
 					tt.content,
 					t.avgRating,
 					t.remixCount))
+			.distinct()
 			.from(t)
 			.join(t.owner, m)
 			.join(t.travelTheme, tt)
