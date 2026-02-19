@@ -3,6 +3,7 @@ package org.umc.travlocksserver.infra.scheduler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.umc.travlocksserver.domain.template.repository.TemplateRepository;
 import org.umc.travlocksserver.domain.template.service.command.TemplateTagCommandService;
@@ -29,7 +30,7 @@ public class TemplateTagScheduler {
 	private final TemplateRepository templateRepository;
 	private final TemplateTagCommandService templateTagCommandService;
 
-	// @Scheduled(cron = "${tag.cron}", zone = "${tag.zone}")
+	 @Scheduled(cron = "${tag.cron}", zone = "${tag.zone}")
 	public void run() {
 		LocalDateTime now = LocalDateTime.now(ZoneId.of(zoneId));
 		LocalDateTime to = now.minusMinutes(graceMinutes);
