@@ -48,7 +48,7 @@ public class Vlock extends SoftDeleteBaseEntity {
 	@JoinColumn(name = "owner_id")
 	private Member owner;
 
-	@Column(nullable = false, length = 20)
+	@Column(nullable = false, length = 30)
 	private String name;
 
 	private String coverImgUrl;
