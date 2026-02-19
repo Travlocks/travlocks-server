@@ -1,9 +1,6 @@
 spring:
   application:
     name: "travlocks"
-  profiles:
-    active: benchmark
-
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -86,7 +83,7 @@ suggestion:
     max-duplicate-category: 2
 
 tag:
-  cron: "0 5 * * * *"
+  cron: "0 20 * * * *"
   grace-minutes: 15
   lookback-minutes: 75
 
