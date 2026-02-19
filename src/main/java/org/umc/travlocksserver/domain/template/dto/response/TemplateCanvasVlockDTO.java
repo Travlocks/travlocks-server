@@ -14,7 +14,7 @@ public record TemplateCanvasVlockDTO(
 	ConnectionPortType outputPort,
 	Integer nextMoveMinutes,
 	VlockBriefDTO vlock) {
-	public static TemplateCanvasVlockDTO from(TemplateVlock cur, int nextMoveMinutes) {
+	public static TemplateCanvasVlockDTO from(TemplateVlock cur, int nextMoveMinutes, String s3Domain) {
 		return new TemplateCanvasVlockDTO(
 			cur.getId(),
 			cur.getOrderNo(),
@@ -24,6 +24,6 @@ public record TemplateCanvasVlockDTO(
 			cur.getInputPort(),
 			cur.getOutputPort(),
 			nextMoveMinutes,
-			VlockBriefDTO.from(cur.getVlock()));
+			VlockBriefDTO.from(cur.getVlock(), s3Domain));
 	}
 }
