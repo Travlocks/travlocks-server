@@ -1,10 +1,8 @@
 package org.umc.travlocksserver.domain.vlock.repository;
 
+import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.EntityGraph;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.umc.travlocksserver.domain.member.dto.response.MyPageRecentVlockDTO;
@@ -95,4 +93,6 @@ public interface VlockRepository extends JpaRepository<Vlock, Long>, VlockReposi
 	List<Vlock> searchByKeyword(@Param("keyword")
 	String keyword, Pageable pageable);
 
+	@Lock(LockModeType.PESSIMISTIC_WRITE)
+	boolean existsByExternalPlaceIdAndIsPublicTrue(String externalPlaceId);
 }
