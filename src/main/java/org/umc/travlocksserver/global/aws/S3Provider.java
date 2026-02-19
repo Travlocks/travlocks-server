@@ -23,9 +23,6 @@ public class S3Provider {
 	private final S3Client s3Client;
 	private final S3Properties s3Properties;
 
-	@Value("${aws.s3.bucket}")
-	private String bucket;
-
 	public String uploadVlockFile(MultipartFile file) {
 		if (file == null || file.isEmpty()) {
 			return null;
@@ -35,7 +32,7 @@ public class S3Provider {
 
 		try {
 			PutObjectRequest putObjectRequest = PutObjectRequest.builder()
-				.bucket(bucket)
+				.bucket(s3Properties.bucket())
 				.key(fileName)
 				.contentType(file.getContentType())
 				.build();
@@ -52,7 +49,7 @@ public class S3Provider {
 	}
 
 	public void deleteFile(String fileUrl) {
-		if (fileUrl == null || !fileUrl.contains(bucket)) {
+		if (fileUrl == null || !fileUrl.contains(s3Properties.bucket())) {
 			return;
 		}
 
@@ -60,7 +57,7 @@ public class S3Provider {
 
 		try {
 			DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
-				.bucket(bucket)
+				.bucket(s3Properties.bucket())
 				.key(key)
 				.build();
 
@@ -79,7 +76,7 @@ public class S3Provider {
 
 		try {
 			PutObjectRequest putObjectRequest = PutObjectRequest.builder()
-				.bucket(bucket)
+				.bucket(s3Properties.bucket())
 				.key(fileName)
 				.contentType(file.getContentType())
 				.build();

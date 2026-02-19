@@ -107,12 +107,6 @@ public class SecurityConfig {
 			"http://localhost:5173",
 			"http://localhost:8080",
 
-			// legacy (.kro.kr)
-			"https://travlocks.kro.kr",
-			"https://www.travlocks.kro.kr",
-			"https://api.travlocks.kro.kr",
-
-			// new (.com)
 			"https://travlocks.com",
 			"https://www.travlocks.com",
 			"https://api.travlocks.com",
