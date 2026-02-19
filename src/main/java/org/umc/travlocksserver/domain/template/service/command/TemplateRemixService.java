@@ -8,9 +8,9 @@ import java.util.Map;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.umc.travlocksserver.domain.member.code.MemberErrorCode;
 import org.umc.travlocksserver.domain.member.entity.Member;
 import org.umc.travlocksserver.domain.member.exception.MemberException;
-import org.umc.travlocksserver.domain.member.code.MemberErrorCode;
 import org.umc.travlocksserver.domain.member.repository.MemberRepository;
 import org.umc.travlocksserver.domain.notification.enums.NotificationType;
 import org.umc.travlocksserver.domain.notification.event.TemplateActivityEvent;
@@ -73,7 +73,9 @@ public class TemplateRemixService {
 	 */
 	private Template createRemixedTemplate(Template original, Member remixer) {
 		Template remixed = Template.remixOf(original, remixer, generateShareToken());
-		return templateRepository.save(remixed);
+		Template saved = templateRepository.save(remixed);
+		remixer.increaseTemplateCount();
+		return saved;
 	}
 
 	/**
