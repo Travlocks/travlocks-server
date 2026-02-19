@@ -56,8 +56,6 @@ public interface VlockRepository extends JpaRepository<Vlock, Long>, VlockReposi
 		double maxLng,
 		Pageable pageable);
 
-	Optional<Vlock> findByExternalPlaceIdAndIsPublicTrue(String externalPlaceId);
-
 	@EntityGraph(attributePaths = {"vlockCategory", "city", "city.region"})
 	List<Vlock> findAllByOwnerIdAndCityIdAndDeletedAtIsNullOrderByUsageCountDescIdDesc(Long ownerId, Long cityId);
 
