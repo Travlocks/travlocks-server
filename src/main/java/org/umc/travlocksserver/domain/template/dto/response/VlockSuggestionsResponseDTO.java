@@ -7,17 +7,24 @@ import java.util.List;
 public record VlockSuggestionsResponseDTO(
 	List<VlockSuggestionCardDTO> vlocks,
 	long seed) {
+
 	public record VlockSuggestionCardDTO(
 		Long vlockId,
 		String name,
 		String coverImgUrl,
 		String categoryName,
 		Double stayhours) {
-		public static VlockSuggestionCardDTO from(Vlock vlock) {
+
+		public static VlockSuggestionCardDTO from(Vlock vlock, String s3Domain) {
+			String coverImgUrl = vlock.getCoverImgUrl();
+			if (coverImgUrl == null) {
+				coverImgUrl = s3Domain + vlock.getVlockCategory().getDefaultCategoryImageKey();
+			}
+
 			return new VlockSuggestionCardDTO(
 				vlock.getId(),
 				vlock.getName(),
-				vlock.getCoverImgUrl(),
+				coverImgUrl,
 				vlock.getVlockCategory().getName(),
 				vlock.getVlockCategory().getStayHours());
 		}

@@ -19,6 +19,7 @@ import org.umc.travlocksserver.domain.template.service.query.TemplateVlockQueryS
 import org.umc.travlocksserver.domain.vlock.entity.Vlock;
 import org.umc.travlocksserver.domain.vlock.service.command.VlockExternalCommandService;
 import org.umc.travlocksserver.domain.vlock.service.query.VlockQueryService;
+import org.umc.travlocksserver.global.aws.S3Properties;
 import org.umc.travlocksserver.global.geo.BoundingBox;
 import org.umc.travlocksserver.global.geo.GeoUtil;
 import org.umc.travlocksserver.global.geo.LatLng;
@@ -59,6 +60,8 @@ public class TemplateDayCommandService {
 	private final VlockSuggestionCache vlockSuggestionCache;
 
 	private final AiSuggestionClient aiClient;
+
+	private final S3Properties s3Properties;
 
 	@Value("${suggestion.vlock.popular-pool}")
 	private int popularPool;
@@ -410,7 +413,6 @@ public class TemplateDayCommandService {
 
 	/**
 	 * 체류 적합도 점수를 계산하는 메서드 (기존 블록수 및 후보 체류시간 기반)
-	 *
 	 * - 0~1개: 1~2시간 1.0, 그 외 0.7
 	 * - 2~3개: 1~2시간 1.0, 2~3시간=> 0.7, 그 외 0.4
 	 * - 4개 이상: ~1시간 1.0, 1.5~2시간 => 0.7, 그 외 0.4
@@ -512,7 +514,7 @@ public class TemplateDayCommandService {
 		recent.addAll(pickedVlockIds);
 		vlockSuggestionCache.set(templateId, cached.withRecentPickedIds(recent));
 
-		List<Vlock> vlocks = vlockQueryService.getAllById(pickedVlockIds);
+		List<Vlock> vlocks = vlockQueryService.getAllWithCategoryByVlockIds(pickedVlockIds);
 		Map<Long, Vlock> map = vlocks.stream().collect(Collectors.toMap(Vlock::getId, v -> v));
 
 		List<VlockSuggestionsResponseDTO.VlockSuggestionCardDTO> cards = new ArrayList<>(vlockSuggestionSize);
@@ -520,7 +522,7 @@ public class TemplateDayCommandService {
 			Vlock v = map.get(vlockId);
 			if (v == null)
 				continue;
-			cards.add(VlockSuggestionsResponseDTO.VlockSuggestionCardDTO.from(v));
+			cards.add(VlockSuggestionsResponseDTO.VlockSuggestionCardDTO.from(v, s3Properties.domain()));
 		}
 		return cards;
 	}
