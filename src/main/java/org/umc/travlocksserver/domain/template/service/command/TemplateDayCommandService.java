@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.umc.travlocksserver.domain.template.dto.response.VlockSuggestionsResponseDTO;
 import org.umc.travlocksserver.domain.template.entity.Template;
@@ -565,7 +566,8 @@ public class TemplateDayCommandService {
 	/**
 	 * 카카오맵 API로부터 Vlock들을 추가하는 메서드
 	 */
-	private void fetchFromExternal(Long templateId, LatLng center, Integer radiusKm) {
+	@Transactional(propagation = Propagation.NOT_SUPPORTED)
+    protected void fetchFromExternal(Long templateId, LatLng center, Integer radiusKm) {
 		List<CityProjectionDTO> cities = templateCityQueryService.getCitiesByTemplateId(templateId);
 		if (cities.isEmpty())
 			return;
