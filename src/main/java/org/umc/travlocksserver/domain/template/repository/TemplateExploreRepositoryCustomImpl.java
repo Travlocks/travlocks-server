@@ -53,7 +53,8 @@ public class TemplateExploreRepositoryCustomImpl implements TemplateExploreRepos
 					m.nickname,
 					tt.content,
 					t.avgRating,
-					t.remixCount))
+					t.remixCount,
+					t.createdAt ))
 			.distinct()
 			.from(t)
 			.join(t.owner, m)
