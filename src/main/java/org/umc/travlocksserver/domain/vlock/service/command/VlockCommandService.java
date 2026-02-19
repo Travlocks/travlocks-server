@@ -54,6 +54,7 @@ public class VlockCommandService {
 			imageUrl, request.latitude(), request.longitude());
 
 		Vlock savedVlock = vlockRepository.save(Vlock.create(command));
+		command.owner().increaseVlockCount();
 
 		return VlockResponseDTO.from(savedVlock, s3Properties.domain());
 	}
@@ -98,6 +99,7 @@ public class VlockCommandService {
 		}
 
 		vlock.softDelete();
+		vlock.getOwner().decreaseVlockCount();
 	}
 
 	private void validateMemberExists(Long memberId) {
