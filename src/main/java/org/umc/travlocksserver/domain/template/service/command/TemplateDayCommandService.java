@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.umc.travlocksserver.domain.member.service.query.MemberQueryService;
 import org.umc.travlocksserver.domain.template.dto.response.VlockSuggestionsResponseDTO;
 import org.umc.travlocksserver.domain.template.entity.Template;
 import org.umc.travlocksserver.domain.template.entity.TemplateDay;
@@ -127,6 +128,7 @@ public class TemplateDayCommandService {
 
 		// 5. vlockCount 증가
 		templateDay.incrementVlockCount();
+		vlock.increaseUsageCount();
 
 		// 6. 경고 메시지 생성
 		String warning = null;
@@ -174,6 +176,7 @@ public class TemplateDayCommandService {
 
 		// 6. vlockCount 감소
 		templateDay.decrementVlockCount();
+		templateVlock.getVlock().decreaseUsageCount();
 
 		return TemplateVlockDeleteResponseDTO.from(
 			templateVlocksId,
