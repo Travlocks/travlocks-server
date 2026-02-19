@@ -24,9 +24,6 @@ public record TemplateCanvasVlockDTO(
 			cur.getInputPort(),
 			cur.getOutputPort(),
 			nextMoveMinutes,
-			new VlockBriefDTO(
-				cur.getVlock().getId(),
-				cur.getVlock().getName(),
-				cur.getVlock().getVlockCategory().getName()));
+			VlockBriefDTO.from(cur.getVlock()));
 	}
 }
