@@ -25,6 +25,7 @@ import org.umc.travlocksserver.domain.traveltheme.repository.PreferredTravelThem
 import org.umc.travlocksserver.global.response.PageResponseDTO;
 import org.umc.travlocksserver.infra.redis.template.CachedTemplateSuggestions;
 import org.umc.travlocksserver.infra.redis.template.TemplateSuggestionCache;
+import org.umc.travlocksserver.domain.template.entity.TemplateDay;
 
 import java.util.List;
 
@@ -172,31 +173,128 @@ public class TemplateQueryService {
 		return PageResponseDTO.from(result);
 	}
 
+	/**
+	 * 최근 편집 초안 조회 (홈 화면용)
+	 * 초안만 필터링하고, 진행률을 실시간 계산하여 반환
+	 */
 	public List<TemplateLatestDTO> getRecentTemplates(Long memberId) {
 		List<Template> templates = templateRepository.findRecentTemplatesByOwner(memberId);
 
+		// 초안만 필터링 후 최대 2개
 		List<TemplateLatestDTO> dtos = templates.stream()
-			.limit(2) // 최신 2개만
-			.map(t -> {
-				String regionName = t.getTemplateCities().stream()
-					.findFirst()
-					.map(tc -> tc.getCity().getRegion().getName())
-					.orElse(null);
+				.filter(this::isDraft)  // 초안만
+				.limit(2)
+				.map(t -> {
+					String regionName = t.getTemplateCities().stream()
+							.findFirst()
+							.map(tc -> tc.getCity().getRegion().getName())
+							.orElse(null);
 
-				return new TemplateLatestDTO(
-					t.getId(),
-					t.getTitle(),
-					t.getUpdatedAt(),
-					t.getProgressRate(),
-					regionName);
-			})
-			.toList();
+					// 실시간 진행률 계산
+					int progressRate = calculateProgressRate(t);
 
-		if (dtos.isEmpty()) {
-			throw new TemplateException(TemplateErrorCode.TEMPLATE_RECENT_NOT_FOUND);
+					return new TemplateLatestDTO(
+							t.getId(),
+							t.getTitle(),
+							t.getUpdatedAt(),
+							progressRate,
+							regionName);
+				})
+				.toList();
+
+		// 초안이 없어도 빈 리스트 반환 (에러 X)
+		return dtos;
+	}
+
+	/**
+	 * 초안 여부 판정
+	 * 다음 중 하나라도 만족하면 초안:
+	 * 1. 전체 블록 ≤ 2개
+	 * 2. 블록 0개인 Day 존재
+	 * 3. 모든 블록이 1일차에만 몰려있음
+	 */
+	public boolean isDraft(Template template) {
+		List<TemplateDay> days = template.getTemplateDays();
+
+		// 총 블록 수
+		int totalVlocks = days.stream()
+				.mapToInt(TemplateDay::getVlockCount)
+				.sum();
+
+		// 조건 1: 전체 블록 ≤ 2개
+		if (totalVlocks <= 2) {
+			return true;
 		}
 
-		return dtos;
+		// 조건 2: 블록 0개인 Day 존재
+		boolean hasEmptyDay = days.stream()
+				.anyMatch(day -> day.getVlockCount() == 0);
+		if (hasEmptyDay) {
+			return true;
+		}
+
+		// 조건 3: 모든 블록이 1일차에만 몰려있음
+		if (days.size() > 1 && totalVlocks >= 1) {
+			long daysWithVlocks = days.stream()
+					.filter(day -> day.getVlockCount() > 0)
+					.count();
+
+			if (daysWithVlocks == 1 && days.get(0).getVlockCount() == totalVlocks) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * 진행률 계산
+	 * Day 완성도 (60점) + 블록 밀도 (40점)
+	 * 20단위 내림
+	 */
+	public int calculateProgressRate(Template template) {
+		List<TemplateDay> days = template.getTemplateDays();
+		int totalDays = days.size();
+
+		if (totalDays == 0) {
+			return 0;
+		}
+
+		// 1. Day 완성도 계산 (최대 60점)
+		long daysWithVlocks = days.stream()
+				.filter(day -> day.getVlockCount() > 0)
+				.count();
+
+		double dayCompletionRatio = (double) daysWithVlocks / totalDays;
+		int dayScore = getDayScore(dayCompletionRatio);
+
+		// 2. 블록 밀도 계산 (최대 40점)
+		int totalVlocks = days.stream()
+				.mapToInt(TemplateDay::getVlockCount)
+				.sum();
+
+		int recommendedVlocks = totalDays * 2;
+		double densityRatio = (double) totalVlocks / recommendedVlocks;
+		int densityScore = getDensityScore(densityRatio);
+
+		// 3. 최종 진행률 (20단위 내림)
+		int totalScore = dayScore + densityScore;
+		return (totalScore / 20) * 20;
+	}
+
+	private int getDayScore(double ratio) {
+		if (ratio >= 0.75) return 60;  // 75% 이상
+		if (ratio >= 0.50) return 40;  // 50~74%
+		if (ratio >= 0.01) return 20;  // 1~49%
+		return 0;
+	}
+
+	private int getDensityScore(double ratio) {
+		if (ratio >= 1.00) return 40;  // 100% 이상
+		if (ratio >= 0.75) return 30;  // 75~99%
+		if (ratio >= 0.50) return 20;  // 50~74%
+		if (ratio >= 0.01) return 10;  // 1~49%
+		return 0;
 	}
 
 	public Template getTemplateByIdAndOwnerId(Long templateId, Long memberId) {

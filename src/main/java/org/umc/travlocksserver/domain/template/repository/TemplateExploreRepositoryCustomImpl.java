@@ -67,6 +67,7 @@ public class TemplateExploreRepositoryCustomImpl implements TemplateExploreRepos
 				travelThemesIn(travelThemes, tt),
 				tripDaysIn(tripDays, t),
 				transportTypesIn(transportTypes, t))
+      .groupBy(t.id)
 			.offset((pageable.getOffset()))
 			.limit(pageable.getPageSize())
 			.orderBy(orderSpecifier);
