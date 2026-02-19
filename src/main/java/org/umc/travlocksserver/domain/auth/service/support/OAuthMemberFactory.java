@@ -45,7 +45,7 @@ public class OAuthMemberFactory {
                 if (existing.getStatus() == MemberStatus.DELETED) {
                     throw new AuthException(AuthErrorCode.DELETED_ACCOUNT); // or ACCOUNT_NOT_FOUND
                 }
-                throw new MemberException(MemberErrorCode.EMAIL_ALREADY_EXISTS);
+                throw new AuthException(AuthErrorCode.OAUTH_EMAIL_CONFLICT);
             });
         }
 
