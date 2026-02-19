@@ -125,14 +125,16 @@ public class TemplateDayCommandService {
 		// 5. vlockCount 증가
 		templateDay.incrementVlockCount();
 
-		// 6. 경고 메시지 생성
+		// 6. 진행률 업데이트
+		updateTemplateProgressRate(templateDay.getTemplate());
+
+		// 7. 경고 메시지 생성
 		String warning = null;
 		if (templateDay.getVlockCount() > 4) {
 			warning = "하루 권장 블록 개수 4개가 초과되었습니다.";
 		}
-
-		return TemplateVlockAddResponseDTO.from(templateVlock, warning);
-	}
+			return TemplateVlockAddResponseDTO.from(templateVlock, warning);
+		}
 
 	// 블록 삭제
 	public TemplateVlockDeleteResponseDTO deleteVlock(
@@ -170,13 +172,16 @@ public class TemplateDayCommandService {
 		}
 
 		// 6. vlockCount 감소
-		templateDay.decrementVlockCount();
+			templateDay.decrementVlockCount();
 
-		return TemplateVlockDeleteResponseDTO.from(
-			templateVlocksId,
-			templateDay.getId(),
-			dayNo,
-			remainingVlocks);
+		// 7. 진행률 업데이트
+			updateTemplateProgressRate(templateDay.getTemplate());
+
+			return TemplateVlockDeleteResponseDTO.from(
+					templateVlocksId,
+					templateDay.getId(),
+					dayNo,
+					remainingVlocks);
 	}
 
 	// 블록 순서 변경
@@ -591,5 +596,12 @@ public class TemplateDayCommandService {
 						Comparator.reverseOrder()))
 			.limit(aiCandidatePool)
 			.toList();
+	}
+	/**
+	 * 템플릿 진행률 업데이트
+	 */
+	private void updateTemplateProgressRate(Template template) {
+		int progressRate = templateQueryService.calculateProgressRate(template);
+		template.updateProgressRate(progressRate);
 	}
 }

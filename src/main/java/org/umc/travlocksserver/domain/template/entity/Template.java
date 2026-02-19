@@ -159,4 +159,8 @@ public class Template extends SoftDeleteBaseEntity {
 		if (isPublic != null)
 			this.isPublic = isPublic;
 	}
+
+	public void updateProgressRate(Integer progressRate) {
+		this.progressRate = progressRate;
+	}
 }
