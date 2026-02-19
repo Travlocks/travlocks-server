@@ -107,8 +107,8 @@ public class VlockCommandService {
 	}
 
 	// ⚪ 외부(카카오맵) API를 통해 블록을 삽입하는 메서드 (추천시 블록에 데이터가 너무 적을 경우 사용)
-
-	private void upsertVlocksFromExternal(Long cityId, List<KakaoPlace> places) {
+	@Transactional(propagation = Propagation.NOT_SUPPORTED)
+	public void upsertVlocksFromExternal(Long cityId, List<KakaoPlace> places) {
 		City city = cityQueryService.getReferenceById(cityId);
 
 		for (KakaoPlace place : places) {
