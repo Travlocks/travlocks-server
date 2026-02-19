@@ -1,8 +1,6 @@
 package org.umc.travlocksserver.domain.vlock.service.command;
 
-import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,7 +47,7 @@ public class VlockCommandService {
 	private final CityQueryService cityQueryService;
 	private final S3Provider s3Provider;
 	private final S3Properties s3Properties;
-	private final EntityManager entityManager;
+	private final VlockSaveCommandService vlockSaveCommandService;
 
 	public VlockResponseDTO createVlock(Long memberId, VlockRequestDTO request, MultipartFile coverImg) {
 		String imageUrl = uploadImageIfPresent(coverImg);
@@ -117,29 +115,32 @@ public class VlockCommandService {
 			if (place.placeId() == null || place.placeId().isBlank())
 				continue;
 
+			VlockCategory category = mapCategory(place.categoryName());
+			vlockSaveCommandService.saveVlocksFromExternal(place, category, city);
+
 //			boolean exists = vlockRepository.existsByExternalPlaceIdAndIsPublicTrue(place.placeId());
 //
 //			if (exists) {
 //				continue;
 //			}
-
-			try {
-				VlockCategory category = mapCategory(place.categoryName());
-
-				Vlock vlock = Vlock.createByExternal(
-					place.placeId(),
-					category,
-					city,
-					place.name(),
-					place.latitude(),
-					place.longitude(),
-					place.address()
-				);
-
-				vlockRepository.save(vlock);
-			} catch(DataIntegrityViolationException e) {
-				// UNIQUE 충돌 -> 이미 존재하는 블록 -> 무시
-			}
+//
+//			try {
+//				VlockCategory category = mapCategory(place.categoryName());
+//
+//				Vlock vlock = Vlock.createByExternal(
+//					place.placeId(),
+//					category,
+//					city,
+//					place.name(),
+//					place.latitude(),
+//					place.longitude(),
+//					place.address()
+//				);
+//
+//				vlockRepository.save(vlock);
+//			} catch(DataIntegrityViolationException e) {
+//				// UNIQUE 충돌 -> 이미 존재하는 블록 -> 무시
+//			}
 		}
 	}
 
