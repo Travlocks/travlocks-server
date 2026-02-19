@@ -26,6 +26,7 @@ public class TemplateTag extends CreatedBaseEntity {
 	@JoinColumn(name = "template_id", nullable = false)
 	private Template template;
 
+	@Enumerated(EnumType.STRING)
 	@Column(nullable = false, length = 16)
 	private TagType type;
 

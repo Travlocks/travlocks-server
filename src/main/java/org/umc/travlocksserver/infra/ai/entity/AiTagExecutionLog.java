@@ -5,11 +5,13 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
+import org.springframework.context.annotation.Profile;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder(access = AccessLevel.PROTECTED)
+@Profile("benchmark")
 public class AiTagExecutionLog {
 
     @Id

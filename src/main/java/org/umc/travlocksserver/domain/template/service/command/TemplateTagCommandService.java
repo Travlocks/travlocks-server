@@ -17,7 +17,6 @@ import org.umc.travlocksserver.domain.template.repository.TemplateTagRepository;
 import org.umc.travlocksserver.domain.template.repository.TemplateVlockRepository;
 import org.umc.travlocksserver.domain.vlock.entity.Vlock;
 import org.umc.travlocksserver.infra.ai.client.AiSuggestionClient;
-import org.umc.travlocksserver.infra.ai.client.HyperClovaSuggestionClient;
 import org.umc.travlocksserver.infra.ai.dto.AiTagResponseDTO;
 
 import java.util.List;
@@ -50,26 +49,26 @@ public class TemplateTagCommandService {
 			case CAR -> "차";
 		};
 
+		template.increaseTagVersion();
+
 		List<String> fixedInfoTags = List.of(travelTheme, tripDays, travelTransit);
 		List<String> cities = cityRepository.findNameByRegionId(region.getId());
 
-		// AI 호출
-		AiTagResponseDTO response = aiSuggestionClient.generateTags(region.getName(), fixedInfoTags,
-			cities, vlocks);
-
-		template.increaseTagVersion();
-
 		saveTemplateTags(template, List.of(region.getName()), TagType.REGION);
 		saveTemplateTags(template, fixedInfoTags, TagType.FIXED_INFO);
-		saveTemplateTags(template, response.cities(), TagType.CITY);
-		saveTemplateTags(template, response.free(), TagType.FREE);
+		// AI 호출
+		if (vlocks.size() >= 3) {
+			AiTagResponseDTO response = aiSuggestionClient.generateTags(region.getName(), fixedInfoTags, cities, vlocks);
+			saveTemplateTags(template, response.cities(), TagType.CITY);
+			saveTemplateTags(template, response.free(), TagType.FREE);
+		}
 	}
 
 	private void saveTemplateTags(Template template, List<String> tags, TagType tagType) {
 		for (String t : tags) {
-			System.out.println("이건 saveTemplateTags에서 호출 " + t);
+			// TODO: 벌크 조회로 최적화
 			Tag tag = tagRepository.findByName(t)
-				.orElse(tagRepository.save(Tag.create(t)));
+				.orElseGet(() -> tagRepository.save(Tag.create(t)));
 
 			TemplateTag templateTag = TemplateTag.create(
 				tag,
