@@ -105,7 +105,7 @@ public class TemplateQueryService {
 		Template template = templateRepository.findById(templateId)
 			.orElseThrow(() -> new TemplateException(TemplateErrorCode.TEMPLATE_NOT_FOUND));
 
-		if (!template.getIsPublic()) {
+		if (!template.getIsPublic() && !template.getOwner().getId().equals(memberId)) {
 			throw new TemplateException(TemplateErrorCode.TEMPLATE_NOT_PUBLIC);
 		}
 
