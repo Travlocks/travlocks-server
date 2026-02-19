@@ -1,5 +1,6 @@
 package org.umc.travlocksserver.domain.vlock.service.command;
 
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -33,6 +34,7 @@ import org.umc.travlocksserver.global.aws.S3Provider;
 import org.umc.travlocksserver.infra.kakao.KakaoPlace;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -47,6 +49,7 @@ public class VlockCommandService {
 	private final CityQueryService cityQueryService;
 	private final S3Provider s3Provider;
 	private final S3Properties s3Properties;
+	private final EntityManager entityManager;
 
 	public VlockResponseDTO createVlock(Long memberId, VlockRequestDTO request, MultipartFile coverImg) {
 		String imageUrl = uploadImageIfPresent(coverImg);
@@ -112,9 +115,16 @@ public class VlockCommandService {
 		for (KakaoPlace place : places) {
 			if (place.placeId() == null || place.placeId().isBlank())
 				continue;
-			VlockCategory category = mapCategory(place.categoryName());
+
+			boolean exists = vlockRepository.existsByExternalPlaceIdAndIsPublicTrue(place.placeId());
+
+			if (exists) {
+				continue;
+			}
 
 			try {
+				VlockCategory category = mapCategory(place.categoryName());
+
 				Vlock vlock = Vlock.createByExternal(
 					place.placeId(),
 					category,
@@ -128,6 +138,7 @@ public class VlockCommandService {
 				vlockRepository.save(vlock);
 			} catch(DataIntegrityViolationException e) {
 				// UNIQUE 충돌 -> 이미 존재하는 블록 -> 무시
+				entityManager.clear(); // 세션 정리
 			}
 		}
 	}
