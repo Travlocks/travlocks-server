@@ -9,6 +9,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.umc.travlocksserver.domain.member.dto.request.*;
 import org.umc.travlocksserver.domain.member.dto.response.MemberEmailExistsResponseDTO;
 import org.umc.travlocksserver.domain.member.dto.response.MemberNicknameExistsResponseDTO;
@@ -149,6 +150,7 @@ public interface MemberControllerDocs {
 		@ApiResponse(responseCode = "401", description = "인증 실패", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 	})
 	ResponseEntity<SuccessResponse<MemberProfileUpdateResponseDTO>> updateMyProfile(
+        @Parameter(hidden = true)
 		Member member,
 		@Valid
 		MemberProfileUpdateRequestDTO request);
@@ -166,7 +168,8 @@ public interface MemberControllerDocs {
 		@ApiResponse(responseCode = "404", description = "존재하지 않는 유저", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 	})
 	ResponseEntity<SuccessResponse<Void>> updatePassword(
-		Member member,
+        @Parameter(hidden = true)
+        Member member,
 		@Valid
 		MemberPasswordUpdateRequestDTO request);
 
@@ -185,11 +188,13 @@ public interface MemberControllerDocs {
 		@ApiResponse(responseCode = "401", description = "인증 실패(토큰 없음/만료/유효하지 않음)", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
 		@ApiResponse(responseCode = "404", description = "존재하지 않는 유저", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 	})
-	ResponseEntity<SuccessResponse<Void>> withdraw(
-		Member member,
-		MemberWithdrawRequestDTO request,
-		HttpServletRequest httpRequest,
-		HttpServletResponse httpResponse);
+    ResponseEntity<SuccessResponse<Void>> withdraw(
+        @Parameter(hidden = true)
+        Member member,
+        @RequestBody(required = false)
+        MemberWithdrawRequestDTO request,
+        HttpServletRequest httpRequest,
+        HttpServletResponse httpResponse);
 
 	@Operation(summary = "마이페이지 내 템플릿 조회 API", description = """
 		마이페이지에서 내 템플릿 리스트를 조회하는 API입니다.

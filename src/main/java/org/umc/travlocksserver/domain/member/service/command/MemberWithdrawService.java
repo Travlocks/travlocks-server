@@ -64,12 +64,7 @@ public class MemberWithdrawService {
 			.orElseThrow(() -> new IllegalStateException("회원이 존재하지 않습니다."));
 
 		member.withdrawAndAnonymize(
-			anonymizedEmail(memberId),
 			anonymizedNickname(memberId));
-	}
-
-	private String anonymizedEmail(Long memberId) {
-		return "deleted_" + memberId + "@travlocks.com";
 	}
 
 	private String anonymizedNickname(Long memberId) {
