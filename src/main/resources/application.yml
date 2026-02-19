@@ -83,7 +83,7 @@ suggestion:
     max-duplicate-category: 2
 
 tag:
-  cron: "0 20 * * * *"
+  cron: "0 25 * * * *"
   grace-minutes: 15
   lookback-minutes: 75
 
