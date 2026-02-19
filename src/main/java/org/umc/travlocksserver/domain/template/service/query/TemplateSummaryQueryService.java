@@ -1,6 +1,8 @@
 package org.umc.travlocksserver.domain.template.service.query;
 
-import lombok.RequiredArgsConstructor;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.umc.travlocksserver.domain.template.code.TemplateErrorCode;
@@ -9,14 +11,13 @@ import org.umc.travlocksserver.domain.template.dto.response.TemplateSummaryRespo
 import org.umc.travlocksserver.domain.template.entity.Template;
 import org.umc.travlocksserver.domain.template.entity.TemplateDay;
 import org.umc.travlocksserver.domain.template.entity.TemplateVlock;
+import org.umc.travlocksserver.domain.template.enums.TransportType;
 import org.umc.travlocksserver.domain.template.exception.TemplateException;
-import org.umc.travlocksserver.domain.template.repository.MoveTimeRepository;
 import org.umc.travlocksserver.domain.template.repository.TemplateDayRepository;
 import org.umc.travlocksserver.domain.template.repository.TemplateRepository;
 import org.umc.travlocksserver.domain.template.repository.TemplateVlockRepository;
 
-import java.util.ArrayList;
-import java.util.List;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -26,7 +27,8 @@ public class TemplateSummaryQueryService {
 	private final TemplateRepository templateRepository;
 	private final TemplateDayRepository templateDayRepository;
 	private final TemplateVlockRepository templateVlockRepository;
-	private final MoveTimeRepository moveTimeRepository;
+
+	private final TemplateRouteQueryService templateRouteQueryService;
 
 	private static final int MOVE_WARNING_THRESHOLD = 30;
 
@@ -61,11 +63,10 @@ public class TemplateSummaryQueryService {
 				Long fromId = vlocks.get(i).getVlock().getId();
 				Long toId = vlocks.get(i + 1).getVlock().getId();
 
-				int moveMin = moveTimeRepository
-					.findByFromVlockIdAndToVlockIdAndTransportType(
-						fromId, toId, template.getTransportType())
-					.map(mt -> mt.getMoveMinutes())
-					.orElse(0); // move_times에 없으면 0
+				// TODO: 현재 WALK만 지원 - 추후 template.getTransportType() 으로 교체
+				int moveMin = templateRouteQueryService
+					.getOrCreateRoute(fromId, toId, TransportType.WALK)
+					.moveMinutes();
 
 				dayMoveMinutes += moveMin;
 
