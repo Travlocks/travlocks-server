@@ -1,6 +1,7 @@
 package org.umc.travlocksserver.domain.vlock.service.command;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -113,20 +114,22 @@ public class VlockCommandService {
 				continue;
 			VlockCategory category = mapCategory(place.categoryName());
 
-			// 공개된 Vlock의 ExternalplaceId 기준 Vlock 조회 후 없으면 생성
-			Vlock vlock = vlockRepository.findByExternalPlaceIdAndIsPublicTrue(place.placeId())
-				.orElseGet(() -> Vlock.createByExternal(
+			try {
+				Vlock vlock = Vlock.createByExternal(
 					place.placeId(),
 					category,
 					city,
 					place.name(),
 					place.latitude(),
 					place.longitude(),
-					place.address()));
+					place.address()
+				);
 
-			vlockRepository.save(vlock);
+				vlockRepository.save(vlock);
+			} catch(DataIntegrityViolationException e) {
+				// UNIQUE 충돌 -> 이미 존재하는 블록 -> 무시
+			}
 		}
-
 	}
 
 	// ⚪ 외부(카카오맵) API를 통해 가져온 카테고리를 우리 서비스 내의 카테고리로 매핑하는 메서드

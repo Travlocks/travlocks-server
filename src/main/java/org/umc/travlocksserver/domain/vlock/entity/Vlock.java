@@ -22,6 +22,14 @@ public class Vlock extends SoftDeleteBaseEntity {
 	@Column(name = "vlock_id")
 	private Long id;
 
+	// isPublic == true면 externalPlaceId, false면 NULL
+	@Column(
+			unique = true, insertable = false, updatable = false,
+			columnDefinition =
+					"VARCHAR(255) GENERATED ALWAYS AS (CASE WHEN is_public = 1 THEN external_place_id ELSE NULL END) STORED"
+	)
+	private String externalPlaceUnique;
+
 	// 외부 장소 ID(Kakao place_id 등)
 	private String externalPlaceId;
 
