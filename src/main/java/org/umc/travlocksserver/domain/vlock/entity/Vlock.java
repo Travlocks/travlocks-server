@@ -129,4 +129,14 @@ public class Vlock extends SoftDeleteBaseEntity {
 			this.isPublic = command.isPublic();
 		}
 	}
+
+	public void increaseUsageCount() {
+		this.usageCount++;
+	}
+
+	public void decreaseUsageCount() {
+		if (this.usageCount > 0) {
+			this.usageCount--;
+		}
+	}
 }
