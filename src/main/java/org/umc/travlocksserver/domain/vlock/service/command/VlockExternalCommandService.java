@@ -74,9 +74,10 @@ public class VlockExternalCommandService {
 
         for (CityProjectionDTO city : cities) {
             List<KakaoPlace> results = new ArrayList<>();
-            results.addAll(fetchKakaoPlaces(city.cityName() + " 관광지", x, y, radiusM));
-            results.addAll(fetchKakaoPlaces(city.cityName() + " 맛집", x, y, radiusM));
-            results.addAll(fetchKakaoPlaces(city.cityName() + " 카페", x, y, radiusM));
+//            results.addAll(fetchKakaoPlaces(city.cityName() + " 관광지", x, y, radiusM));
+//            results.addAll(fetchKakaoPlaces(city.cityName() + " 맛집", x, y, radiusM));
+//            results.addAll(fetchKakaoPlaces(city.cityName() + " 카페", x, y, radiusM));
+            results.addAll(fetchKakaoPlaces(city.cityName() + " 숙소", x, y, radiusM));
 
             List<KakaoPlace> deduplicated = deduplicateByPlaceId(results);
 
