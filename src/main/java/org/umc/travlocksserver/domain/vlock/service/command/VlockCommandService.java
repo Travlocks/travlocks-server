@@ -4,6 +4,7 @@ import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.umc.travlocksserver.domain.location.constant.CityErrorCode;
@@ -34,7 +35,6 @@ import org.umc.travlocksserver.global.aws.S3Provider;
 import org.umc.travlocksserver.infra.kakao.KakaoPlace;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -109,6 +109,7 @@ public class VlockCommandService {
 	}
 
 	// ⚪ 외부(카카오맵) API를 통해 블록을 삽입하는 메서드 (추천시 블록에 데이터가 너무 적을 경우 사용)
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public void upsertVlocksFromExternal(Long cityId, List<KakaoPlace> places) {
 		City city = cityQueryService.getReferenceById(cityId);
 
@@ -116,11 +117,11 @@ public class VlockCommandService {
 			if (place.placeId() == null || place.placeId().isBlank())
 				continue;
 
-			boolean exists = vlockRepository.existsByExternalPlaceIdAndIsPublicTrue(place.placeId());
-
-			if (exists) {
-				continue;
-			}
+//			boolean exists = vlockRepository.existsByExternalPlaceIdAndIsPublicTrue(place.placeId());
+//
+//			if (exists) {
+//				continue;
+//			}
 
 			try {
 				VlockCategory category = mapCategory(place.categoryName());
@@ -138,7 +139,6 @@ public class VlockCommandService {
 				vlockRepository.save(vlock);
 			} catch(DataIntegrityViolationException e) {
 				// UNIQUE 충돌 -> 이미 존재하는 블록 -> 무시
-				entityManager.clear(); // 세션 정리
 			}
 		}
 	}
