@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.umc.travlocksserver.domain.template.code.TemplateErrorCode;
 import org.umc.travlocksserver.domain.template.dto.response.TemplateDayRouteResponseDTO;
@@ -75,7 +76,7 @@ public class TemplateRouteQueryService {
 	/**
 	 * 단일 경로 조회/생성 (캐싱)
 	 */
-	@Transactional
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public TemplateDayRouteResponseDTO getOrCreateRoute(
 		Long fromVlockId,
 		Long toVlockId,
