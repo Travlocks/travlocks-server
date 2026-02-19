@@ -106,6 +106,8 @@ public class TemplatePreInputService {
 		List<TemplateDay> templateDays = createTemplateDays(savedTemplate, days);
 		templateDayRepository.saveAll(templateDays);
 
+		member.increaseTemplateCount();
+
 		// 8. Response 반환
 		return TemplatePreInputResponseDTO.of(
 			savedTemplate.getId(),

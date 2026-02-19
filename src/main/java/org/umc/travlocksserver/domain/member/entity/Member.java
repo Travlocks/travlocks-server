@@ -2,12 +2,15 @@ package org.umc.travlocksserver.domain.member.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.umc.travlocksserver.domain.favorite.code.FavoriteErrorCode;
 import org.umc.travlocksserver.domain.favorite.exception.FavoriteException;
 import org.umc.travlocksserver.domain.member.enums.MemberStatus;
 import org.umc.travlocksserver.domain.template.code.TemplateErrorCode;
 import org.umc.travlocksserver.domain.template.exception.TemplateException;
+import org.umc.travlocksserver.domain.vlock.code.VlockErrorCode;
+import org.umc.travlocksserver.domain.vlock.exception.VlockException;
 import org.umc.travlocksserver.global.entity.SoftDeleteBaseEntity;
 
 @Entity
@@ -97,6 +100,17 @@ public class Member extends SoftDeleteBaseEntity {
 		this.templateCount = 0;
 		this.favoriteCount = 0;
 	}
+
+	public void increaseVlockCount() { this.vlockCount = this.vlockCount + 1; }
+
+	public void decreaseVlockCount() {
+		if (this.vlockCount <= 0) {
+			throw new VlockException(VlockErrorCode.VLOCK_COUNT_BELOW_ZERO);
+		}
+		this.vlockCount = this.vlockCount - 1;
+	}
+
+	public void increaseTemplateCount() { this.templateCount = this.templateCount + 1; }
 
 	public void decreaseTemplateCount() {
 		if (this.templateCount <= 0) {
