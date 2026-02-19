@@ -35,8 +35,8 @@ public class VlockQueryService {
 		return vlockRepository.findPopularByCityIds(cityIds, pageable);
 	}
 
-	public List<Vlock> getAllById(List<Long> ids) {
-		return vlockRepository.findAllById(ids);
+	public List<Vlock> getAllWithCategoryByVlockIds(List<Long> vlockIds) {
+		return vlockRepository.findAllWithCategoryByVlockIds(vlockIds);
 	}
 
 	public List<Vlock> getVlocksInBoxExcluding(
