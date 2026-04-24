@@ -11,7 +11,13 @@ import org.umc.travlocksserver.global.entity.BaseEntity;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
 @Entity
-@Table(name = "move_times")
+@Table(
+	name = "move_times",
+	indexes = @Index(
+		name = "idx_move_times_route",
+		columnList = "from_vlock_id, to_vlock_id, transport_type"
+	)
+)
 public class MoveTime extends BaseEntity {
 
 	@Id
