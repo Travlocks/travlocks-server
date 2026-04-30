@@ -1,4 +1,7 @@
 spring:
+  main:
+    banner-mode: off
+
   datasource:
     url: jdbc:h2:mem:testdb;MODE=MySQL;DB_CLOSE_DELAY=-1;NON_KEYWORDS=END,START
     driver-class-name: org.h2.Driver
@@ -7,10 +10,10 @@ spring:
 
   jpa:
     database: h2
-    database-platform: org.hibernate.dialect.H2Dialect
+    open-in-view: false
     show-sql: false
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: none
     properties:
       hibernate:
         format_sql: true
@@ -148,3 +151,21 @@ global:
 tag:
   grace-minutes: 5
   lookback-minutes: 60
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
+logging:
+  level:
+    root: warn
+    org.springframework: warn
+    org.hibernate: warn
+    com.zaxxer.hikari: warn
+    org.umc.travlocksserver: warn
+    org.hibernate.dialect.Dialect: error
+    org.hibernate.orm.deprecation: error
+    route-performance: info
+    route-integration-performance: info

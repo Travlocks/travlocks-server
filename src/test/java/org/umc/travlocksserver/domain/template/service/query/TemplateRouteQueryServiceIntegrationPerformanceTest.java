@@ -53,7 +53,7 @@ import org.umc.travlocksserver.global.external.tmap.TmapDTO;
 })
 class TemplateRouteQueryServiceIntegrationPerformanceTest {
 
-	private static final Logger log = LoggerFactory.getLogger(TemplateRouteQueryServiceIntegrationPerformanceTest.class);
+	private static final Logger log = LoggerFactory.getLogger("route-integration-performance");
 	private static final int WARMUP_COUNT = 3;
 	private static final int REPEAT_COUNT = 20;
 

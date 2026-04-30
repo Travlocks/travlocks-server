@@ -42,7 +42,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @ExtendWith(MockitoExtension.class)
 class TemplateRouteQueryServiceTest {
 
-	private static final Logger log = LoggerFactory.getLogger(TemplateRouteQueryServiceTest.class);
+	private static final Logger log = LoggerFactory.getLogger("route-performance");
 	private static final Duration FAST_RESPONSE_TIMEOUT = Duration.ofMillis(500);
 	private static final int PERFORMANCE_WARMUP_COUNT = 5;
 	private static final int PERFORMANCE_REPEAT_COUNT = 50;
