@@ -1,5 +1,6 @@
 package org.umc.travlocksserver.domain.template.repository;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -9,10 +10,18 @@ import org.umc.travlocksserver.domain.template.entity.MoveTime;
 import org.umc.travlocksserver.domain.template.enums.TransportType;
 
 public interface MoveTimeRepository extends JpaRepository<MoveTime, Long> {
-	Optional<MoveTime> findByFromVlockIdAndToVlockIdAndTransportType(
-		Long fromVlockId,
-		Long toVlockId,
-		TransportType transportType);
+	@Query("""
+		SELECT m FROM MoveTime m
+		WHERE m.fromVlock.id = :fromId
+		  AND m.toVlock.id = :toId
+		  AND m.transportType = :type
+		  AND (m.expiresAt IS NULL OR m.expiresAt > :now)
+		""")
+	Optional<MoveTime> findValidRoute(
+		@Param("fromId") Long fromId,
+		@Param("toId") Long toId,
+		@Param("type") TransportType type,
+		@Param("now") LocalDateTime now);
 
 	@Query("""
 		select mt

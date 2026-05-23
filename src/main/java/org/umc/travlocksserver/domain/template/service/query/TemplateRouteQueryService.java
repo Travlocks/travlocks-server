@@ -1,5 +1,6 @@
 package org.umc.travlocksserver.domain.template.service.query;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -104,7 +105,7 @@ public class TemplateRouteQueryService {
 		Long toVlockId,
 		TransportType transportType) {
 		return moveTimeRepository
-			.findByFromVlockIdAndToVlockIdAndTransportType(fromVlockId, toVlockId, transportType)
+			.findValidRoute(fromVlockId, toVlockId, transportType, LocalDateTime.now())
 			.map(this::toResponseDTO)
 			.orElseGet(() -> {
 				log.info("경로 캐시 미스 - 새로 계산합니다: {} -> {} ({})",
@@ -162,7 +163,11 @@ public class TemplateRouteQueryService {
 	}
 
 	/**
-	 * 정방향 근처 경로를 먼저 찾고, 없으면 역방향도 확인
+	 * 출발지/도착지가 유사한 기존 경로 재사용
+	 *
+	 * 1. 정방향(A → B) 근처 경로를 우선 탐색
+	 * 2. 없을 경우 WALK에 한해 역방향(B → A) 경로도 재사용 허용
+	 * 3. TRANSIT은 노선/환승 정보 영향을 받으므로 근처 경로 재사용 불가
 	 */
 	private MoveTime findReusableNearbyRoute(
 		Vlock fromVlock,
@@ -179,6 +184,11 @@ public class TemplateRouteQueryService {
 
 		if (forward.isPresent()) {
 			return forward.get();
+		}
+
+		// 역방향(B→A) 근처 경로 재사용은 WALK만 허용
+		if (transportType != TransportType.WALK) {
+			return null;
 		}
 
 		// 역방향(B→A) 근처 경로도 재활용 시도

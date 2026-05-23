@@ -1,5 +1,6 @@
 package org.umc.travlocksserver.domain.template.service.command;
 
+import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -45,8 +46,8 @@ public class RouteCalculationAsyncService {
 			return;
 		}
 		try {
-			if (moveTimeRepository.findByFromVlockIdAndToVlockIdAndTransportType(
-				fromVlockId, toVlockId, transportType).isPresent()) {
+			if (moveTimeRepository.findValidRoute(
+				fromVlockId, toVlockId, transportType, LocalDateTime.now()).isPresent()) {
 				log.debug("비동기 계산 도중 이미 저장됨, 스킵: {}", key);
 				return;
 			}
@@ -60,7 +61,16 @@ public class RouteCalculationAsyncService {
 				case WALK -> tmapApiService.getPedestrianRoute(
 					fromVlock.getLongitude(), fromVlock.getLatitude(),
 					toVlock.getLongitude(), toVlock.getLatitude());
-				case CAR, TRANSIT -> throw new TemplateException(TemplateErrorCode.UNSUPPORTED_TRANSPORT_TYPE);
+				case CAR -> tmapApiService.getCarRoute(
+					fromVlock.getLongitude(), fromVlock.getLatitude(),
+					toVlock.getLongitude(), toVlock.getLatitude());
+				case TRANSIT -> throw new TemplateException(TemplateErrorCode.UNSUPPORTED_TRANSPORT_TYPE);
+			};
+
+			LocalDateTime expiresAt = switch (transportType) {
+				case WALK -> null;
+				case CAR -> LocalDateTime.now().plusDays(7);
+				case TRANSIT -> null;
 			};
 
 			moveTimeRepository.save(MoveTime.builder()
@@ -70,6 +80,7 @@ public class RouteCalculationAsyncService {
 				.transportType(transportType)
 				.distanceMeter(routeInfo.getTotalDistanceMeter())
 				.polyline(routeInfo.getPolyline())
+				.expiresAt(expiresAt)
 				.build());
 
 			log.info("비동기 경로 계산 완료: {}", key);
