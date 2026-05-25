@@ -5,12 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.umc.travlocksserver.infra.redis.template.RouteCache;
 import org.umc.travlocksserver.domain.template.code.TemplateErrorCode;
 import org.umc.travlocksserver.domain.template.dto.response.TemplateDayRouteResponseDTO;
 import org.umc.travlocksserver.domain.template.entity.MoveTime;
@@ -45,16 +42,10 @@ public class TemplateRouteQueryService {
 	private final VlockRepository vlockRepository;
 	private final RouteCalculationService routeCalculationService;
 	private final PolylineUtil polylineUtil;
-
-	@Autowired
-	@Lazy
-	private TemplateRouteQueryService self;
-
+	private final RouteCache routeCache;
 	private static final double NEARBY_ROUTE_LAT_TOLERANCE = 0.001;
 	private static final double NEARBY_ROUTE_LON_TOLERANCE = 0.001;
-	private static final double SHORT_DISTANCE_THRESHOLD_KM = 0.3; // 300m 이하는 자체 계산
-	private static final double WALK_SPEED_M_PER_MIN = 80.0;
-	private static final double WALK_DETOUR_FACTOR = 1.3;           // 직선거리 → 실보행거리 보정
+	private static final double SHORT_DISTANCE_THRESHOLD_KM = 0.3;
 
 	public List<TemplateDayRouteResponseDTO> getDayRoutes(
 		Long templateId,
@@ -79,40 +70,40 @@ public class TemplateRouteQueryService {
 			TemplateVlock from = templateVlocks.get(i);
 			TemplateVlock to = templateVlocks.get(i + 1);
 
-			TemplateDayRouteResponseDTO route = self.getOrCreateRoute(
+			routes.add(getOrCreateRoute(
 				from.getVlock().getId(),
 				to.getVlock().getId(),
-				transportType);
-			routes.add(route);
+				transportType));
 		}
 
 		return routes;
 	}
 
 	/**
-	 * 인메모리 캐시 조회 — 미스 시 getOrCreateRouteInternal 위임
+	 * Redis 캐시 조회 — 미스 시 DB/API 조회
 	 */
-	@Cacheable(
-		value = "moveTime",
-		key = "#fromVlockId + '_' + #toVlockId + '_' + #transportType.name()",
-		unless = "#result.moveTimeId == null"
-	)
 	public TemplateDayRouteResponseDTO getOrCreateRoute(
 		Long fromVlockId,
 		Long toVlockId,
 		TransportType transportType) {
-		return self.getOrCreateRouteInternal(fromVlockId, toVlockId, transportType);
+		TemplateDayRouteResponseDTO cached = routeCache.get(fromVlockId, toVlockId, transportType);
+		if (cached != null) {
+			return cached;
+		}
+
+		TemplateDayRouteResponseDTO result = getOrCreateRouteInternal(fromVlockId, toVlockId, transportType);
+
+		if (result.moveTimeId() != null) {
+			routeCache.set(fromVlockId, toVlockId, transportType, result);
+		}
+
+		return result;
 	}
 
 	/**
-	 * 출발지/도착지가 유사한 기존 경로 재사용 (TRANSIT은 노선/환승 정보 영향을 받으므로 근처 경로 재사용 불가)
-	 *
-	 * 1. 유효 경로 반환
-	 * 2. 만료 시 백그라운드 갱신 트리거
-	 * 3. 없으면 동기 계산
+	 * DB 경로 조회/생성
 	 */
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
-	public TemplateDayRouteResponseDTO getOrCreateRouteInternal(
+	private TemplateDayRouteResponseDTO getOrCreateRouteInternal(
 		Long fromVlockId,
 		Long toVlockId,
 		TransportType transportType) {
@@ -167,7 +158,8 @@ public class TemplateRouteQueryService {
 			new LatLng(toVlock.getLatitude(), toVlock.getLongitude()));
 		if (distKm < SHORT_DISTANCE_THRESHOLD_KM) {
 			log.info("짧은 거리 자체 계산: {} -> {} ({}m)", fromVlockId, toVlockId, (int)(distKm * 1000));
-			return saveShortDistanceRoute(fromVlock, toVlock, transportType, distKm);
+			return toResponseDTO(
+				routeCalculationService.calculateAndSaveShortDistance(fromVlock, toVlock, transportType, distKm));
 		}
 
 		// 정방향 근처 경로 재사용
@@ -180,8 +172,7 @@ public class TemplateRouteQueryService {
 
 		// 외부 API 동기 호출
 		log.info("외부 API 동기 계산: {} -> {} ({})", fromVlockId, toVlockId, transportType);
-		MoveTime moveTime = routeCalculationService.calculateAndSave(fromVlockId, toVlockId, transportType);
-		return toResponseDTO(moveTime);
+		return toResponseDTO(routeCalculationService.calculateAndSave(fromVlockId, toVlockId, transportType));
 	}
 
 	/**
@@ -227,32 +218,6 @@ public class TemplateRouteQueryService {
 				NEARBY_ROUTE_LON_TOLERANCE,
 				transportType)
 			.orElse(null);
-	}
-
-	/**
-	 * 300m 이하 직선거리 도보 속도 기반 자체 추정
-	 */
-	private TemplateDayRouteResponseDTO saveShortDistanceRoute(
-		Vlock fromVlock,
-		Vlock toVlock,
-		TransportType transportType,
-		double distKm) {
-		int estimatedDistanceMeter = (int)Math.round(distKm * 1000 * WALK_DETOUR_FACTOR);
-		int estimatedMinutes = (int)Math.ceil(estimatedDistanceMeter / WALK_SPEED_M_PER_MIN);
-
-		MoveTime moveTime = MoveTime.builder()
-			.fromVlock(fromVlock)
-			.toVlock(toVlock)
-			.moveMinutes(estimatedMinutes)
-			.transportType(transportType)
-			.distanceMeter(estimatedDistanceMeter)
-			.polyline(String.format("[[%.6f,%.6f],[%.6f,%.6f]]",
-				fromVlock.getLongitude(), fromVlock.getLatitude(),
-				toVlock.getLongitude(), toVlock.getLatitude()))
-			.build();
-
-		moveTimeRepository.save(moveTime);
-		return toResponseDTO(moveTime);
 	}
 
 	/**

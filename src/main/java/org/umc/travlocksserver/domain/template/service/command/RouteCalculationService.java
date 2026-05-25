@@ -4,10 +4,9 @@ import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.springframework.cache.Cache;
-import org.springframework.cache.CacheManager;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.umc.travlocksserver.domain.template.entity.MoveTime;
 import org.umc.travlocksserver.domain.template.enums.TransportType;
@@ -19,6 +18,7 @@ import org.umc.travlocksserver.domain.vlock.repository.VlockRepository;
 import org.umc.travlocksserver.global.external.odsay.OdsayApiService;
 import org.umc.travlocksserver.global.external.tmap.TmapApiService;
 import org.umc.travlocksserver.global.external.tmap.TmapDTO;
+import org.umc.travlocksserver.infra.redis.template.RouteCache;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,18 +28,21 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class RouteCalculationService {
 
+	static final double WALK_SPEED_M_PER_MIN = 80.0;
+	static final double WALK_DETOUR_FACTOR = 1.3;
+
 	private final Set<String> inProgress = ConcurrentHashMap.newKeySet();
 
 	private final MoveTimeRepository moveTimeRepository;
 	private final VlockRepository vlockRepository;
 	private final TmapApiService tmapApiService;
 	private final OdsayApiService odsayApiService;
-	private final CacheManager cacheManager;
+	private final RouteCache routeCache;
 
 	/**
 	 * 경로를 동기로 계산해 DB에 저장하고 엔티티 반환 (WALK/CAR: TMap, TRANSIT: ODsay)
 	 */
-	@Transactional
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public MoveTime calculateAndSave(Long fromVlockId, Long toVlockId, TransportType transportType) {
 		Vlock fromVlock = vlockRepository.findById(fromVlockId)
 			.orElseThrow(() -> new VlockException(VlockErrorCode.START_VLOCK_NOT_FOUND));
@@ -76,6 +79,30 @@ public class RouteCalculationService {
 	}
 
 	/**
+	 * 300m 이하 직선거리 도보 속도 기반 자체 추정 저장
+	 */
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	public MoveTime calculateAndSaveShortDistance(
+		Vlock fromVlock,
+		Vlock toVlock,
+		TransportType transportType,
+		double distKm) {
+		int estimatedDistanceMeter = (int)Math.round(distKm * 1000 * WALK_DETOUR_FACTOR);
+		int estimatedMinutes = (int)Math.ceil(estimatedDistanceMeter / WALK_SPEED_M_PER_MIN);
+
+		return moveTimeRepository.save(MoveTime.builder()
+			.fromVlock(fromVlock)
+			.toVlock(toVlock)
+			.moveMinutes(estimatedMinutes)
+			.transportType(transportType)
+			.distanceMeter(estimatedDistanceMeter)
+			.polyline(String.format("[[%.6f,%.6f],[%.6f,%.6f]]",
+				fromVlock.getLongitude(), fromVlock.getLatitude(),
+				toVlock.getLongitude(), toVlock.getLatitude()))
+			.build());
+	}
+
+	/**
 	 * 경로를 비동기로 계산해 DB에 저장
 	 * 동일한 쌍에 대해 중복 호출이 들어오면 첫 번째만 실행하고 나머지는 스킵
 	 */
@@ -94,10 +121,7 @@ public class RouteCalculationService {
 				return;
 			}
 			calculateAndSave(fromVlockId, toVlockId, transportType);
-			Cache moveTimeCache = cacheManager.getCache("moveTime");
-			if (moveTimeCache != null) {
-				moveTimeCache.evict(fromVlockId + "_" + toVlockId + "_" + transportType.name());
-			}
+			routeCache.evict(fromVlockId, toVlockId, transportType);
 			log.info("비동기 경로 계산 완료 (캐시 evict): {}_{}_{}", fromVlockId, toVlockId, transportType);
 		} catch (Exception e) {
 			log.warn("비동기 경로 계산 실패: {}_{}_{} - {}", fromVlockId, toVlockId, transportType, e.getMessage());
