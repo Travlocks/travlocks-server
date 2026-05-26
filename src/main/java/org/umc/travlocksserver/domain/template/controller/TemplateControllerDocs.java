@@ -256,9 +256,6 @@ public interface TemplateControllerDocs {
 		[Path Variable]
 		- templateId: 조회할 템플릿 ID
 		- dayNo: 조회할 일차 (1부터 시작)
-
-		[Query Parameter]
-		- transportType: 이동 수단 (WALK)
 		     """)
 	@ApiResponses({
 		@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "템플릿 이동 루트 조회 성공"),
@@ -269,9 +266,7 @@ public interface TemplateControllerDocs {
 		@PathVariable
 		Long templateId,
 		@PathVariable
-		Integer dayNo,
-		@RequestParam
-		TransportType transportType);
+		Integer dayNo);
 
 	@Operation(summary = "템플릿 탐색", description = """
 		검색, 필터, 정렬 조건을 기준으로 템플릿을 조회합니다.

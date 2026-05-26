@@ -11,7 +11,6 @@ import org.umc.travlocksserver.domain.template.dto.response.TemplateSummaryRespo
 import org.umc.travlocksserver.domain.template.entity.Template;
 import org.umc.travlocksserver.domain.template.entity.TemplateDay;
 import org.umc.travlocksserver.domain.template.entity.TemplateVlock;
-import org.umc.travlocksserver.domain.template.enums.TransportType;
 import org.umc.travlocksserver.domain.template.exception.TemplateException;
 import org.umc.travlocksserver.domain.template.repository.TemplateDayRepository;
 import org.umc.travlocksserver.domain.template.repository.TemplateRepository;
@@ -63,9 +62,8 @@ public class TemplateSummaryQueryService {
 				Long fromId = vlocks.get(i).getVlock().getId();
 				Long toId = vlocks.get(i + 1).getVlock().getId();
 
-				// TODO: 현재 WALK만 지원 - 추후 template.getTransportType() 으로 교체
 				int moveMin = templateRouteQueryService
-					.getOrCreateRoute(fromId, toId, TransportType.WALK)
+					.getOrCreateRoute(fromId, toId, template.getTransportType())
 					.moveMinutes();
 
 				dayMoveMinutes += moveMin;

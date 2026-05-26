@@ -1,5 +1,7 @@
 package org.umc.travlocksserver.domain.template.entity;
 
+import java.time.LocalDateTime;
+
 import jakarta.persistence.*;
 import lombok.*;
 import org.umc.travlocksserver.domain.template.enums.TransportType;
@@ -47,4 +49,8 @@ public class MoveTime extends BaseEntity {
 
 	@Column(columnDefinition = "TEXT")
 	private String polyline;
+
+	/** 캐시 만료 시각 (null = 영구) */
+	@Column(name = "expires_at")
+	private LocalDateTime expiresAt;
 }

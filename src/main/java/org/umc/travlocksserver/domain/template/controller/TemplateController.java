@@ -20,7 +20,6 @@ import org.umc.travlocksserver.domain.template.dto.response.BatchRouteResponseDT
 import org.umc.travlocksserver.domain.template.dto.response.TemplateCanvasResponseDTO;
 import org.umc.travlocksserver.domain.template.dto.response.TemplateDayRouteResponseDTO;
 import org.umc.travlocksserver.domain.template.dto.response.TemplateRemixResponseDTO;
-import org.umc.travlocksserver.domain.template.enums.TransportType;
 import org.umc.travlocksserver.domain.template.dto.response.OptimizeResponseDTO;
 import org.umc.travlocksserver.domain.template.dto.response.*;
 import org.umc.travlocksserver.domain.template.code.TemplateDaySuccessCode;
@@ -252,13 +251,10 @@ public class TemplateController implements TemplateControllerDocs {
 		@PathVariable
 		Long templateId,
 		@PathVariable
-		Integer dayNo,
-		@RequestParam(defaultValue = "WALK")
-		TransportType transportType) {
+		Integer dayNo) {
 		TemplateSuccessCode successCode = TemplateSuccessCode.TEMPLATE_GET_ROUTES_SUCCESS;
 
-		List<TemplateDayRouteResponseDTO> routes = templateRouteQueryService.getDayRoutes(templateId, dayNo,
-			transportType);
+		List<TemplateDayRouteResponseDTO> routes = templateRouteQueryService.getDayRoutes(templateId, dayNo);
 
 		BatchRouteResponseDTO data = new BatchRouteResponseDTO(routes);
 

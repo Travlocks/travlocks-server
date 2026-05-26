@@ -1,30 +1,18 @@
 package org.umc.travlocksserver.domain.template.service.query;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Supplier;
 
-import ch.qos.logback.classic.Level;
-
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.umc.travlocksserver.domain.template.dto.response.TemplateDayRouteResponseDTO;
 import org.umc.travlocksserver.domain.template.entity.MoveTime;
@@ -32,400 +20,228 @@ import org.umc.travlocksserver.domain.template.enums.TransportType;
 import org.umc.travlocksserver.domain.template.repository.MoveTimeRepository;
 import org.umc.travlocksserver.domain.template.repository.TemplateDayRepository;
 import org.umc.travlocksserver.domain.template.repository.TemplateVlockRepository;
-import org.umc.travlocksserver.domain.template.service.command.RouteCalculationAsyncService;
+import org.umc.travlocksserver.domain.template.service.command.RouteCalculationService;
 import org.umc.travlocksserver.domain.vlock.entity.Vlock;
 import org.umc.travlocksserver.domain.vlock.repository.VlockRepository;
 import org.umc.travlocksserver.global.util.PolylineUtil;
+import org.umc.travlocksserver.infra.redis.template.RouteCache;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
+@DisplayName("TemplateRouteQueryService unit tests")
 @ExtendWith(MockitoExtension.class)
 class TemplateRouteQueryServiceTest {
 
-	private static final Logger log = LoggerFactory.getLogger("route-performance");
-	private static final Duration FAST_RESPONSE_TIMEOUT = Duration.ofMillis(500);
-	private static final int PERFORMANCE_WARMUP_COUNT = 5;
-	private static final int PERFORMANCE_REPEAT_COUNT = 50;
-
 	@Mock
-	private MoveTimeRepository moveTimeRepository;
-
+	MoveTimeRepository moveTimeRepository;
 	@Mock
-	private TemplateDayRepository templateDayRepository;
-
+	TemplateDayRepository templateDayRepository;
 	@Mock
-	private TemplateVlockRepository templateVlockRepository;
-
+	TemplateVlockRepository templateVlockRepository;
 	@Mock
-	private VlockRepository vlockRepository;
-
+	VlockRepository vlockRepository;
 	@Mock
-	private RouteCalculationAsyncService routeCalculationAsyncService;
+	RouteCalculationService routeCalculationService;
+	@Mock
+	PolylineUtil polylineUtil;
+	@Mock
+	RouteCache routeCache;
 
-	@Captor
-	private ArgumentCaptor<MoveTime> moveTimeCaptor;
+	@InjectMocks
+	TemplateRouteQueryService sut;
 
-	private TemplateRouteQueryService templateRouteQueryService;
+	private static final Long FROM = 1L;
+	private static final Long TO = 2L;
+	private static final TransportType WALK = TransportType.WALK;
 
-	@BeforeEach
-	void setUp() {
-		templateRouteQueryService = new TemplateRouteQueryService(
-			moveTimeRepository,
-			templateDayRepository,
-			templateVlockRepository,
-			vlockRepository,
-			routeCalculationAsyncService,
-			new PolylineUtil(new ObjectMapper()));
-	}
+	// ──────────────────────────────────────────────────────────────
+	// 1. Redis 캐시 히트
+	// ──────────────────────────────────────────────────────────────
 
 	@Test
-	// 정확히 일치하는 DB 경로가 있으면 Vlock 조회, 저장, 비동기 계산 없이 기존 결과를 그대로 재사용한다.
-	@DisplayName("reuses exact DB route without recalculation")
-	void getOrCreateRoute_reusesExactDbRoute() {
-		Vlock from = vlock(1L, 37.5665, 126.9780);
-		Vlock to = vlock(2L, 37.5700, 126.9820);
-		MoveTime cached = moveTime(10L, from, to, 7, 520, "[[126.978,37.5665],[126.982,37.57]]");
+	@DisplayName("Returns immediately without querying the DB on Redis cache hit")
+	void cacheHit_returnsImmediately() {
+		TemplateDayRouteResponseDTO cached = new TemplateDayRouteResponseDTO(
+			10L, FROM, TO, 5, 400, WALK, List.of());
+		when(routeCache.get(FROM, TO, WALK)).thenReturn(cached);
 
-		when(moveTimeRepository.findByFromVlockIdAndToVlockIdAndTransportType(1L, 2L, TransportType.WALK))
-			.thenReturn(Optional.of(cached));
+		TemplateDayRouteResponseDTO result = sut.getOrCreateRoute(FROM, TO, WALK);
 
-		TemplateDayRouteResponseDTO result = assertTimeout(
-			FAST_RESPONSE_TIMEOUT,
-			() -> templateRouteQueryService.getOrCreateRoute(1L, 2L, TransportType.WALK));
-
-		assertThat(result.moveTimeId()).isEqualTo(10L);
-		assertThat(result.fromVlockId()).isEqualTo(1L);
-		assertThat(result.toVlockId()).isEqualTo(2L);
-		assertThat(result.moveMinutes()).isEqualTo(7);
-		assertThat(result.distanceMeter()).isEqualTo(520);
-		assertThat(result.polyline()).containsExactly(
-			List.of(126.978, 37.5665),
-			List.of(126.982, 37.57));
-
-		verify(vlockRepository, never()).findById(any());
-		verify(moveTimeRepository, never()).findTopReusableNearbyRoute(any(), any(), any(), any(), any(Double.class),
-			any(Double.class), any());
-		verify(moveTimeRepository, never()).save(any(MoveTime.class));
-		verify(routeCalculationAsyncService, never()).calculateAndSaveAsync(any(), any(), any());
+		assertThat(result).isEqualTo(cached);
+		verifyNoInteractions(moveTimeRepository, vlockRepository, routeCalculationService);
 	}
 
-	@Test
-	// 근처 DB 경로가 있으면 이동시간, 거리, polyline을 복사해 저장하고 외부 경로 계산은 호출하지 않는다.
-	@DisplayName("reuses nearby DB route without external route calculation")
-	void getOrCreateRoute_reusesNearbyRoute() {
-		Vlock from = vlock(1L, 37.5665, 126.9780);
-		Vlock to = vlock(2L, 37.5750, 126.9900);
-		Vlock reusableFrom = vlock(3L, 37.5666, 126.9781);
-		Vlock reusableTo = vlock(4L, 37.5751, 126.9901);
-		MoveTime reusable = moveTime(20L, reusableFrom, reusableTo, 16, 1200,
-			"[[126.9781,37.5666],[126.9901,37.5751]]");
+	// ──────────────────────────────────────────────────────────────
+	// 2. 만료된 경로 → 즉시 반환 + 백그라운드 갱신
+	// ──────────────────────────────────────────────────────────────
 
-		when(moveTimeRepository.findByFromVlockIdAndToVlockIdAndTransportType(1L, 2L, TransportType.WALK))
-			.thenReturn(Optional.empty());
-		when(vlockRepository.findById(1L)).thenReturn(Optional.of(from));
-		when(vlockRepository.findById(2L)).thenReturn(Optional.of(to));
+	@Test
+	@DisplayName("Returns an expired route immediately and triggers background refresh")
+	void expiredRoute_returnsAndTriggersAsyncRefresh() {
+		MoveTime expired = moveTime(5L, FROM, TO, 8, 650, "[[127.0,37.5]]");
+		when(routeCache.get(FROM, TO, WALK)).thenReturn(null);
+		when(moveTimeRepository.findValidRoute(eq(FROM), eq(TO), eq(WALK), any())).thenReturn(Optional.empty());
+		when(moveTimeRepository.findAnyRoute(FROM, TO, WALK)).thenReturn(Optional.of(expired));
+		when(polylineUtil.toCoordinates("[[127.0,37.5]]")).thenReturn(List.of(List.of(127.0, 37.5)));
+
+		TemplateDayRouteResponseDTO result = sut.getOrCreateRoute(FROM, TO, WALK);
+
+		assertThat(result.moveTimeId()).isEqualTo(5L);
+		assertThat(result.moveMinutes()).isEqualTo(8);
+		assertThat(result.distanceMeter()).isEqualTo(650);
+		verify(routeCalculationService).calculateAndSaveAsync(FROM, TO, WALK);
+		verify(routeCache).set(eq(FROM), eq(TO), eq(WALK), any());
+	}
+
+	// ──────────────────────────────────────────────────────────────
+	// 3. 유효한 DB 경로 → 재사용
+	// ──────────────────────────────────────────────────────────────
+
+	@Test
+	@DisplayName("Reuses a valid DB route without Vlock lookup, save, or async calculation")
+	void validDbRoute_reusesWithoutVlockOrAsyncCall() {
+		MoveTime valid = moveTime(3L, FROM, TO, 10, 800, "[]");
+		when(routeCache.get(FROM, TO, WALK)).thenReturn(null);
+		when(moveTimeRepository.findValidRoute(eq(FROM), eq(TO), eq(WALK), any())).thenReturn(Optional.of(valid));
+		when(polylineUtil.toCoordinates("[]")).thenReturn(List.of());
+
+		TemplateDayRouteResponseDTO result = sut.getOrCreateRoute(FROM, TO, WALK);
+
+		assertThat(result.moveTimeId()).isEqualTo(3L);
+		assertThat(result.moveMinutes()).isEqualTo(10);
+		verifyNoInteractions(vlockRepository);
+		verify(moveTimeRepository, never()).findAnyRoute(any(), any(), any());
+		verifyNoInteractions(routeCalculationService);
+		verify(routeCache).set(FROM, TO, WALK, result);
+	}
+
+	// ──────────────────────────────────────────────────────────────
+	// 4. 근처 경로 재사용
+	// ──────────────────────────────────────────────────────────────
+
+	@Test
+	@DisplayName("Copies move time, distance, and polyline from a nearby route")
+	void nearbyRoute_copiesTimeDistanceAndPolyline() {
+		// 한국 내 좌표, 두 지점 간 거리 > 300m
+		Vlock from = vlock(FROM, 37.5000, 127.0000);
+		Vlock to = vlock(TO, 37.5040, 127.0040);
+		List<List<Double>> coords = List.of(List.of(127.0, 37.5), List.of(127.004, 37.504));
+		MoveTime nearby = moveTime(7L, 10L, 11L, 12, 950, "[[127.0,37.5],[127.004,37.504]]");
+
+		when(routeCache.get(FROM, TO, WALK)).thenReturn(null);
+		when(moveTimeRepository.findValidRoute(eq(FROM), eq(TO), eq(WALK), any())).thenReturn(Optional.empty());
+		when(moveTimeRepository.findAnyRoute(FROM, TO, WALK)).thenReturn(Optional.empty());
+		when(vlockRepository.findById(FROM)).thenReturn(Optional.of(from));
+		when(vlockRepository.findById(TO)).thenReturn(Optional.of(to));
 		when(moveTimeRepository.findTopReusableNearbyRoute(
-			37.5665, 126.9780, 37.5750, 126.9900, 0.001, 0.001, TransportType.WALK))
-			.thenReturn(Optional.of(reusable));
-		when(moveTimeRepository.save(any(MoveTime.class))).thenAnswer(invocation -> {
-			MoveTime saved = invocation.getArgument(0);
-			ReflectionTestUtils.setField(saved, "id", 30L);
-			return saved;
-		});
+			anyDouble(), anyDouble(), anyDouble(), anyDouble(), anyDouble(), anyDouble(), eq(WALK)))
+			.thenReturn(Optional.of(nearby));
+		when(polylineUtil.toCoordinates(nearby.getPolyline())).thenReturn(coords);
 
-		TemplateDayRouteResponseDTO result = assertTimeout(
-			FAST_RESPONSE_TIMEOUT,
-			() -> templateRouteQueryService.getOrCreateRoute(1L, 2L, TransportType.WALK));
+		TemplateDayRouteResponseDTO result = sut.getOrCreateRoute(FROM, TO, WALK);
 
-		assertThat(result.moveTimeId()).isEqualTo(30L);
-		assertThat(result.fromVlockId()).isEqualTo(1L);
-		assertThat(result.toVlockId()).isEqualTo(2L);
-		assertThat(result.moveMinutes()).isEqualTo(16);
-		assertThat(result.distanceMeter()).isEqualTo(1200);
-		assertThat(result.polyline()).containsExactly(
-			List.of(126.9781, 37.5666),
-			List.of(126.9901, 37.5751));
-
-		verify(moveTimeRepository).save(moveTimeCaptor.capture());
-		MoveTime saved = moveTimeCaptor.getValue();
-		assertThat(saved.getFromVlock()).isSameAs(from);
-		assertThat(saved.getToVlock()).isSameAs(to);
-		assertThat(saved.getMoveMinutes()).isEqualTo(reusable.getMoveMinutes());
-		assertThat(saved.getDistanceMeter()).isEqualTo(reusable.getDistanceMeter());
-		assertThat(saved.getPolyline()).isEqualTo(reusable.getPolyline());
-		verify(routeCalculationAsyncService, never()).calculateAndSaveAsync(any(), any(), any());
+		assertThat(result.moveTimeId()).isNull(); // DB 저장 없이 DTO 직접 반환
+		assertThat(result.fromVlockId()).isEqualTo(FROM);
+		assertThat(result.toVlockId()).isEqualTo(TO);
+		assertThat(result.moveMinutes()).isEqualTo(12);
+		assertThat(result.distanceMeter()).isEqualTo(950);
+		assertThat(result.polyline()).isEqualTo(coords);
+		verify(routeCalculationService, never()).calculateAndSave(any(), any(), any());
+		verify(routeCache, never()).set(any(), any(), any(), any()); // moveTimeId == null 이므로 캐시 저장 없음
 	}
 
+	// ──────────────────────────────────────────────────────────────
+	// 5. 300m 이하 직선거리 → 자체 계산
+	// ──────────────────────────────────────────────────────────────
+
 	@Test
-	// 짧은 도보 거리는 외부 API/비동기 계산 없이 자체 계산한 결과를 저장한다.
-	@DisplayName("calculates short walking distance locally")
-	void getOrCreateRoute_calculatesShortDistanceLocally() {
-		Vlock from = vlock(1L, 37.5665, 126.9780);
-		Vlock to = vlock(2L, 37.5670, 126.9785);
+	@DisplayName("Self-calculates routes within 300 meters without external API")
+	void shortDistance_selfCalculatesWithoutExternalApi() {
+		// 두 지점 간 거리 < 300m (약 57m)
+		Vlock from = vlock(FROM, 37.5000, 127.0000);
+		Vlock to = vlock(TO, 37.5005, 127.0005);
+		MoveTime shortResult = moveTime(9L, FROM, TO, 2, 130, "[[127.0,37.5],[127.0005,37.5005]]");
 
-		when(moveTimeRepository.findByFromVlockIdAndToVlockIdAndTransportType(1L, 2L, TransportType.WALK))
-			.thenReturn(Optional.empty());
-		when(vlockRepository.findById(1L)).thenReturn(Optional.of(from));
-		when(vlockRepository.findById(2L)).thenReturn(Optional.of(to));
-		when(moveTimeRepository.save(any(MoveTime.class))).thenAnswer(invocation -> {
-			MoveTime saved = invocation.getArgument(0);
-			ReflectionTestUtils.setField(saved, "id", 40L);
-			return saved;
-		});
+		when(routeCache.get(FROM, TO, WALK)).thenReturn(null);
+		when(moveTimeRepository.findValidRoute(eq(FROM), eq(TO), eq(WALK), any())).thenReturn(Optional.empty());
+		when(moveTimeRepository.findAnyRoute(FROM, TO, WALK)).thenReturn(Optional.empty());
+		when(vlockRepository.findById(FROM)).thenReturn(Optional.of(from));
+		when(vlockRepository.findById(TO)).thenReturn(Optional.of(to));
+		when(routeCalculationService.calculateAndSaveShortDistance(eq(from), eq(to), eq(WALK), anyDouble()))
+			.thenReturn(shortResult);
+		when(polylineUtil.toCoordinates(shortResult.getPolyline())).thenReturn(List.of());
 
-		TemplateDayRouteResponseDTO result = assertTimeout(
-			FAST_RESPONSE_TIMEOUT,
-			() -> templateRouteQueryService.getOrCreateRoute(1L, 2L, TransportType.WALK));
+		TemplateDayRouteResponseDTO result = sut.getOrCreateRoute(FROM, TO, WALK);
 
-		assertThat(result.moveTimeId()).isEqualTo(40L);
-		assertThat(result.fromVlockId()).isEqualTo(1L);
-		assertThat(result.toVlockId()).isEqualTo(2L);
-		assertThat(result.transportType()).isEqualTo(TransportType.WALK);
-		assertThat(result.distanceMeter()).isPositive();
-		assertThat(result.moveMinutes()).isPositive();
-		assertThat(result.polyline()).containsExactly(
-			List.of(126.9780, 37.5665),
-			List.of(126.9785, 37.5670));
-
-		verify(moveTimeRepository, never()).findTopReusableNearbyRoute(any(), any(), any(), any(), any(Double.class),
-			any(Double.class), any());
-		verify(routeCalculationAsyncService, never()).calculateAndSaveAsync(any(), any(), any());
+		assertThat(result.moveTimeId()).isEqualTo(9L);
+		verify(routeCalculationService).calculateAndSaveShortDistance(eq(from), eq(to), eq(WALK), anyDouble());
+		verify(routeCalculationService, never()).calculateAndSave(any(), any(), any());
+		verify(moveTimeRepository, never()).findTopReusableNearbyRoute(
+			anyDouble(), anyDouble(), anyDouble(), anyDouble(), anyDouble(), anyDouble(), any());
 	}
 
-	@Test
-	// 정확 DB 캐시와 근처 경로가 모두 없으면 fallback을 반환하고 비동기 계산만 트리거한다.
-	@DisplayName("returns fallback and triggers async calculation on route cache miss")
-	void getOrCreateRoute_triggersAsyncCalculationOnMiss() {
-		Vlock from = vlock(1L, 37.5665, 126.9780);
-		Vlock to = vlock(2L, 37.6000, 127.0500);
+	// ──────────────────────────────────────────────────────────────
+	// 6. DB에 경로 없음 → 외부 API 동기 호출
+	// ──────────────────────────────────────────────────────────────
 
-		when(moveTimeRepository.findByFromVlockIdAndToVlockIdAndTransportType(1L, 2L, TransportType.WALK))
-			.thenReturn(Optional.empty());
-		when(vlockRepository.findById(1L)).thenReturn(Optional.of(from));
-		when(vlockRepository.findById(2L)).thenReturn(Optional.of(to));
+	@Test
+	@DisplayName("Calls the external API synchronously when no DB route exists")
+	void noDbRoute_callsExternalApiSynchronously() {
+		// 두 지점 간 거리 > 300m, 근처 경로도 없음
+		Vlock from = vlock(FROM, 37.5000, 127.0000);
+		Vlock to = vlock(TO, 37.5040, 127.0040);
+		MoveTime apiResult = moveTime(20L, FROM, TO, 15, 1200, "[]");
+
+		when(routeCache.get(FROM, TO, WALK)).thenReturn(null);
+		when(moveTimeRepository.findValidRoute(eq(FROM), eq(TO), eq(WALK), any())).thenReturn(Optional.empty());
+		when(moveTimeRepository.findAnyRoute(FROM, TO, WALK)).thenReturn(Optional.empty());
+		when(vlockRepository.findById(FROM)).thenReturn(Optional.of(from));
+		when(vlockRepository.findById(TO)).thenReturn(Optional.of(to));
 		when(moveTimeRepository.findTopReusableNearbyRoute(
-			37.5665, 126.9780, 37.6000, 127.0500, 0.001, 0.001, TransportType.WALK))
+			anyDouble(), anyDouble(), anyDouble(), anyDouble(), anyDouble(), anyDouble(), eq(WALK)))
 			.thenReturn(Optional.empty());
+		// WALK는 역방향도 탐색
 		when(moveTimeRepository.findTopReusableNearbyRouteReverse(
-			37.5665, 126.9780, 37.6000, 127.0500, 0.001, 0.001, TransportType.WALK))
+			anyDouble(), anyDouble(), anyDouble(), anyDouble(), anyDouble(), anyDouble(), eq(WALK)))
 			.thenReturn(Optional.empty());
+		when(routeCalculationService.calculateAndSave(FROM, TO, WALK)).thenReturn(apiResult);
+		when(polylineUtil.toCoordinates("[]")).thenReturn(List.of());
 
-		TemplateDayRouteResponseDTO result = assertTimeout(
-			FAST_RESPONSE_TIMEOUT,
-			() -> templateRouteQueryService.getOrCreateRoute(1L, 2L, TransportType.WALK));
+		TemplateDayRouteResponseDTO result = sut.getOrCreateRoute(FROM, TO, WALK);
 
-		assertThat(result.moveTimeId()).isNull();
-		assertThat(result.moveMinutes()).isZero();
-		assertThat(result.distanceMeter()).isZero();
-		assertThat(result.polyline()).isEmpty();
-
-		verify(routeCalculationAsyncService).calculateAndSaveAsync(1L, 2L, TransportType.WALK);
-		verify(moveTimeRepository, never()).save(any(MoveTime.class));
+		assertThat(result.moveTimeId()).isEqualTo(20L);
+		verify(routeCalculationService).calculateAndSave(FROM, TO, WALK);
 	}
 
-	@Test
-	@Tag("performance")
-	@DisplayName("logs getOrCreateRoute response time by optimized path")
-	void getOrCreateRoute_logsResponseTimeByOptimizedPath() {
-		PerformanceStats exactDbRoute = benchmarkWithRouteServiceLogMuted("exact DB route", this::measureExactDbRoute);
-		PerformanceStats nearbyDbRoute = benchmarkWithRouteServiceLogMuted(
-			"nearby DB route reuse",
-			this::measureNearbyDbRoute);
-		PerformanceStats shortDistanceRoute = benchmarkWithRouteServiceLogMuted(
-			"short distance local calculation",
-			this::measureShortDistanceRoute);
-		PerformanceStats fallbackAsyncTriggerRoute = benchmarkWithRouteServiceLogMuted(
-			"fallback async trigger",
-			this::measureFallbackAsyncTriggerRoute);
+	// ──────────────────────────────────────────────────────────────
+	// 헬퍼
+	// ──────────────────────────────────────────────────────────────
 
-		assertThat(exactDbRoute.averageMicros()).isGreaterThanOrEqualTo(0);
-		assertThat(nearbyDbRoute.averageMicros()).isGreaterThanOrEqualTo(0);
-		assertThat(shortDistanceRoute.averageMicros()).isGreaterThanOrEqualTo(0);
-		assertThat(fallbackAsyncTriggerRoute.averageMicros()).isGreaterThanOrEqualTo(0);
+	/** 좌표가 세팅된 Vlock 목 생성
+	 *  getId()는 경로에 따라 호출되지 않을 수 있으므로 lenient 처리 */
+	private Vlock vlock(Long id, double lat, double lon) {
+		Vlock v = mock(Vlock.class);
+		lenient().when(v.getId()).thenReturn(id);
+		when(v.getLatitude()).thenReturn(lat);
+		when(v.getLongitude()).thenReturn(lon);
+		return v;
 	}
 
-	private Vlock vlock(Long id, Double latitude, Double longitude) {
-		Vlock vlock = Vlock.createByExternal(
-			"place-" + id,
-			null,
-			null,
-			"vlock-" + id,
-			latitude,
-			longitude,
-			"address-" + id);
-		ReflectionTestUtils.setField(vlock, "id", id);
-		return vlock;
-	}
+	/** MoveTime 빌더로 생성 후 id를 리플렉션으로 주입
+	 *  내부 from/to 목의 getId()는 toResponseDTO 경로에 따라 호출되지 않을 수 있으므로 lenient 처리 */
+	private MoveTime moveTime(Long id, Long fromId, Long toId, int minutes, int distance, String polyline) {
+		Vlock from = mock(Vlock.class);
+		lenient().when(from.getId()).thenReturn(fromId);
+		Vlock to = mock(Vlock.class);
+		lenient().when(to.getId()).thenReturn(toId);
 
-	private MoveTime moveTime(
-		Long id,
-		Vlock from,
-		Vlock to,
-		Integer moveMinutes,
-		Integer distanceMeter,
-		String polyline) {
-		MoveTime moveTime = MoveTime.builder()
+		MoveTime mt = MoveTime.builder()
 			.fromVlock(from)
 			.toVlock(to)
-			.moveMinutes(moveMinutes)
-			.distanceMeter(distanceMeter)
-			.transportType(TransportType.WALK)
+			.moveMinutes(minutes)
+			.transportType(WALK)
+			.distanceMeter(distance)
 			.polyline(polyline)
 			.build();
-		ReflectionTestUtils.setField(moveTime, "id", id);
-		return moveTime;
-	}
-
-	private Measured<TemplateDayRouteResponseDTO> measureExactDbRoute() {
-		reset(moveTimeRepository, vlockRepository, routeCalculationAsyncService);
-		Vlock from = vlock(1L, 37.5665, 126.9780);
-		Vlock to = vlock(2L, 37.5700, 126.9820);
-		MoveTime cached = moveTime(10L, from, to, 7, 520, "[[126.978,37.5665],[126.982,37.57]]");
-
-		when(moveTimeRepository.findByFromVlockIdAndToVlockIdAndTransportType(1L, 2L, TransportType.WALK))
-			.thenReturn(Optional.of(cached));
-
-		return measure(() -> templateRouteQueryService.getOrCreateRoute(1L, 2L, TransportType.WALK));
-	}
-
-	private Measured<TemplateDayRouteResponseDTO> measureNearbyDbRoute() {
-		reset(moveTimeRepository, vlockRepository, routeCalculationAsyncService);
-		Vlock from = vlock(1L, 37.5665, 126.9780);
-		Vlock to = vlock(2L, 37.5750, 126.9900);
-		Vlock reusableFrom = vlock(3L, 37.5666, 126.9781);
-		Vlock reusableTo = vlock(4L, 37.5751, 126.9901);
-		MoveTime reusable = moveTime(20L, reusableFrom, reusableTo, 16, 1200,
-			"[[126.9781,37.5666],[126.9901,37.5751]]");
-
-		when(moveTimeRepository.findByFromVlockIdAndToVlockIdAndTransportType(1L, 2L, TransportType.WALK))
-			.thenReturn(Optional.empty());
-		when(vlockRepository.findById(1L)).thenReturn(Optional.of(from));
-		when(vlockRepository.findById(2L)).thenReturn(Optional.of(to));
-		when(moveTimeRepository.findTopReusableNearbyRoute(
-			37.5665, 126.9780, 37.5750, 126.9900, 0.001, 0.001, TransportType.WALK))
-			.thenReturn(Optional.of(reusable));
-		when(moveTimeRepository.save(any(MoveTime.class))).thenAnswer(invocation -> {
-			MoveTime saved = invocation.getArgument(0);
-			ReflectionTestUtils.setField(saved, "id", 30L);
-			return saved;
-		});
-
-		return measure(() -> templateRouteQueryService.getOrCreateRoute(1L, 2L, TransportType.WALK));
-	}
-
-	private Measured<TemplateDayRouteResponseDTO> measureShortDistanceRoute() {
-		reset(moveTimeRepository, vlockRepository, routeCalculationAsyncService);
-		Vlock from = vlock(1L, 37.5665, 126.9780);
-		Vlock to = vlock(2L, 37.5670, 126.9785);
-
-		when(moveTimeRepository.findByFromVlockIdAndToVlockIdAndTransportType(1L, 2L, TransportType.WALK))
-			.thenReturn(Optional.empty());
-		when(vlockRepository.findById(1L)).thenReturn(Optional.of(from));
-		when(vlockRepository.findById(2L)).thenReturn(Optional.of(to));
-		when(moveTimeRepository.save(any(MoveTime.class))).thenAnswer(invocation -> {
-			MoveTime saved = invocation.getArgument(0);
-			ReflectionTestUtils.setField(saved, "id", 40L);
-			return saved;
-		});
-
-		return measure(() -> templateRouteQueryService.getOrCreateRoute(1L, 2L, TransportType.WALK));
-	}
-
-	private Measured<TemplateDayRouteResponseDTO> measureFallbackAsyncTriggerRoute() {
-		reset(moveTimeRepository, vlockRepository, routeCalculationAsyncService);
-		Vlock from = vlock(1L, 37.5665, 126.9780);
-		Vlock to = vlock(2L, 37.6000, 127.0500);
-
-		when(moveTimeRepository.findByFromVlockIdAndToVlockIdAndTransportType(1L, 2L, TransportType.WALK))
-			.thenReturn(Optional.empty());
-		when(vlockRepository.findById(1L)).thenReturn(Optional.of(from));
-		when(vlockRepository.findById(2L)).thenReturn(Optional.of(to));
-		when(moveTimeRepository.findTopReusableNearbyRoute(
-			37.5665, 126.9780, 37.6000, 127.0500, 0.001, 0.001, TransportType.WALK))
-			.thenReturn(Optional.empty());
-		when(moveTimeRepository.findTopReusableNearbyRouteReverse(
-			37.5665, 126.9780, 37.6000, 127.0500, 0.001, 0.001, TransportType.WALK))
-			.thenReturn(Optional.empty());
-
-		return measure(() -> templateRouteQueryService.getOrCreateRoute(1L, 2L, TransportType.WALK));
-	}
-
-	private <T> Measured<T> measure(Supplier<T> supplier) {
-		long startedAt = System.nanoTime();
-		T result = supplier.get();
-		return new Measured<>(result, System.nanoTime() - startedAt);
-	}
-
-	private PerformanceStats benchmarkWithRouteServiceLogMuted(
-		String scenario,
-		Supplier<Measured<TemplateDayRouteResponseDTO>> measuredSupplier) {
-		ch.qos.logback.classic.Logger routeLogger =
-			(ch.qos.logback.classic.Logger)LoggerFactory.getLogger(TemplateRouteQueryService.class);
-		Level previousLevel = routeLogger.getLevel();
-		routeLogger.setLevel(Level.WARN);
-		try {
-			return benchmark(scenario, measuredSupplier);
-		} finally {
-			routeLogger.setLevel(previousLevel);
-		}
-	}
-
-	private PerformanceStats benchmark(String scenario, Supplier<Measured<TemplateDayRouteResponseDTO>> measuredSupplier) {
-		for (int i = 0; i < PERFORMANCE_WARMUP_COUNT; i++) {
-			measuredSupplier.get();
-		}
-
-		List<Long> elapsedMicros = new ArrayList<>();
-		for (int i = 0; i < PERFORMANCE_REPEAT_COUNT; i++) {
-			Measured<TemplateDayRouteResponseDTO> measured = measuredSupplier.get();
-			assertThat(measured.result()).isNotNull();
-			elapsedMicros.add(measured.elapsedMicros());
-		}
-
-		PerformanceStats stats = PerformanceStats.from(elapsedMicros);
-		log.info(
-			"[route-performance] scenario={}, samples={}, avg={}us, median={}us, p95={}us, min={}us, max={}us",
-			scenario,
-			elapsedMicros.size(),
-			stats.averageMicros(),
-			stats.medianMicros(),
-			stats.p95Micros(),
-			stats.minMicros(),
-			stats.maxMicros());
-		return stats;
-	}
-
-	private record Measured<T>(T result, long elapsedNanos) {
-		long elapsedMicros() {
-			return elapsedNanos / 1_000;
-		}
-	}
-
-	private record PerformanceStats(
-		long averageMicros,
-		long medianMicros,
-		long p95Micros,
-		long minMicros,
-		long maxMicros) {
-
-		private static PerformanceStats from(List<Long> values) {
-			List<Long> sorted = new ArrayList<>(values);
-			Collections.sort(sorted);
-			long sum = 0;
-			for (Long value : sorted) {
-				sum += value;
-			}
-			return new PerformanceStats(
-				sum / sorted.size(),
-				percentile(sorted, 0.50),
-				percentile(sorted, 0.95),
-				sorted.get(0),
-				sorted.get(sorted.size() - 1));
-		}
-
-		private static long percentile(List<Long> sorted, double percentile) {
-			int index = (int)Math.ceil(sorted.size() * percentile) - 1;
-			return sorted.get(Math.max(0, Math.min(index, sorted.size() - 1)));
-		}
+		ReflectionTestUtils.setField(mt, "id", id);
+		return mt;
 	}
 }

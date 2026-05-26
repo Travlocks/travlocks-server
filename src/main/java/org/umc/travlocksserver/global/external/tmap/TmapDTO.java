@@ -81,6 +81,7 @@ public class TmapDTO {
 			private Integer distance; // 구간 거리
 			private Integer time; // 구간 시간
 			private String lineIndex; // 라인 인덱스
+			private String pointType; // SP(출발), EP(도착) - 차량 경로에서 사용
 		}
 	}
 
