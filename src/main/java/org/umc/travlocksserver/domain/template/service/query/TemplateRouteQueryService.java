@@ -7,7 +7,6 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.umc.travlocksserver.infra.redis.template.RouteCache;
 import org.umc.travlocksserver.domain.template.code.TemplateErrorCode;
 import org.umc.travlocksserver.domain.template.dto.response.TemplateDayRouteResponseDTO;
 import org.umc.travlocksserver.domain.template.entity.MoveTime;
@@ -26,6 +25,7 @@ import org.umc.travlocksserver.domain.vlock.repository.VlockRepository;
 import org.umc.travlocksserver.global.geo.GeoUtil;
 import org.umc.travlocksserver.global.geo.LatLng;
 import org.umc.travlocksserver.global.util.PolylineUtil;
+import org.umc.travlocksserver.infra.redis.template.RouteCache;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -93,7 +93,8 @@ public class TemplateRouteQueryService {
 
 		TemplateDayRouteResponseDTO result = getOrCreateRouteInternal(fromVlockId, toVlockId, transportType);
 
-		if (result.moveTimeId() != null) {
+		// transportType이 일치할 때만 캐시 — 불일치 시(TRANSIT 실패 → WALK fallback 등) 다음 호출에서 재시도
+		if (result.moveTimeId() != null && result.transportType() == transportType) {
 			routeCache.set(fromVlockId, toVlockId, transportType, result);
 		}
 
@@ -172,7 +173,15 @@ public class TemplateRouteQueryService {
 
 		// 외부 API 동기 호출
 		log.info("외부 API 동기 계산: {} -> {} ({})", fromVlockId, toVlockId, transportType);
-		return toResponseDTO(routeCalculationService.calculateAndSave(fromVlockId, toVlockId, transportType));
+		try {
+			return toResponseDTO(routeCalculationService.calculateAndSave(fromVlockId, toVlockId, transportType));
+		} catch (RuntimeException e) {
+			log.warn("외부 API 경로 계산 실패: {} -> {} ({}) - {}", fromVlockId, toVlockId, transportType, e.getMessage());
+			if (transportType == TransportType.TRANSIT) {
+				return transitFallbackByWalk(fromVlockId, toVlockId);
+			}
+			return fallbackRoute(fromVlockId, toVlockId, transportType);
+		}
 	}
 
 	/**
@@ -236,6 +245,20 @@ public class TemplateRouteQueryService {
 			reusableRoute.getDistanceMeter(),
 			transportType,
 			polylineUtil.toCoordinates(reusableRoute.getPolyline()));
+	}
+
+	/**
+	 * ODsay 실패 시 TMap 도보 경로를 TRANSIT 타입으로 저장하여 반환
+	 * TMap마저 실패하면 빈 fallback 반환
+	 */
+	private TemplateDayRouteResponseDTO transitFallbackByWalk(Long fromVlockId, Long toVlockId) {
+		try {
+			log.info("ODsay 실패, TMap 도보 경로로 대체 저장 (TRANSIT, TTL=1일): {} -> {}", fromVlockId, toVlockId);
+			return toResponseDTO(routeCalculationService.calculateAndSaveTransitFallback(fromVlockId, toVlockId));
+		} catch (RuntimeException e) {
+			log.warn("TMap 도보 fallback도 실패, 빈 응답 반환: {} -> {} - {}", fromVlockId, toVlockId, e.getMessage());
+			return fallbackRoute(fromVlockId, toVlockId, TransportType.TRANSIT);
+		}
 	}
 
 	private TemplateDayRouteResponseDTO fallbackRoute(Long fromVlockId, Long toVlockId, TransportType transportType) {

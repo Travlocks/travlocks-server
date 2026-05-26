@@ -79,6 +79,31 @@ public class RouteCalculationService {
 	}
 
 	/**
+	 * ODsay 실패 시 TMap 도보 경로를 TRANSIT 타입으로 저장 (1일 만료 → 다음 날 ODsay 재시도)
+	 */
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	public MoveTime calculateAndSaveTransitFallback(Long fromVlockId, Long toVlockId) {
+		Vlock fromVlock = vlockRepository.findById(fromVlockId)
+			.orElseThrow(() -> new VlockException(VlockErrorCode.START_VLOCK_NOT_FOUND));
+		Vlock toVlock = vlockRepository.findById(toVlockId)
+			.orElseThrow(() -> new VlockException(VlockErrorCode.END_VLOCK_NOT_FOUND));
+
+		TmapDTO.RouteInfo routeInfo = tmapApiService.getPedestrianRoute(
+			fromVlock.getLongitude(), fromVlock.getLatitude(),
+			toVlock.getLongitude(), toVlock.getLatitude());
+
+		return moveTimeRepository.save(MoveTime.builder()
+			.fromVlock(fromVlock)
+			.toVlock(toVlock)
+			.moveMinutes(routeInfo.getTotalTimeMinutes())
+			.transportType(TransportType.TRANSIT)
+			.distanceMeter(routeInfo.getTotalDistanceMeter())
+			.polyline(routeInfo.getPolyline())
+			.expiresAt(LocalDateTime.now().plusDays(1))
+			.build());
+	}
+
+	/**
 	 * 300m 이하 직선거리 도보 속도 기반 자체 추정 저장
 	 */
 	@Transactional(propagation = Propagation.REQUIRES_NEW)

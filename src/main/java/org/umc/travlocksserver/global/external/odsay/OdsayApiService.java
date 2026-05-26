@@ -9,6 +9,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 import org.umc.travlocksserver.global.external.tmap.TmapDTO;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +22,7 @@ public class OdsayApiService {
 
 	private final RestTemplate restTemplate;
 	private final OdsayProperties odsayProperties;
+	private final ObjectMapper objectMapper;
 
 	private static final String BASE_URL = "https://api.odsay.com/v1/api";
 	private static final String TRANSIT_PATH = "/searchPubTransPathT";
@@ -42,12 +45,23 @@ public class OdsayApiService {
 		log.info("ODsay 대중교통 경로 API 요청: startX={}, startY={}, endX={}, endY={}", startX, startY, endX, endY);
 
 		try {
-			OdsayResponse response = restTemplate.getForObject(url, OdsayResponse.class);
+			String rawBody = restTemplate.getForObject(url, String.class);
+			if (rawBody == null || rawBody.isBlank()) {
+				throw new RuntimeException("ODsay API 응답 바디가 비어있습니다.");
+			}
+
+			OdsayResponse response = objectMapper.readValue(rawBody, OdsayResponse.class);
+
+			if (hasError(response.error)) {
+				throw new RuntimeException("ODsay API 오류 응답: code=" + response.error.path("code").asText()
+					+ ", message=" + response.error.path("message").asText());
+			}
 
 			if (response == null
 				|| response.result == null
 				|| response.result.path == null
 				|| response.result.path.isEmpty()) {
+				log.warn("ODsay API 응답에 경로 데이터가 없습니다. bodyPreview={}", abbreviateForLog(rawBody, 1000));
 				throw new RuntimeException("ODsay API 응답에 경로 데이터가 없습니다.");
 			}
 
@@ -61,7 +75,18 @@ public class OdsayApiService {
 			if (best.subPath != null) {
 				for (OdsayResponse.SubPath sub : best.subPath) {
 					if (sub.passShape != null && sub.passShape.linestring != null) {
-						coordinates.addAll(parseLinestring(sub.passShape.linestring));
+						List<List<Double>> parsed = parseLinestring(sub.passShape.linestring);
+						log.debug("ODsay subPath trafficType={} passShape coords={}", sub.trafficType, parsed.size());
+						coordinates.addAll(parsed);
+					} else if (sub.startX != null && sub.startY != null
+						&& sub.endX != null && sub.endY != null) {
+						// passShape 없는 구간(도보 등)은 출발·도착 2점으로 대체
+						log.debug("ODsay subPath trafficType={} passShape 없음, 출발/도착 2점 사용", sub.trafficType);
+						coordinates.add(List.of(sub.startX, sub.startY));
+						coordinates.add(List.of(sub.endX, sub.endY));
+					} else {
+						log.warn("ODsay subPath trafficType={} 좌표 정보 없음 (passShape=null, startX=null)",
+							sub.trafficType);
 					}
 				}
 			}
@@ -119,6 +144,7 @@ public class OdsayApiService {
 	@JsonIgnoreProperties(ignoreUnknown = true)
 	static class OdsayResponse {
 		public Result result;
+		public JsonNode error;
 
 		@JsonIgnoreProperties(ignoreUnknown = true)
 		static class Result {
@@ -139,6 +165,11 @@ public class OdsayApiService {
 
 		@JsonIgnoreProperties(ignoreUnknown = true)
 		static class SubPath {
+			public Integer trafficType; // 1=지하철, 2=버스, 3=도보
+			public Double startX;       // 구간 출발 경도
+			public Double startY;       // 구간 출발 위도
+			public Double endX;         // 구간 도착 경도
+			public Double endY;         // 구간 도착 위도
 			public PassShape passShape;
 		}
 
@@ -146,5 +177,34 @@ public class OdsayApiService {
 		static class PassShape {
 			public String linestring;
 		}
+	}
+
+	private boolean hasError(JsonNode error) {
+		if (error == null || error.isNull()) {
+			return false;
+		}
+		if (error.isArray()) {
+			for (JsonNode item : error) {
+				if (hasError(item)) {
+					return true;
+				}
+			}
+			return false;
+		}
+		if (error.isObject()) {
+			return hasText(error.path("code")) || hasText(error.path("message"));
+		}
+		return false;
+	}
+
+	private boolean hasText(JsonNode node) {
+		return node != null && !node.isMissingNode() && !node.isNull() && !node.asText("").isBlank();
+	}
+
+	private static String abbreviateForLog(String s, int maxChars) {
+		if (s == null || s.length() <= maxChars) {
+			return s;
+		}
+		return s.substring(0, maxChars) + "... (truncated, len=" + s.length() + ")";
 	}
 }
