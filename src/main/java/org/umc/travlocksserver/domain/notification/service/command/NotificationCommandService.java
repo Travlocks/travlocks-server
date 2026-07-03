@@ -69,7 +69,8 @@ public class NotificationCommandService {
 
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public Notification createNotification(Long receiverId, Long actorId, Long templateId, NotificationType type) {
-		Member member = memberQueryService.getById(actorId);
+		Member member = memberQueryService.getById(receiverId);
+		member.increaseNotificationCount();
 		return notificationRepository.save(
 			Notification.create(
 				receiverId,
@@ -139,6 +140,7 @@ public class NotificationCommandService {
 	@Transactional
 	public void deleteAllNotification(Long memberId) {
 		notificationRepository.deleteAllByReceiverId(memberId);
+		memberQueryService.getById(memberId).clearNotificationCount();
 		signalHasUnread(memberId, false);
 	}
 }

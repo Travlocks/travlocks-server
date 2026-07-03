@@ -2,11 +2,8 @@ package org.umc.travlocksserver.domain.notification.service.query;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StopWatch;
 import org.umc.travlocksserver.domain.member.entity.Member;
 import org.umc.travlocksserver.domain.member.service.query.MemberQueryService;
 import org.umc.travlocksserver.domain.notification.dto.response.NotificationAllResponseDTO;
@@ -28,7 +25,8 @@ public class NotificationQueryService {
 	private final MemberQueryService memberQueryService;
 
 	public NotificationAllResponseDTO getNotifications(Long memberId, String cursor, Integer size) {
-		long totalCount = notificationRepository.countByReceiverId(memberId);
+		Member member = memberQueryService.getById(memberId);
+		long totalCount = member.getNotificationCount();
 
 		List<Notification> notifications = (cursor == null || cursor.isBlank())
 			? notificationRepository.findFirstPage(memberId, size)
