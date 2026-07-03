@@ -69,13 +69,14 @@ public class NotificationCommandService {
 
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public Notification createNotification(Long receiverId, Long actorId, Long templateId, NotificationType type) {
-		Member member = memberQueryService.getById(receiverId);
-		member.increaseNotificationCount();
+		Member actor = memberQueryService.getById(actorId);
+		Member receiver = memberQueryService.getById(receiverId);
+		receiver.increaseNotificationCount();
 		return notificationRepository.save(
 			Notification.create(
 				receiverId,
 				actorId,
-				member.getNickname(),
+				actor.getNickname(),
 				templateId,
 				type));
 	}
