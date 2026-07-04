@@ -24,7 +24,9 @@ import org.umc.travlocksserver.domain.template.exception.TemplateException;
 import org.umc.travlocksserver.domain.template.repository.TemplateCityRepository;
 import org.umc.travlocksserver.domain.template.repository.TemplateDayRepository;
 import org.umc.travlocksserver.domain.template.repository.TemplateRepository;
+import org.umc.travlocksserver.domain.template.enums.TransportType;
 import org.umc.travlocksserver.domain.template.repository.TemplateVlockRepository;
+import org.umc.travlocksserver.domain.template.service.query.TemplateRouteQueryService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -38,6 +40,7 @@ public class TemplateRemixService {
 	private final TemplateCityRepository templateCityRepository;
 	private final TemplateDayRepository templateDayRepository;
 	private final TemplateVlockRepository templateVlockRepository;
+	private final TemplateRouteQueryService templateRouteQueryService;
 
 	private final ApplicationEventPublisher eventPublisher;
 
@@ -56,6 +59,9 @@ public class TemplateRemixService {
 		copyTemplateVlocks(dayMap);
 
 		original.increaseRemixCount();
+
+		// remix된 템플릿의 모든 vlock 쌍 경로 계산 트리거
+		triggerRouteCalculation(remixedTemplate.getId(), remixedTemplate.getTransportType());
 
 		// 이벤트 발행
 		eventPublisher.publishEvent(new TemplateActivityEvent(
@@ -152,6 +158,22 @@ public class TemplateRemixService {
 			.toList();
 
 		templateVlockRepository.saveAll(newVlocks);
+	}
+
+	/**
+	 * 템플릿의 모든 day에서 인접 vlock 쌍 경로 계산 트리거
+	 */
+	private void triggerRouteCalculation(Long templateId, TransportType transportType) {
+		List<TemplateDay> days = templateDayRepository.findByTemplateIdOrderByDayNoAsc(templateId);
+		for (TemplateDay day : days) {
+			List<TemplateVlock> vlocks = templateVlockRepository
+				.findByTemplateDayIdOrderByOrderNo(day.getId());
+			for (int i = 0; i < vlocks.size() - 1; i++) {
+				Long fromId = vlocks.get(i).getVlock().getId();
+				Long toId = vlocks.get(i + 1).getVlock().getId();
+				templateRouteQueryService.getOrCreateRoute(fromId, toId, transportType);
+			}
+		}
 	}
 
 	/**

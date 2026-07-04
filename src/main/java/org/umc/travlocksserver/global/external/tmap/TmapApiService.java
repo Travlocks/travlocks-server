@@ -28,6 +28,7 @@ public class TmapApiService {
 
 	private static final String PEDESTRIAN_PATH = "/tmap/routes/pedestrian";
 	private static final int PEDESTRIAN_VERSION = 1;
+	private static final String CAR_PATH = "/tmap/routes";
 
 	/**
 	 * 도보 경로 조회
@@ -98,6 +99,60 @@ public class TmapApiService {
 	}
 
 	/**
+	 * 차량 경로 조회
+	 */
+	public TmapDTO.RouteInfo getCarRoute(Double startX, Double startY, Double endX, Double endY) {
+		try {
+			TmapDTO.PedestrianRequest request = TmapDTO.PedestrianRequest.builder()
+				.startX(startX)
+				.startY(startY)
+				.endX(endX)
+				.endY(endY)
+				.startName("출발")
+				.endName("도착")
+				.build();
+
+			HttpHeaders headers = new HttpHeaders();
+			headers.set("appKey", tmapConfig.getApiKey());
+			headers.setContentType(MediaType.APPLICATION_JSON);
+
+			HttpEntity<TmapDTO.PedestrianRequest> httpEntity = new HttpEntity<>(request, headers);
+
+			String url = UriComponentsBuilder
+				.fromHttpUrl(tmapConfig.getBaseUrl())
+				.path(CAR_PATH)
+				.toUriString();
+			log.info("TMAP 차량 경로 API 요청: url={}, body={}", url, request);
+
+			ResponseEntity<String> stringResponse = restTemplate.exchange(
+				url, HttpMethod.POST, httpEntity, String.class);
+
+			String rawBody = stringResponse.getBody();
+			if (rawBody == null || rawBody.isBlank()) {
+				throw new RuntimeException("TMAP 차량 경로 API 응답 바디가 비어있습니다.");
+			}
+
+			log.info("TMAP 차량 경로 API 응답: status={}, bodyPreview={}",
+				stringResponse.getStatusCode(),
+				abbreviateForLog(rawBody, 2000));
+
+			String sanitizedBody = sanitizeJson(rawBody);
+			TmapDTO.PedestrianResponse responseBody = objectMapper.readValue(sanitizedBody,
+				TmapDTO.PedestrianResponse.class);
+
+			if (responseBody == null || responseBody.getFeatures() == null || responseBody.getFeatures().isEmpty()) {
+				throw new RuntimeException("TMAP 차량 경로 API 응답 features가 비어있습니다.");
+			}
+
+			return parseCarRouteInfo(responseBody);
+
+		} catch (Exception e) {
+			log.error("TMAP 차량 경로 API 호출 실패: {}", e.getMessage(), e);
+			throw new RuntimeException("차량 경로 조회에 실패했습니다: " + e.getMessage(), e);
+		}
+	}
+
+	/**
 	 * TMAP 응답을 RouteInfo로 변환
 	 */
 	private TmapDTO.RouteInfo parseRouteInfo(TmapDTO.PedestrianResponse response) {
@@ -137,6 +192,43 @@ public class TmapApiService {
 			.totalDistanceMeter(totalDistance)
 			.totalTimeMinutes((int)Math.ceil(totalTime / 60.0)) // 초 -> 분 (올림)
 			.polyline(polyline)
+			.build();
+	}
+
+	/**
+	 * 차량 경로 응답을 RouteInfo로 변환
+	 * EP(도착) 포인트에서 총 거리/시간 추출
+	 */
+	private TmapDTO.RouteInfo parseCarRouteInfo(TmapDTO.PedestrianResponse response) {
+		Integer totalDistance = null;
+		Integer totalTime = null;
+		List<List<Double>> coordinates = new ArrayList<>();
+
+		for (TmapDTO.PedestrianResponse.Feature feature : response.getFeatures()) {
+			if (feature.getGeometry() != null && "LineString".equals(feature.getGeometry().getType())) {
+				@SuppressWarnings("unchecked") List<List<Double>> lineCoords = (List<List<Double>>)feature.getGeometry()
+					.getCoordinates();
+				if (lineCoords != null) {
+					coordinates.addAll(lineCoords);
+				}
+			}
+
+			if (feature.getProperties() != null
+				&& feature.getProperties().getTotalTime() != null
+				&& totalTime == null) {
+				totalDistance = feature.getProperties().getTotalDistance();
+				totalTime = feature.getProperties().getTotalTime();
+			}
+		}
+
+		if (totalDistance == null || totalTime == null) {
+			throw new RuntimeException("차량 경로 정보를 파싱할 수 없습니다.");
+		}
+
+		return TmapDTO.RouteInfo.builder()
+			.totalDistanceMeter(totalDistance)
+			.totalTimeMinutes((int)Math.ceil(totalTime / 60.0))
+			.polyline(encodePolyline(coordinates))
 			.build();
 	}
 

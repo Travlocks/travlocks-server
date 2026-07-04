@@ -1,6 +1,7 @@
 package org.umc.travlocksserver.global.config;
 
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -8,6 +9,7 @@ import org.umc.travlocksserver.global.exception.handler.AsyncExceptionHandler;
 
 @Configuration
 @EnableAsync
+@EnableCaching
 public class AsyncConfig implements AsyncConfigurer {
 
 	@Override

@@ -1,5 +1,7 @@
 package org.umc.travlocksserver.domain.template.entity;
 
+import java.time.LocalDateTime;
+
 import jakarta.persistence.*;
 import lombok.*;
 import org.umc.travlocksserver.domain.template.enums.TransportType;
@@ -11,7 +13,13 @@ import org.umc.travlocksserver.global.entity.BaseEntity;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
 @Entity
-@Table(name = "move_times")
+@Table(
+	name = "move_times",
+	indexes = @Index(
+		name = "idx_move_times_route",
+		columnList = "from_vlock_id, to_vlock_id, transport_type"
+	)
+)
 public class MoveTime extends BaseEntity {
 
 	@Id
@@ -41,4 +49,8 @@ public class MoveTime extends BaseEntity {
 
 	@Column(columnDefinition = "TEXT")
 	private String polyline;
+
+	/** 캐시 만료 시각 (null = 영구) */
+	@Column(name = "expires_at")
+	private LocalDateTime expiresAt;
 }

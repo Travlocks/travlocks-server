@@ -1,0 +1,171 @@
+spring:
+  main:
+    banner-mode: off
+
+  datasource:
+    url: jdbc:h2:mem:testdb;MODE=MySQL;DB_CLOSE_DELAY=-1;NON_KEYWORDS=END,START
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  jpa:
+    database: h2
+    open-in-view: false
+    show-sql: false
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        format_sql: true
+
+  sql:
+    init:
+      mode: never
+
+  h2:
+    console:
+      enabled: false
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+# JWT
+jwt:
+  secret: test-secret-key-that-is-long-enough-for-hmac-sha256-algorithm
+  access-ttl-seconds: 3600
+  refresh-ttl-seconds: 86400
+
+# TMap
+tmap:
+  api:
+    key: test-tmap-api-key
+    base-url: https://apis.openapi.sk.com
+
+# Mail
+mail:
+  resend:
+    api-key: test-resend-api-key
+    from-email: test@example.com
+
+# Kakao
+kakao:
+  base-url: https://dapi.kakao.com
+  rest-api-key: test-kakao-rest-api-key
+  keyword-search:
+    path: /v2/local/search/keyword.json
+    size: 15
+  timeout:
+    connect-ms: 3000
+    response-ms: 5000
+
+# OAuth
+oauth:
+  google:
+    clientId: test-google-client-id
+    jwkSetUri: https://www.googleapis.com/oauth2/v3/certs
+  naver:
+    client-id: test-naver-client-id
+    client-secret: test-naver-client-secret
+    redirect-uri: http://localhost:8080/oauth/naver/callback
+    token-uri: https://nid.naver.com/oauth2.0/token
+    userinfo-uri: https://openapi.naver.com/v1/nid/me
+
+# AWS
+aws:
+  region: ap-northeast-2
+  s3:
+    bucket: test-bucket
+    domain: https://test-bucket.s3.ap-northeast-2.amazonaws.com
+
+# App
+app:
+  profile:
+    defaultBaseUrl: https://example.com/profiles/
+    defaultFiles: default1.png,default2.png
+
+# Cookie
+cookie:
+  sse-token:
+    token-ttl-ms: 3600000
+    name: sse-token
+    http-only: true
+    secure: false
+    same-site: Lax
+    path: /
+
+# SSE
+sse:
+  timeout-ms: 600000
+
+# Cache TTL
+cache:
+  suggestion:
+    vlocks:
+      cache-ttl-minutes: 30
+    templates:
+      cache-ttl-minutes: 30
+  categories:
+    cache-ttl-minutes: 60
+
+# Suggestion
+suggestion:
+  vlock:
+    popular-pool: 20
+    min-pool: 5
+    box-pool: 10
+    ai-candidate-pool: 10
+    pool-size: 10
+    size: 5
+    max-duplicate-category: 2
+
+# Template
+template:
+  limit:
+    recent: 10
+    suggestion: 10
+
+# HyperClova
+hyperclova:
+  base-url: https://clovastudio.stream.ntruss.com
+  api-key: test-hyperclova-api-key
+  model: HCX-DASH-001
+  timeout-ms:
+    connect: 3000
+    response: 10000
+  retry:
+    max: 3
+    backoff-ms: 500
+
+# Password reset
+password-reset:
+  redirect-uri: http://localhost:3000/reset-password
+  ttl-minutes: 30
+
+# Global
+global:
+  timezone: Asia/Seoul
+
+# Tag
+tag:
+  grace-minutes: 5
+  lookback-minutes: 60
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
+logging:
+  level:
+    root: warn
+    org.springframework: warn
+    org.hibernate: warn
+    com.zaxxer.hikari: warn
+    org.umc.travlocksserver: warn
+    org.hibernate.dialect.Dialect: error
+    org.hibernate.orm.deprecation: error
+    route-performance: info
+    route-integration-performance: info

@@ -1,10 +1,11 @@
 package org.umc.travlocksserver.domain.template.service.query;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.umc.travlocksserver.domain.template.code.TemplateErrorCode;
 import org.umc.travlocksserver.domain.template.dto.response.TemplateDayRouteResponseDTO;
@@ -16,13 +17,15 @@ import org.umc.travlocksserver.domain.template.exception.TemplateException;
 import org.umc.travlocksserver.domain.template.repository.MoveTimeRepository;
 import org.umc.travlocksserver.domain.template.repository.TemplateDayRepository;
 import org.umc.travlocksserver.domain.template.repository.TemplateVlockRepository;
+import org.umc.travlocksserver.domain.template.service.command.RouteCalculationService;
 import org.umc.travlocksserver.domain.vlock.code.VlockErrorCode;
 import org.umc.travlocksserver.domain.vlock.entity.Vlock;
 import org.umc.travlocksserver.domain.vlock.exception.VlockException;
 import org.umc.travlocksserver.domain.vlock.repository.VlockRepository;
-import org.umc.travlocksserver.global.external.tmap.TmapApiService;
-import org.umc.travlocksserver.global.external.tmap.TmapDTO;
+import org.umc.travlocksserver.global.geo.GeoUtil;
+import org.umc.travlocksserver.global.geo.LatLng;
 import org.umc.travlocksserver.global.util.PolylineUtil;
+import org.umc.travlocksserver.infra.redis.template.RouteCache;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,17 +40,21 @@ public class TemplateRouteQueryService {
 	private final TemplateDayRepository templateDayRepository;
 	private final TemplateVlockRepository templateVlockRepository;
 	private final VlockRepository vlockRepository;
-	private final TmapApiService tmapApiService;
+	private final RouteCalculationService routeCalculationService;
 	private final PolylineUtil polylineUtil;
+	private final RouteCache routeCache;
+	private static final double NEARBY_ROUTE_LAT_TOLERANCE = 0.001;
+	private static final double NEARBY_ROUTE_LON_TOLERANCE = 0.001;
+	private static final double SHORT_DISTANCE_THRESHOLD_KM = 0.3;
 
-	@Transactional
 	public List<TemplateDayRouteResponseDTO> getDayRoutes(
 		Long templateId,
-		Integer dayNo,
-		TransportType transportType) {
+		Integer dayNo) {
 		TemplateDay templateDay = templateDayRepository
 			.findByTemplateIdAndDayNo(templateId, dayNo)
 			.orElseThrow(() -> new TemplateException(TemplateErrorCode.TEMPLATE_DAY_NOT_FOUND));
+
+		TransportType transportType = templateDay.getTemplate().getTransportType();
 
 		List<TemplateVlock> templateVlocks = templateVlockRepository
 			.findByTemplateDayIdOrderByOrderNo(templateDay.getId());
@@ -63,36 +70,67 @@ public class TemplateRouteQueryService {
 			TemplateVlock from = templateVlocks.get(i);
 			TemplateVlock to = templateVlocks.get(i + 1);
 
-			TemplateDayRouteResponseDTO route = getOrCreateRoute(
+			routes.add(getOrCreateRoute(
 				from.getVlock().getId(),
 				to.getVlock().getId(),
-				transportType);
-			routes.add(route);
+				transportType));
 		}
 
 		return routes;
 	}
 
 	/**
-	 * 단일 경로 조회/생성 (캐싱)
+	 * Redis 캐시 조회 — 미스 시 DB/API 조회
 	 */
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public TemplateDayRouteResponseDTO getOrCreateRoute(
 		Long fromVlockId,
 		Long toVlockId,
 		TransportType transportType) {
-		return moveTimeRepository
-			.findByFromVlockIdAndToVlockIdAndTransportType(fromVlockId, toVlockId, transportType)
-			.map(this::toResponseDTO)
-			.orElseGet(() -> {
-				log.info("경로 캐시 미스 - 새로 계산합니다: {} -> {} ({})",
-					fromVlockId, toVlockId, transportType);
-				return createAndSaveRoute(fromVlockId, toVlockId, transportType);
-			});
+		TemplateDayRouteResponseDTO cached = routeCache.get(fromVlockId, toVlockId, transportType);
+		if (cached != null) {
+			return cached;
+		}
+
+		TemplateDayRouteResponseDTO result = getOrCreateRouteInternal(fromVlockId, toVlockId, transportType);
+
+		// transportType이 일치할 때만 캐시 — 불일치 시(TRANSIT 실패 → WALK fallback 등) 다음 호출에서 재시도
+		if (result.moveTimeId() != null && result.transportType() == transportType) {
+			routeCache.set(fromVlockId, toVlockId, transportType, result);
+		}
+
+		return result;
 	}
 
 	/**
-	 * 새로운 경로 저장
+	 * DB 경로 조회/생성
+	 */
+	private TemplateDayRouteResponseDTO getOrCreateRouteInternal(
+		Long fromVlockId,
+		Long toVlockId,
+		TransportType transportType) {
+		// 1. 유효한(만료 안 된) 경로
+		Optional<MoveTime> valid = moveTimeRepository.findValidRoute(
+			fromVlockId, toVlockId, transportType, LocalDateTime.now());
+		if (valid.isPresent()) {
+			return toResponseDTO(valid.get());
+		}
+
+		// 2. 만료된 경로 → 즉시 반환 + 백그라운드 갱신
+		Optional<MoveTime> expired = moveTimeRepository.findAnyRoute(
+			fromVlockId, toVlockId, transportType);
+		if (expired.isPresent()) {
+			log.info("만료된 경로 재사용, 백그라운드 갱신 트리거: {} -> {} ({})", fromVlockId, toVlockId, transportType);
+			routeCalculationService.calculateAndSaveAsync(fromVlockId, toVlockId, transportType);
+			return toResponseDTO(expired.get());
+		}
+
+		// 3. DB에 없음 → 동기 계산
+		log.info("경로 없음 - 동기 계산: {} -> {} ({})", fromVlockId, toVlockId, transportType);
+		return createAndSaveRoute(fromVlockId, toVlockId, transportType);
+	}
+
+	/**
+	 * 좌표 검증 → 300m 이하 자체 추정 / 근처 경로 재사용 / 외부 API 동기 호출 순으로 경로 계산
 	 */
 	private TemplateDayRouteResponseDTO createAndSaveRoute(
 		Long fromVlockId,
@@ -104,7 +142,7 @@ public class TemplateRouteQueryService {
 		Vlock toVlock = vlockRepository.findById(toVlockId)
 			.orElseThrow(() -> new VlockException(VlockErrorCode.END_VLOCK_NOT_FOUND));
 
-		// 좌표가 유효하지 않은 값이면(더미/범위 밖) TMAP 호출 없이 fallback
+		// 좌표가 유효하지 않은 값이면(더미/범위 밖) 외부 API 호출 없이 fallback
 		if (!isValidKoreaCoord(fromVlock.getLongitude(), fromVlock.getLatitude())
 			|| !isValidKoreaCoord(toVlock.getLongitude(), toVlock.getLatitude())) {
 
@@ -115,41 +153,116 @@ public class TemplateRouteQueryService {
 			return fallbackRoute(fromVlockId, toVlockId, transportType);
 		}
 
-		// TMAP 호출 실패해도 해당 구간만 fallback
-		final TmapDTO.RouteInfo routeInfo;
-		try {
-			routeInfo = calculateRoute(fromVlock, toVlock, transportType);
-		} catch (RuntimeException e) {
-			log.warn("TMAP 경로 계산 실패 - 해당 구간만 polyline 없이 반환: {} -> {} ({}), reason={}",
-				fromVlockId, toVlockId, transportType, e.getMessage());
-			return fallbackRoute(fromVlockId, toVlockId, transportType);
+		// 300m 이하 직선거리 → 외부 API 호출 없이 도보 속도 기반 자체 추정
+		double distKm = GeoUtil.haversineKm(
+			new LatLng(fromVlock.getLatitude(), fromVlock.getLongitude()),
+			new LatLng(toVlock.getLatitude(), toVlock.getLongitude()));
+		if (distKm < SHORT_DISTANCE_THRESHOLD_KM) {
+			log.info("짧은 거리 자체 계산: {} -> {} ({}m)", fromVlockId, toVlockId, (int)(distKm * 1000));
+			return toResponseDTO(
+				routeCalculationService.calculateAndSaveShortDistance(fromVlock, toVlock, transportType, distKm));
 		}
 
-		MoveTime moveTime = MoveTime.builder()
-			.fromVlock(fromVlock)
-			.toVlock(toVlock)
-			.moveMinutes(routeInfo.getTotalTimeMinutes())
-			.transportType(transportType)
-			.distanceMeter(routeInfo.getTotalDistanceMeter())
-			.polyline(routeInfo.getPolyline())
-			.build();
+		// 정방향 근처 경로 재사용
+		MoveTime reusableRoute = findReusableNearbyRoute(fromVlock, toVlock, transportType);
+		if (reusableRoute != null) {
+			log.info("Reusable nearby route cache hit: {} -> {} ({}) using moveTimeId={}",
+				fromVlockId, toVlockId, transportType, reusableRoute.getId());
+			return toNearbyRouteResponseDTO(fromVlock, toVlock, transportType, reusableRoute);
+		}
 
-		moveTimeRepository.save(moveTime);
+		// 외부 API 동기 호출
+		log.info("외부 API 동기 계산: {} -> {} ({})", fromVlockId, toVlockId, transportType);
+		try {
+			return toResponseDTO(routeCalculationService.calculateAndSave(fromVlockId, toVlockId, transportType));
+		} catch (RuntimeException e) {
+			log.warn("외부 API 경로 계산 실패: {} -> {} ({}) - {}", fromVlockId, toVlockId, transportType, e.getMessage());
+			if (transportType == TransportType.TRANSIT) {
+				return transitFallbackByWalk(fromVlockId, toVlockId);
+			}
+			return fallbackRoute(fromVlockId, toVlockId, transportType);
+		}
+	}
 
-		return toResponseDTO(moveTime);
+	/**
+	 * 출발지/도착지가 유사한 기존 경로 재사용 (TRANSIT은 노선/환승 정보 영향을 받으므로 근처 경로 재사용 불가)
+	 *
+	 * 1. 정방향(A → B) 근처 경로를 우선 탐색
+	 * 2. 없을 경우 WALK에 한해 역방향(B → A) 경로도 재사용 허용
+	 */
+	private MoveTime findReusableNearbyRoute(
+		Vlock fromVlock,
+		Vlock toVlock,
+		TransportType transportType) {
+		// TRANSIT 근처 경로 재사용 불가
+		if (transportType == TransportType.TRANSIT) {
+			return null;
+		}
+
+		Optional<MoveTime> forward = moveTimeRepository.findTopReusableNearbyRoute(
+			fromVlock.getLatitude(),
+			fromVlock.getLongitude(),
+			toVlock.getLatitude(),
+			toVlock.getLongitude(),
+			NEARBY_ROUTE_LAT_TOLERANCE,
+			NEARBY_ROUTE_LON_TOLERANCE,
+			transportType);
+
+		if (forward.isPresent()) {
+			return forward.get();
+		}
+
+		// 역방향(B→A) 근처 경로 재사용은 WALK만 허용
+		if (transportType != TransportType.WALK) {
+			return null;
+		}
+
+		// 역방향(B→A) 근처 경로도 재활용 시도
+		return moveTimeRepository.findTopReusableNearbyRouteReverse(
+				fromVlock.getLatitude(),
+				fromVlock.getLongitude(),
+				toVlock.getLatitude(),
+				toVlock.getLongitude(),
+				NEARBY_ROUTE_LAT_TOLERANCE,
+				NEARBY_ROUTE_LON_TOLERANCE,
+				transportType)
+			.orElse(null);
+	}
+
+	/**
+	 * 근처 경로 재사용 — DB 저장 없이 DTO 반환
+	 */
+	private TemplateDayRouteResponseDTO toNearbyRouteResponseDTO(
+		Vlock fromVlock,
+		Vlock toVlock,
+		TransportType transportType,
+		MoveTime reusableRoute) {
+		return new TemplateDayRouteResponseDTO(
+			null,
+			fromVlock.getId(),
+			toVlock.getId(),
+			reusableRoute.getMoveMinutes(),
+			reusableRoute.getDistanceMeter(),
+			transportType,
+			polylineUtil.toCoordinates(reusableRoute.getPolyline()));
+	}
+
+	/**
+	 * ODsay 실패 시 TMap 도보 경로를 TRANSIT 타입으로 저장하여 반환
+	 * TMap마저 실패하면 빈 fallback 반환
+	 */
+	private TemplateDayRouteResponseDTO transitFallbackByWalk(Long fromVlockId, Long toVlockId) {
+		try {
+			log.info("ODsay 실패, TMap 도보 경로로 대체 저장 (TRANSIT, TTL=1일): {} -> {}", fromVlockId, toVlockId);
+			return toResponseDTO(routeCalculationService.calculateAndSaveTransitFallback(fromVlockId, toVlockId));
+		} catch (RuntimeException e) {
+			log.warn("TMap 도보 fallback도 실패, 빈 응답 반환: {} -> {} - {}", fromVlockId, toVlockId, e.getMessage());
+			return fallbackRoute(fromVlockId, toVlockId, TransportType.TRANSIT);
+		}
 	}
 
 	private TemplateDayRouteResponseDTO fallbackRoute(Long fromVlockId, Long toVlockId, TransportType transportType) {
-		// moveTimeId null, 시간/거리 0, polyline 좌표는 빈 배열로 반환
-		return new TemplateDayRouteResponseDTO(
-			null,
-			fromVlockId,
-			toVlockId,
-			0,
-			0,
-			transportType,
-			List.of()
-		);
+		return new TemplateDayRouteResponseDTO(null, fromVlockId, toVlockId, 0, 0, transportType, List.of());
 	}
 
 	/**
@@ -163,24 +276,6 @@ public class TemplateRouteQueryService {
 			return false;
 		// 한국 대략 범위
 		return (lon >= 124.0 && lon <= 132.0) && (lat >= 33.0 && lat <= 39.5);
-	}
-
-	/**
-	 * 이동 수단별 경로 계산
-	 * 현재는 도보(WALK)만 지원
-	 */
-	private TmapDTO.RouteInfo calculateRoute(
-		Vlock fromVlock,
-		Vlock toVlock,
-		TransportType transportType) {
-		return switch (transportType) {
-			case WALK -> tmapApiService.getPedestrianRoute(
-				fromVlock.getLongitude(),
-				fromVlock.getLatitude(),
-				toVlock.getLongitude(),
-				toVlock.getLatitude());
-			case CAR, TRANSIT -> throw new TemplateException(TemplateErrorCode.UNSUPPORTED_TRANSPORT_TYPE);
-		};
 	}
 
 	/**
