@@ -49,6 +49,4 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
 		ORDER BY n.created_at DESC, n.notification_id DESC
 	""", nativeQuery = true)
 	List<Notification> findNextPage(Long receiverId, LocalDateTime cursor, int limit);
-
-	long countByReceiverId(Long receiverId);
 }

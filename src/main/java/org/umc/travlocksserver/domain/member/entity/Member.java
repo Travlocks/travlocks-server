@@ -123,10 +123,6 @@ public class Member extends SoftDeleteBaseEntity {
 		this.templateCount--;
 	}
 
-	public void increaseNotificationCount() {
-		this.notificationCount++;
-	}
-
 	public void clearNotificationCount() {
 		this.notificationCount = 0;
 	}

@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import org.umc.travlocksserver.domain.member.entity.Member;
+import org.umc.travlocksserver.domain.member.service.command.MemberProfileUpdateService;
 import org.umc.travlocksserver.domain.member.service.query.MemberQueryService;
 import org.umc.travlocksserver.domain.notification.dto.response.NotificationAllResponseDTO;
 import org.umc.travlocksserver.domain.notification.dto.sse.NotificationSsePayloadDTO;
@@ -35,6 +36,7 @@ public class NotificationCommandService {
 	private final SseEmitterRepository emitterRepository;
 	private final NotificationRepository notificationRepository;
 	private final MemberQueryService memberQueryService;
+	private final MemberProfileUpdateService memberProfileUpdateService;
 	private final JwtTokenProvider jwtTokenProvider;
 	private final TimeAgoFormatter timeAgoFormatter;
 
@@ -70,15 +72,15 @@ public class NotificationCommandService {
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public Notification createNotification(Long receiverId, Long actorId, Long templateId, NotificationType type) {
 		Member actor = memberQueryService.getById(actorId);
-		Member receiver = memberQueryService.getById(receiverId);
-		receiver.increaseNotificationCount();
+		memberProfileUpdateService.increaseNotificationCount(receiverId);
 		return notificationRepository.save(
 			Notification.create(
 				receiverId,
 				actorId,
 				actor.getNickname(),
 				templateId,
-				type));
+				type)
+		);
 	}
 
 	/**

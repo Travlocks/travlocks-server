@@ -146,4 +146,9 @@ public class MemberProfileUpdateService {
 	private static boolean isPresent(JsonNullable<?> v) {
 		return v != null && v.isPresent();
 	}
+
+	@Transactional
+	public void increaseNotificationCount(Long memberId) {
+		memberRepository.increaseNotificationCount(memberId);
+	}
 }
