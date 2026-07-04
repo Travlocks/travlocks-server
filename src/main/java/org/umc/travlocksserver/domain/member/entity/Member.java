@@ -61,6 +61,9 @@ public class Member extends SoftDeleteBaseEntity {
 	@Column(name = "favorite_count", nullable = false)
 	private int favoriteCount;
 
+	@Column(name = "notification_count", nullable = false)
+	private int notificationCount;
+
 	public static Member of(Long id) {
 		Member member = new Member();
 		member.id = id;
@@ -99,6 +102,7 @@ public class Member extends SoftDeleteBaseEntity {
 		this.vlockCount = 0;
 		this.templateCount = 0;
 		this.favoriteCount = 0;
+		this.notificationCount = 0;
 	}
 
 	public void increaseVlockCount() { this.vlockCount = this.vlockCount + 1; }
@@ -116,7 +120,11 @@ public class Member extends SoftDeleteBaseEntity {
 		if (this.templateCount <= 0) {
 			throw new TemplateException(TemplateErrorCode.TEMPLATE_COUNT_BELOW_ZERO);
 		}
-		this.templateCount = this.templateCount - 1;
+		this.templateCount--;
+	}
+
+	public void clearNotificationCount() {
+		this.notificationCount = 0;
 	}
 
 	public void increaseFavoriteCount() {
