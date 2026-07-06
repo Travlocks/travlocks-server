@@ -3,14 +3,15 @@ package org.umc.travlocksserver.domain.template.service.command;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.umc.travlocksserver.domain.member.service.query.MemberQueryService;
 import org.umc.travlocksserver.domain.template.dto.response.VlockSuggestionsResponseDTO;
 import org.umc.travlocksserver.domain.template.entity.Template;
 import org.umc.travlocksserver.domain.template.entity.TemplateDay;
 import org.umc.travlocksserver.domain.template.enums.TransportType;
+import org.umc.travlocksserver.domain.template.event.TemplateContentUpdatedEvent;
 import org.umc.travlocksserver.domain.template.exception.TemplateDayException;
 import org.umc.travlocksserver.domain.template.code.TemplateDayErrorCode;
 import org.umc.travlocksserver.domain.template.repository.TemplateDayRepository;
@@ -61,6 +62,7 @@ public class TemplateDayCommandService {
 	private final VlockSuggestionCache vlockSuggestionCache;
 
 	private final AiSuggestionClient aiClient;
+	private final ApplicationEventPublisher eventPublisher;
 
 	private final S3Properties s3Properties;
 
@@ -138,8 +140,11 @@ public class TemplateDayCommandService {
 		if (templateDay.getVlockCount() > 4) {
 			warning = "하루 권장 블록 개수 4개가 초과되었습니다.";
 		}
-			return TemplateVlockAddResponseDTO.from(templateVlock, warning);
-		}
+
+		// 8. DB commit 이후 AI 태그 생성을 예약하기 위한 이벤트 발행
+		eventPublisher.publishEvent(new TemplateContentUpdatedEvent(templateId));
+		return TemplateVlockAddResponseDTO.from(templateVlock, warning);
+	}
 
 	// 블록 삭제
 	public TemplateVlockDeleteResponseDTO deleteVlock(
@@ -177,18 +182,22 @@ public class TemplateDayCommandService {
 		}
 
 		// 6. vlockCount 감소
-			templateDay.decrementVlockCount();
+		templateDay.decrementVlockCount();
 		templateDay.decrementVlockCount();
 		templateVlock.getVlock().decreaseUsageCount();
 
 		// 7. 진행률 업데이트
-			updateTemplateProgressRate(templateDay.getTemplate());
+		updateTemplateProgressRate(templateDay.getTemplate());
 
-			return TemplateVlockDeleteResponseDTO.from(
-					templateVlocksId,
-					templateDay.getId(),
-					dayNo,
-					remainingVlocks);
+		// 8. DB commit 이후 AI 태그 생성을 예약하기 위한 이벤트 발행
+		eventPublisher.publishEvent(new TemplateContentUpdatedEvent(templateId));
+
+		return TemplateVlockDeleteResponseDTO.from(
+				templateVlocksId,
+				templateDay.getId(),
+				dayNo,
+				remainingVlocks);
+
 	}
 
 	// 블록 순서 변경
