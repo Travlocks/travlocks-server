@@ -86,6 +86,8 @@ tag:
   cron: "0 25 * * * *"
   grace-minutes: 15
   lookback-minutes: 75
+  delay-minutes: 20
+  worker-delay: 60000
 
 kakao:
   rest-api-key: ${KAKAO_REST_API_KEY}

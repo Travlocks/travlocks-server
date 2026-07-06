@@ -11,7 +11,7 @@ import org.umc.travlocksserver.domain.notification.service.command.NotificationC
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class NotificationEventHandler {
+public class NotificationEventListener {
 
 	private final NotificationCommandService notificationCommandService;
 
@@ -19,7 +19,7 @@ public class NotificationEventHandler {
 	 * 이벤트 발생 커밋 시 알림 생성 및 미읽음 신호 전송
 	 * */
 	@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-	public void onTemplateActivity(TemplateActivityEvent event) {
+	public void handle(TemplateActivityEvent event) {
 		try {
 			Notification saved = notificationCommandService.createNotification(
 				event.ownerId(),
