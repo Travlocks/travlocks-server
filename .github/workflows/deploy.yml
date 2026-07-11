@@ -10,7 +10,7 @@ permissions:
 # 전역 환경변수
 env:
   # Docker Hub 이미지 이름
-  DOCKERHUB_IMAGE: docker.io/${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DOCKERHUB_REPO }}
+  DOCKERHUB_IMAGE: docker.io/${{ secrets.HM_DOCKERHUB_USERNAME }}/${{ secrets.HM_DOCKERHUB_REPO }}
   # EC2에서 docker-compose.yml, .env 등이 있는 경로
   APP_DIR: /home/ubuntu/travlocks
 
@@ -31,8 +31,8 @@ jobs:
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          username: ${{ secrets.HM_DOCKERHUB_USERNAME }}
+          password: ${{ secrets.HM_DOCKERHUB_TOKEN }}
 
       # 4. Docker 이미지 빌드 후 푸시
       # - latest: 항상 최신 배포 이미지
@@ -56,15 +56,15 @@ jobs:
       - name: Deploy to EC2 via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
-            host: ${{ secrets.SSH_HOST }}
-            username: ${{ secrets.SSH_USER }}
-            key: ${{ secrets.SSH_PRIVATE_KEY }}
+            host: ${{ secrets.HM_SSH_HOST }}
+            username: ${{ secrets.HM_SSH_USER }}
+            key: ${{ secrets.HM_SSH_PRIVATE_KEY }}
             script: |
               set -e
               echo "====== EC2 Deploy Start ======"
               cd ${{ env.APP_DIR }}
               
-              echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+              echo "${{ secrets.HM_DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.HM_DOCKERHUB_USERNAME }}" --password-stdin
               
               # 1) 태그를 SHA로 고정 (롤백 쉬움)
               sed -i 's/^IMAGE_TAG=.*/IMAGE_TAG=${{ github.sha }}/' .env
