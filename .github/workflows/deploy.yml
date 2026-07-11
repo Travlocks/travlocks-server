@@ -70,9 +70,9 @@ jobs:
               sed -i 's/^IMAGE_TAG=.*/IMAGE_TAG=${{ github.sha }}/' .env
               
               # 2) pull + 재기동
-              docker-compose pull
-              docker-compose down || true
-              docker-compose up -d
+              docker compose pull
+              docker compose down || true
+              docker compose up -d
               
               docker image prune -f
               echo "====== EC2 Deploy Done ======"
